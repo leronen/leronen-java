@@ -31,7 +31,7 @@
          -->
          <classpath>
           <pathelement path="${classpath}"/>
-          <pathelement location="lib/ext/json.jar"/>
+          <pathelement location="lib/json.jar"/>
          </classpath>
         </javac>
     </target>  
