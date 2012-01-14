@@ -37,9 +37,7 @@ public final class Logger {
     private int mCurrentHierarchyLevel;
     
     private static String sProgramName; 
-            
-    // private boolean mCRFlag = false;
-    
+                
     public static final int LOGLEVEL_DBG = 1;
     public static final int LOGLEVEL_INFO = 2;
     public static final int LOGLEVEL_IMPORTANT_INFO = 3;
@@ -590,6 +588,44 @@ public final class Logger {
         }
     }
     
+    /** 
+     * Wraps this trad. leronen Logger to clients using the more lightweight, 
+     * if less fancy, ILogger interface.
+     */
+    public static class ILoggerAdapter implements ILogger {
+                      
+        @Override
+        public void info(String msg) {
+            Logger.info(msg);        
+        }
+        
+        @Override
+        public void warning(String msg) {
+            Logger.warning(msg);        
+        }
+        
+        /** Report error and exit with exit code 1. TODO: proper logging */
+        @Override
+        public void error(String msg) {
+            Logger.error(msg);        
+        }
+        
+        @Override
+        public void error(String msg, Exception e) {
+            Logger.error(msg, e);        
+        }
+
+        @Override
+        public void closeStreams() {
+            Logger.endLog();
+        }
+
+        @Override
+        public void error(Exception e) {
+            Logger.error(e);            
+        }       
+    }
+    
     public static String logLevelString(String pSeparator) {
         return "1 - DBG; all log messages"+pSeparator+
                "2 - INFO; all but dbg messages"+pSeparator+
@@ -619,4 +655,6 @@ public final class Logger {
             MemLogger.initialize(true);
         }
     }
+    
+    
 }

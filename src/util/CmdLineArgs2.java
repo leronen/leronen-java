@@ -3,7 +3,7 @@ package util;
 import java.util.*;
 
 
-/** A simplified version cargo-culted from BC code base */
+/** A simplified version cargo-culted from BC-leronen code base */
 public class CmdLineArgs2 {
 
     /** options with no value */
@@ -80,6 +80,17 @@ public class CmdLineArgs2 {
         }
         else {
             return null;
+        }
+        
+    }
+    
+    public Integer getIntOpt(String name, int defaultVal) {
+        String s = opts.get(name);
+        if (s != null) {
+            return Integer.parseInt(s);
+        }
+        else {
+            return defaultVal;
         }
         
     }
