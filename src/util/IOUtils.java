@@ -1269,7 +1269,7 @@ public class IOUtils {
     	}
     }
     
-    public static class LineIterable implements Iterable {    
+    public static class LineIterable implements Iterable<String> {    
     	
     	boolean alreadyIterated = false;
     	private LineIterator mLineIterator;
@@ -1286,7 +1286,7 @@ public class IOUtils {
         	mLineIterator = new LineIterator(pFile);     
         }
         
-        public Iterator iterator() {
+        public Iterator<String> iterator() {
         	if (alreadyIterated) {
         		throw new RuntimeException("Unfortunately, can only iterate once...");
         	}
