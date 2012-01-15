@@ -111,8 +111,13 @@ public class DateUtils {
         return ORDERABLE_DATE_FORMAT_NO_TIME_OF_DAY.format(pDate);
     }
     
-   
-
+   public static String formatBmzDate() {
+       Calendar cal = Calendar.getInstance();
+       String prefix = formatOrderableDate_no_time_of_day();             
+       String suffix = ""+(cal.get(Calendar.HOUR_OF_DAY)-23)+":"+cal.get(Calendar.MINUTE)+":"+cal.get(Calendar.SECOND);
+       return prefix+"_"+suffix+" BMZ";
+   }
+    
     /* Format with {@link #NON_WHITE_SPACE_DATE_FORMAT} (at the time of last checking,
     * that was just yyyy_MM_dd_HH_mm_ss
     */
@@ -379,6 +384,9 @@ public class DateUtils {
         if (cmd.equals("getformatteddatetime")) {
             System.out.println(formatDate(System.currentTimeMillis()));
         }
+        else if (cmd.equals("bmz")) {
+            System.out.println(formatBmzDate());
+        }
         else if (cmd.equals("ndaysbefore")) {
         	String date = args[1];
         	int n = Integer.parseInt(args[2]);        	
@@ -420,8 +428,21 @@ public class DateUtils {
         	System.err.println("Illegal command: "+cmd);
         }
     }
-                    
+     
+    /** Generates current date as yyyy-mm-dd_hh:mm:ss */
+    public static class DateGenerator implements StringGenerator {
+        
+        public String generate() {
+            return formatOrderableDate();
+        }
+    }
     
+    public static class BMZGenerator implements StringGenerator {
+        
+        public String generate() {
+            return formatBmzDate();
+        }
+    }
     
     
 

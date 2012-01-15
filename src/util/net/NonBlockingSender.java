@@ -7,7 +7,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import util.IOUtils;
-import util.dbg.Logger;
+import util.dbg.DevNullLogger;
+import util.dbg.ILogger;
 
 /**
  * Uses a dedicated thread (automatically created at constructor) to send queued byte array messages to a socket passed in at constructing time. Closes output 
@@ -16,6 +17,8 @@ import util.dbg.Logger;
  * Does not close the output stream, that is to be done by the caller. 
  */
 public class NonBlockingSender {
+
+    private ILogger log;
     
     /** Special "message" that is used to stop execution of sender thread */ 
     private static final byte[] POISON = new byte[0];
@@ -29,14 +32,34 @@ public class NonBlockingSender {
     // null if stopped cleanly because of being requested by calling {@link #stop()} 
     private Exception stopCause;
     
+    public void setName(String name) {
+        this.name = name; 
+    }
+    
     /** 
      * Listener should only close output stream of socket after receiving a finished notification,
      * so having the listener is mandatory. 
      */
     public NonBlockingSender(Socket socket, Listener listener) throws IOException {
+        this(socket,listener,null);
+    }
+    
+    /** 
+     * Listener should only close output stream of socket after receiving a finished notification,
+     * so having the listener is mandatory. 
+     */
+    public NonBlockingSender(Socket socket, Listener listener, ILogger log) throws IOException {
         if (listener == null) {
             throw new IOException("Null listener!");
         }
+        
+        if (log != null) {
+            this.log = log;
+        }
+        else {
+            this.log = DevNullLogger.SINGLETON;
+        }
+        
         this.name = "NonBlockingSender-"+socket.getRemoteSocketAddress();
         this.listener = listener;
         this.stopped = false;        
@@ -134,15 +157,15 @@ public class NonBlockingSender {
     
     @SuppressWarnings("unused")
     private void error(String msg) {
-        Logger.error(name+": "+msg);
+        log.error(name+": "+msg);
     }
     
     private void error(String msg, Exception e) {
-        Logger.error(name+": "+msg, e);
+        log.error(name+": "+msg, e);
     }
     
     private void log(String msg) {
-        Logger.info(name+": "+msg);
+        log.info(name+": "+msg);
     }
         
 }

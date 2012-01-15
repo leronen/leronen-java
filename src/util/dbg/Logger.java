@@ -571,60 +571,7 @@ public final class Logger {
         // Logger anotherLogger = new Logger();
     }
 
-    private class StreamForLogLevelCondition implements Condition {
-        private int mMsgLogLevel;
-        
-        StreamForLogLevelCondition(int pMsgLogLevel) {
-            mMsgLogLevel = pMsgLogLevel;
-        }
-        
-        public boolean fulfills(Object p) {
-            PrintStream ps = (PrintStream)p;
-            int streamLogLevel = ((Integer)mLogLevelByStream.get(ps)).intValue();
-            if (streamLogLevel == LOGLEVEL_SHARED) {
-                streamLogLevel = mSharedLogLevel;
-            }
-            return streamLogLevel <= mMsgLogLevel; 
-        }
-    }
     
-    /** 
-     * Wraps this trad. leronen Logger to clients using the more lightweight, 
-     * if less fancy, ILogger interface.
-     */
-    public static class ILoggerAdapter implements ILogger {
-                      
-        @Override
-        public void info(String msg) {
-            Logger.info(msg);        
-        }
-        
-        @Override
-        public void warning(String msg) {
-            Logger.warning(msg);        
-        }
-        
-        /** Report error and exit with exit code 1. TODO: proper logging */
-        @Override
-        public void error(String msg) {
-            Logger.error(msg);        
-        }
-        
-        @Override
-        public void error(String msg, Exception e) {
-            Logger.error(msg, e);        
-        }
-
-        @Override
-        public void closeStreams() {
-            Logger.endLog();
-        }
-
-        @Override
-        public void error(Exception e) {
-            Logger.error(e);            
-        }       
-    }
     
     public static String logLevelString(String pSeparator) {
         return "1 - DBG; all log messages"+pSeparator+
@@ -655,6 +602,99 @@ public final class Logger {
             MemLogger.initialize(true);
         }
     }
+
+    private class StreamForLogLevelCondition implements Condition {
+        private int mMsgLogLevel;
+        
+        StreamForLogLevelCondition(int pMsgLogLevel) {
+            mMsgLogLevel = pMsgLogLevel;
+        }
+        
+        public boolean fulfills(Object p) {
+            PrintStream ps = (PrintStream)p;
+            int streamLogLevel = ((Integer)mLogLevelByStream.get(ps)).intValue();
+            if (streamLogLevel == LOGLEVEL_SHARED) {
+                streamLogLevel = mSharedLogLevel;
+            }
+            return streamLogLevel <= mMsgLogLevel; 
+        }
+    }    
+
+    /** 
+     * Wraps this trad. leronen Logger to clients using the more lightweight, 
+     * if less fancy, ILogger interface.
+     */
+    public static class ILoggerAdapter implements ILogger {
+                      
+        private String prefix;
+        private StringGenerator dateGenerator;
+        private StringBuffer buf = new StringBuffer();
+        
+        public ILoggerAdapter() {
+            this(null, null);
+        }
+        
+        public ILoggerAdapter(String prefix) {
+            this(prefix, null);
+        }
+        
+        public ILoggerAdapter(String prefix, StringGenerator dateGenerator) {
+            this.prefix = prefix;
+            this.dateGenerator = dateGenerator;
+        }
+                
+        private String generateMsg(String msg) {
+            buf.setLength(0);            
+            if (dateGenerator != null) {
+                buf.append(dateGenerator.generate());
+                buf.append(' ');
+            }
+            if (prefix != null) {
+                buf.append(prefix);                
+            }
+            buf.append(msg);
+            return buf.toString();
+        }
+        
+        @Override
+        public void info(String msg) {
+            Logger.info(generateMsg(msg));        
+        }
+        
+        @Override
+        public void warning(String msg) {
+            Logger.warning(generateMsg(msg));        
+        }
+        
+        /** Report error and exit with exit code 1. TODO: proper logging */
+        @Override
+        public void error(String msg) {
+            Logger.error(generateMsg(msg));        
+        }
+        
+        @Override
+        public void error(String msg, Exception e) {
+            Logger.error(generateMsg(msg), e);        
+        }
+
+        @Override
+        public void closeStreams() {
+            Logger.endLog();
+        }
+
+        @Override
+        public void error(Exception e) {
+            String msg = generateMsg("");
+            if (msg.length() > 0) {
+                Logger.error(msg, e);
+            }
+            else {
+                Logger.error(e);
+            }
+        }       
+    }
     
     
 }
+
+

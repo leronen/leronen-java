@@ -5,6 +5,7 @@ import java.io.PrintStream;
 
 import util.io.OutputStreamManager;
 
+/** Logger where the base name (added as prefix to all output) can be changed on the fly... */ 
 public class MutableLogger implements ILogger {
     
     @SuppressWarnings("unused")

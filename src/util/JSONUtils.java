@@ -9,7 +9,7 @@ public class JSONUtils {
      * Trivial deep cloning implementation that performs a JSONObject => String => JSONObject
      * conversion to minimize implementation effort.
      */
-    public static JSONObject clone(JSONObject obj) throws RuntimeException {
+    public static JSONObject clone(JSONObject obj) {
         try {
             return new JSONObject(obj.toString());
         }
