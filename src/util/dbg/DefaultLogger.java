@@ -51,6 +51,12 @@ public class DefaultLogger implements ILogger {
     }
     
     @Override
+    public void dbg(String msg) {
+        System.err.println(msg);
+        infoStream.println(msg);
+    }
+    
+    @Override
     public void info(String msg) {
         System.err.println(msg);
         infoStream.println(msg);

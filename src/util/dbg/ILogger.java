@@ -1,6 +1,7 @@
 package util.dbg;
 
-public interface ILogger {    
+public interface ILogger {
+    public void dbg(String msg);
     public void info(String msg);        
     public void warning(String warning);                
     public void error(String msg);

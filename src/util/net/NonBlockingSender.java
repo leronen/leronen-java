@@ -145,6 +145,15 @@ public class NonBlockingSender {
     }
     
     public interface Listener {
+        /** Called in all of following circumstances:
+         *  <pre>
+         *   -sender requested stopping (all stuff sent before stop request has been delivered to stream)
+         *   -IOException while reading
+         *   -InterruptedException while reading
+         *  </pre>
+         * 
+         * Make this interface more fine-grained if needed later.
+         */
         public void senderFinished();
     }
     

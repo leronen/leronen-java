@@ -34,6 +34,11 @@ public class DevNullLogger implements ILogger {
     @Override
     public void error(Exception e) {
         //        
+    }
+
+    @Override
+    public void dbg(String msg) {
+        //         
     }   
 }
 

@@ -657,39 +657,58 @@ public final class Logger {
         }
         
         @Override
+        public void dbg(String msg) {
+            synchronized(ILogger.class) {
+                Logger.dbg(generateMsg(msg));
+            }
+        }
+        
+        @Override
         public void info(String msg) {
-            Logger.info(generateMsg(msg));        
+            synchronized(ILogger.class) {
+                Logger.info(generateMsg(msg));
+            }
         }
         
         @Override
         public void warning(String msg) {
-            Logger.warning(generateMsg(msg));        
+            synchronized(ILogger.class) {
+                Logger.warning(generateMsg(msg));
+            }
         }
         
         /** Report error and exit with exit code 1. TODO: proper logging */
         @Override
         public void error(String msg) {
-            Logger.error(generateMsg(msg));        
+            synchronized(ILogger.class) {
+                Logger.error(generateMsg(msg));
+            }
         }
         
         @Override
         public void error(String msg, Exception e) {
-            Logger.error(generateMsg(msg), e);        
+            synchronized(ILogger.class) {
+                Logger.error(generateMsg(msg), e);
+            }
         }
 
         @Override
         public void closeStreams() {
-            Logger.endLog();
+            synchronized(ILogger.class) {
+                Logger.endLog();
+            }
         }
 
         @Override
         public void error(Exception e) {
-            String msg = generateMsg("");
-            if (msg.length() > 0) {
-                Logger.error(msg, e);
-            }
-            else {
-                Logger.error(e);
+            synchronized(ILogger.class) {
+                String msg = generateMsg("");
+                if (msg.length() > 0) {
+                    Logger.error(msg, e);
+                }
+                else {
+                    Logger.error(e);
+                }
             }
         }       
     }

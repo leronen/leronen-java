@@ -46,6 +46,13 @@ public class MutableLogger implements ILogger {
     
     /** TODO: proper impl */
     @Override
+    public void dbg(String msg) {
+        System.err.println(msg);
+        infoStream.println(msg);
+    }
+    
+    /** TODO: proper impl */
+    @Override
     public void info(String msg) {
         System.err.println(msg);
         infoStream.println(msg);

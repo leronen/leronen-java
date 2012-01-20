@@ -4,6 +4,11 @@ package util.dbg;
 public class StdErrLogger implements ILogger {    
     
     @Override
+    public void dbg(String msg) {
+        System.err.println(msg);        
+    }
+    
+    @Override
     public void info(String msg) {
         System.err.println(msg);        
     }
