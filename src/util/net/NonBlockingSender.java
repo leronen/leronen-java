@@ -73,8 +73,12 @@ public class NonBlockingSender {
         this.senderThread.start();
     }
     
-    /** Stop the sender thread. Any further attempts to send will raise IOExceptions */     
-    public void stop() {
+    /** 
+     * Add a specific POISON message to the send queue, which is interpreted as a
+     * request to stop the sender thread (once all previous packets have been sent.
+     * Any further attempts to send will raise IOExceptions
+     */     
+    public void requestStop() {
         if (!stopped) { 
             messageQueue.add(POISON);
         }
