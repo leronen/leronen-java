@@ -2,6 +2,7 @@ package util;
 
 import util.collections.*;
 import util.collections.tree.NodeAdapter;
+import util.commandline.CommandLineTests;
 import util.condition.*;
 import util.converter.*;
 import util.dbg.*;
@@ -15,8 +16,23 @@ import java.io.*;
 import java.lang.reflect.Field;
 
 
-
-public final class StringUtils {
+public final class StringUtils extends CommandLineTests {
+    
+    
+    public static final String CMD_H = "h";
+    public static final String CMD_TESTALLSTRINGSITERATOR = "testallstringsiterator";
+    public static final String CMD_TESTFORMATTERASETC = "testformatterasetc";
+    public static final String CMD_TESTDOUBLEQUOTEDSTRINGS = "testdoublequotedstrings";
+    public static final String CMD_TESTFASTSPLIT = "testfastsplit";
+    public static final String CMD_EXPANDBASHLIST = "expandBashList";
+    public static final String CMD_FORMATINT = "formatint";
+    public static final String CMD_DEC2HEX = "dec2hex";
+    public static final String CMD_TESTEXTRACTCOL = "testextractcol";
+    public static final String CMD_TESTESCAPEBACKLASHES = "testescapebacklashes";
+    public static final String CMD_TESTREMOVESUBSTRING = "testremovesubstring";
+    public static final String CMD_TESTUNIQUENAME = "testuniquename";
+    public static final String CMD_PARSELINES = "parselines";             
+    
     
     private static DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS;       
     private static final DecimalFormat LONGEST_DECIMAL_FORMAT;
@@ -43,6 +59,111 @@ public final class StringUtils {
         LONGEST_DECIMAL_FORMAT = DECIMAL_FORMATS[DECIMAL_FORMAT_MAX_PRECISION-1]; 
                 
     }        
+    
+    public StringUtils(String[] args) {
+        super(args);
+    }
+    
+    @Override
+    public void run(String cmd) throws Exception {
+        if (cmd.equals("h")) {
+            if (args.getNonOptArgs().size() == 0) {
+                try {
+                    List<String> lines = IOUtils.readLines(System.in);
+                    for (String line: lines) {
+                        System.out.println(h(Long.parseLong(line)));
+                    }
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }               
+            }
+            else {
+                System.out.println(h(Integer.parseInt(args.shift())));
+            }
+        }
+        else if (cmd.equals("testallstringsiterator")) {
+            testAllStringsIterator();            
+        }
+        else if (cmd.equals("testformatterasetc")) {                        
+            for (String s: args.posargs) {
+                Long l = Long.parseLong(s);
+                System.out.println(formatSize(l)); 
+            }
+        }
+        else if (cmd.equals("testdoublequotedstrings")) {            
+            testDoubleQuotedStrings(args.posargs);            
+        }
+        else if (cmd.equals("testfastsplit")) {
+            testFastSplit();            
+        }
+        else if (cmd.equals("expandBashList")) {
+            expandBashListCmdLIne();
+        }
+        else if (cmd.equals("formatint")) {
+            long val = Long.parseLong(args.shift());
+            System.out.println(formatLargeInteger(val));
+        }
+        else if (cmd.equals("dec2hex")) {
+            long i = Long.parseLong(args.shift());
+            System.out.println(Long.toHexString(i));
+        }
+        else if (cmd.equals("testextractcol")) {
+            int col = Integer.parseInt(args.shift());
+            Iterator<String> lineIter = IOUtils.lineIterator(System.in);             
+            while(lineIter.hasNext()) {
+                System.out.println(extractCol(lineIter.next(), '\t', col));
+            }             
+        }
+        else if (cmd.equals("testescapebacklashes")) {
+            List<String> data = CollectionUtils.makeList("foobar", "foobar\\", "\"quoted\"", "\\\"complex\\\"");
+            Logger.info("Escape backlashes:");
+            for (String s: data) {
+                String escaped = escapeBacklashes(s);
+                Logger.info("Original: "+s);
+                Logger.info("Escaped: "+escaped);
+            }
+            Logger.info("");
+            Logger.info("Escape double quotes:");
+            for (String s: data) {
+                String escaped = escapeDoubleQuotes(s);
+                Logger.info("Original: "+s);
+                Logger.info("Escaped: "+escaped);
+            }
+        }
+        else if (cmd.equals("testremovesubstring")) {
+            String s = args.shift();
+            int start = Integer.parseInt(args.shift());
+            int end = Integer.parseInt(args.shift());
+            String result = removeSubString(s, start, end);
+            System.out.println(result);
+        }
+        else if (cmd.equals("testuniquename")) {
+            // Set<String> usedNames = new HashSet(CollectionUtils.makeList("foo", "fooA", "fooB", "fooC", "fooF"));
+            String prefix = "foo_";
+            Set<String> usedSuffixes = new LinkedHashSet(CollectionUtils.extractFirst(100, new AllStringsIterator(new ABAlphabet())));
+            Set<String> usedNames = new LinkedHashSet();
+            usedNames.add(prefix);
+            for (String usedSuffix: usedSuffixes) {
+                usedNames.add(prefix+usedSuffix);
+            }             
+            Logger.info("Used names:\n"+StringUtils.collectionToString(usedNames));
+            String uniqueName = createUniqueName(prefix, usedNames, new AllStringsIterator(new ABAlphabet()));
+            Logger.info("generated unique name: "+uniqueName);
+        }
+        else if (cmd.equals("parselines")) {
+            int i=0;
+            for (String line: IOUtils.readLines()) {
+                i++;
+                Logger.info("Parsed map "+i+":");
+                Logger.info(mapToString(parseMapLine(line)));
+                Logger.info("");
+            }
+        }
+        else {
+            System.err.println("Illegal command: "+cmd);
+        }
+    }
     
     /** 
      * "Monopoly-style" formatting of big bucks etc. e.g. 1000 => 1.000,
@@ -888,6 +1009,43 @@ public final class StringUtils {
     }
     */
     
+    /**
+     * (Approximately) ls -lh type formatting of numbers, with applications including but not limited  
+     * to expressing file sizes (the unlimited applications naturally having to do with formatting
+     * of other quantities having similar numeric magnitude ranges).
+     */ 
+    public static String formatSize(long value) {
+        long TERA = 1000000000000l;
+        long GIGA = 1000000000l;
+        long MEGA = 1000000l;
+        long KILO = 1000l;
+        if (value >= TERA) {
+            long teras = value / TERA;
+            long bytes = value - teras * TERA;
+            long gigas= bytes / GIGA;
+            return ""+teras+"."+(gigas/100)+"T";
+        }
+        else if (value >= GIGA) {
+            long gigas = value / GIGA;
+            long bytes = value - gigas * GIGA;
+            long megas = bytes / MEGA;
+            return ""+gigas+"."+(megas/100)+"G";
+        }
+        else if (value >= MEGA) {
+            long megas = value / MEGA;
+            long bytes = value - megas * MEGA;
+            long kilos = bytes / KILO;
+            return ""+megas+"."+(kilos/100)+"M";
+        }
+        else if (value >= KILO) {
+            long kilos = value / KILO;
+            long bytes = value - kilos * 1000;
+            return ""+kilos+"."+(bytes/ 100)+"K";
+        }
+        else {        
+            return ""+value;
+        }
+    }
    
     /** keywords: järjestysluku, järjestysluvun */
     public static String formatOrdinal(int pOrdinal) {
@@ -1589,13 +1747,21 @@ public final class StringUtils {
         return collectionToString(tokenList.subList(0, tokenList.size()-1), ".");        
     }
     
-    public static String getExtension(String pPath) {
-        String[] tokens = split(pPath, "\\.");
-        return tokens[tokens.length-1];                
+    /** @return null if no extension (i.e., no '.' in filename). */ 
+    public static String getExtension(File file) {         
+         String name = file.getName();         
+         if (name.contains(".")) {
+             String[] tokens = split(name, "\\.");
+             return tokens[tokens.length-1];
+         }
+         else {
+             return null;
+         }
+                         
     }
     
-    public static String getExtension(File pFile) {
-        return getExtension(pFile.getName());        
+    public static String getExtension(String path) {
+        return getExtension(new File(path));        
     }
     
     public static boolean containsUpperCaseLetters(String pString) {
@@ -1958,100 +2124,109 @@ public final class StringUtils {
     }
 
     public static void main(String[] args) throws Exception {
-    	 String cmd = args[0];
-         if (cmd.equals("h")) {
-        	 if (args.length == 1) {
-        		 try {
-        			 List<String> lines = IOUtils.readLines(System.in);
-        			 for (String line: lines) {
-            			 System.out.println(h(Long.parseLong(line)));
-            		 }
-        		 }
-        		 catch (IOException e) {
-        			 e.printStackTrace();
-        		 }        		 
-        	 }
-        	 else {
-        		 System.out.println(h(Integer.parseInt(args[1])));
-        	 }
-         }
-         else if (cmd.equals("testallstringsiterator")) {
-             testAllStringsIterator();            
-         }
-         else if (cmd.equals("testdoublequotedstrings")) {
-             CmdLineArgs cmdLineArgs = new CmdLineArgs(args);
-             cmdLineArgs.shift();
-             testDoubleQuotedStrings(cmdLineArgs.getNonOptArgs());            
-         }
-         else if (cmd.equals("testfastsplit")) {
-             testFastSplit();            
-         }
-         else if (cmd.equals("expandBashList")) {
-             expandBashListCmdLIne();
-         }
-         else if (cmd.equals("formatint")) {
-             long val = Long.parseLong(args[1]);
-             System.out.println(formatLargeInteger(val));
-         }
-         else if (cmd.equals("dec2hex")) {
-             long i = Long.parseLong(args[1]);
-             System.out.println(Long.toHexString(i));
-         }
-         else if (cmd.equals("testextractcol")) {
-             int col = Integer.parseInt(args[1]);
-             Iterator<String> lineIter = IOUtils.lineIterator(System.in);             
-             while(lineIter.hasNext()) {
-                 System.out.println(extractCol(lineIter.next(), '\t', col));
-             }             
-         }
-         else if (cmd.equals("testescapebacklashes")) {
-             List<String> data = CollectionUtils.makeList("foobar", "foobar\\", "\"quoted\"", "\\\"complex\\\"");
-             Logger.info("Escape backlashes:");
-             for (String s: data) {
-                 String escaped = escapeBacklashes(s);
-                 Logger.info("Original: "+s);
-                 Logger.info("Escaped: "+escaped);
-             }
-             Logger.info("");
-             Logger.info("Escape double quotes:");
-             for (String s: data) {
-                 String escaped = escapeDoubleQuotes(s);
-                 Logger.info("Original: "+s);
-                 Logger.info("Escaped: "+escaped);
-             }
-         }
-         else if (cmd.equals("testremovesubstring")) {
-             String s = args[1];
-             int start = Integer.parseInt(args[2]);
-             int end = Integer.parseInt(args[3]);
-             String result = removeSubString(s, start, end);
-             System.out.println(result);
-         }
-         else if (cmd.equals("testuniquename")) {
-             // Set<String> usedNames = new HashSet(CollectionUtils.makeList("foo", "fooA", "fooB", "fooC", "fooF"));
-             String prefix = "foo_";
-             Set<String> usedSuffixes = new LinkedHashSet(CollectionUtils.extractFirst(100, new AllStringsIterator(new ABAlphabet())));
-             Set<String> usedNames = new LinkedHashSet();
-             usedNames.add(prefix);
-             for (String usedSuffix: usedSuffixes) {
-                 usedNames.add(prefix+usedSuffix);
-             }             
-             Logger.info("Used names:\n"+StringUtils.collectionToString(usedNames));
-             String uniqueName = createUniqueName(prefix, usedNames, new AllStringsIterator(new ABAlphabet()));
-             Logger.info("generated unique name: "+uniqueName);
-         }
-         else if (cmd.equals("parselines")) {
-             int i=0;
-             for (String line: IOUtils.readLines()) {
-                 i++;
-                 Logger.info("Parsed map "+i+":");
-                 Logger.info(mapToString(parseMapLine(line)));
-                 Logger.info("");
-             }
-         }
-         else {
-        	 System.err.println("Illegal command: "+cmd);
-         }
+        StringUtils su = new StringUtils(args);
+        su.run();
+        
+//    	 String cmd = args[0];
+//         if (cmd.equals("h")) {
+//        	 if (args.length == 1) {
+//        		 try {
+//        			 List<String> lines = IOUtils.readLines(System.in);
+//        			 for (String line: lines) {
+//            			 System.out.println(h(Long.parseLong(line)));
+//            		 }
+//        		 }
+//        		 catch (IOException e) {
+//        			 e.printStackTrace();
+//        		 }        		 
+//        	 }
+//        	 else {
+//        		 System.out.println(h(Integer.parseInt(args[1])));
+//        	 }
+//         }
+//         else if (cmd.equals("testallstringsiterator")) {
+//             testAllStringsIterator();            
+//         }
+//         else if (cmd.equals("testformatterasetc")) {
+//             CmdLineArgs cmdLineArgs = new CmdLineArgs(args);
+//             cmdLineArgs.shift();
+//             for (String s: cmdLineArgs.getNonOptArgs()) {
+//                 Long l = Long.parseLong(s);
+//                 System.out.println(formatBytesKilosMegasGigasOrTeras(l)); 
+//             }
+//         }
+//         else if (cmd.equals("testdoublequotedstrings")) {                         
+//             testDoubleQuotedStrings(args.);            
+//         }
+//         else if (cmd.equals("testfastsplit")) {
+//             testFastSplit();            
+//         }
+//         else if (cmd.equals("expandBashList")) {
+//             expandBashListCmdLIne();
+//         }
+//         else if (cmd.equals("formatint")) {
+//             long val = Long.parseLong(args[1]);
+//             System.out.println(formatLargeInteger(val));
+//         }
+//         else if (cmd.equals("dec2hex")) {
+//             long i = Long.parseLong(args[1]);
+//             System.out.println(Long.toHexString(i));
+//         }
+//         else if (cmd.equals("testextractcol")) {
+//             int col = Integer.parseInt(args[1]);
+//             Iterator<String> lineIter = IOUtils.lineIterator(System.in);             
+//             while(lineIter.hasNext()) {
+//                 System.out.println(extractCol(lineIter.next(), '\t', col));
+//             }             
+//         }
+//         else if (cmd.equals("testescapebacklashes")) {
+//             List<String> data = CollectionUtils.makeList("foobar", "foobar\\", "\"quoted\"", "\\\"complex\\\"");
+//             Logger.info("Escape backlashes:");
+//             for (String s: data) {
+//                 String escaped = escapeBacklashes(s);
+//                 Logger.info("Original: "+s);
+//                 Logger.info("Escaped: "+escaped);
+//             }
+//             Logger.info("");
+//             Logger.info("Escape double quotes:");
+//             for (String s: data) {
+//                 String escaped = escapeDoubleQuotes(s);
+//                 Logger.info("Original: "+s);
+//                 Logger.info("Escaped: "+escaped);
+//             }
+//         }
+//         else if (cmd.equals("testremovesubstring")) {
+//             String s = args[1];
+//             int start = Integer.parseInt(args[2]);
+//             int end = Integer.parseInt(args[3]);
+//             String result = removeSubString(s, start, end);
+//             System.out.println(result);
+//         }
+//         else if (cmd.equals("testuniquename")) {
+//             // Set<String> usedNames = new HashSet(CollectionUtils.makeList("foo", "fooA", "fooB", "fooC", "fooF"));
+//             String prefix = "foo_";
+//             Set<String> usedSuffixes = new LinkedHashSet(CollectionUtils.extractFirst(100, new AllStringsIterator(new ABAlphabet())));
+//             Set<String> usedNames = new LinkedHashSet();
+//             usedNames.add(prefix);
+//             for (String usedSuffix: usedSuffixes) {
+//                 usedNames.add(prefix+usedSuffix);
+//             }             
+//             Logger.info("Used names:\n"+StringUtils.collectionToString(usedNames));
+//             String uniqueName = createUniqueName(prefix, usedNames, new AllStringsIterator(new ABAlphabet()));
+//             Logger.info("generated unique name: "+uniqueName);
+//         }
+//         else if (cmd.equals("parselines")) {
+//             int i=0;
+//             for (String line: IOUtils.readLines()) {
+//                 i++;
+//                 Logger.info("Parsed map "+i+":");
+//                 Logger.info(mapToString(parseMapLine(line)));
+//                 Logger.info("");
+//             }
+//         }
+//         else {
+//        	 System.err.println("Illegal command: "+cmd);
+//         }
         // String original = "a:b:c:d";
         // String result = replaceNthElement(original, "D", ":", 3);
         // dbgMsg("result: "+result);
@@ -2078,7 +2253,7 @@ public final class StringUtils {
         System.out.println(StringUtils.collectionToString(first1000));               
     }
     
-    private static void testDoubleQuotedStrings(String[] pArgs) throws Exception {
+    private static void testDoubleQuotedStrings(List<String> pArgs) throws Exception {
         StringBuffer buf = new StringBuffer();
         
         for (String arg: pArgs) {

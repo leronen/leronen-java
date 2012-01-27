@@ -141,7 +141,7 @@ public class DefaultGraph<T, N extends DefaultNode<T>, E extends AbstractEdge<T,
      * Note that there is currently no efficient way to remove a given edge;
      * this is because edges are stored into nodes as ArrayList.
      * 
-     * This method of mass-removing using a condigion may be efficient enough 
+     * This method of mass-removing using a condition may be efficient enough 
      * for many situations, though.
      * 
      * @param pCondition Condition should return true for edges that are to 

@@ -10,9 +10,8 @@ import java.util.*;
 /**
  * Base class for implementing unit tests runnable from the command line.
  * Aimed to enable implementing unit tests with minimum effort.
- * 
- * See e.g. class com.bcplatforms.bcos.custom.koiranet.test.EYEUnitTests
- * for example usage. 
+ *
+ * see e.g. biomine3000.objects.ABBOETests for an example usage.
  */
 public abstract class CommandLineTests {
 	

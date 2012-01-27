@@ -13,7 +13,7 @@ public class CmdLineArgs2 {
     public Map<String,String> opts;
     
     /** non-option arguments */
-    public List<String> args;
+    public List<String> posargs;
     
     
     public CmdLineArgs2(String[] args) throws IllegalArgumentsException {
@@ -24,14 +24,25 @@ public class CmdLineArgs2 {
         this(args, new LinkedHashSet<String>(Arrays.asList(flagNames)));       
     }
 
-    public String getOpt(String name) {
+    public String get(String name) {
         return opts.get(name);
     }
     
-
+    /** Get i:th non-opt argument */
+    public String get(int i) {
+        return posargs.get(i);
+    }
     
     public List<String> getNonOptArgs() {
-        return args; 
+        return posargs; 
+    }
+    
+    public boolean hasPositionalArgs() {
+        return posargs.size() > 0; 
+    }
+    
+    public int numPositionalArgs() {
+        return posargs.size(); 
     }
     
     /** 
@@ -41,7 +52,7 @@ public class CmdLineArgs2 {
     public CmdLineArgs2(String[] args, Set<String> flagNames) throws IllegalArgumentsException {
         this.flags = new LinkedHashSet<String>();
         this.opts = new LinkedHashMap<String, String>();
-        this.args = new ArrayList<String>();
+        this.posargs = new ArrayList<String>();
         
         for (int i=0; i<args.length; i++) {
             String arg = args[i];
@@ -68,12 +79,12 @@ public class CmdLineArgs2 {
             }
             else {
                 // non-opt arg
-                this.args.add(arg);
+                this.posargs.add(arg);
             }
         }       
     }
 
-    public Integer getIntOpt(String name) {
+    public Integer getInt(String name) {
         String s = opts.get(name);
         if (s != null) {
             return Integer.parseInt(s);
@@ -108,11 +119,11 @@ public class CmdLineArgs2 {
      * Return null if no more args.
      */
     public String shift() {
-        if (args.size() == 0) {
+        if (posargs.size() == 0) {
             return null;
         }
         else {
-            return args.remove(0);
+            return posargs.remove(0);
         }
     }
     
@@ -132,7 +143,7 @@ public class CmdLineArgs2 {
     
     /** Does not include the ones already removed by calling shift() */
     public int getNumArgs() {
-        return args.size();
+        return posargs.size();
     }
     
     public boolean hasFlag(String flag) {
@@ -142,7 +153,7 @@ public class CmdLineArgs2 {
     public String toString() {
         return "flags:\n\t"+StringUtils.collectionToString(flags, "\n\t")+"\n"+
                "opts:\n\t"+StringUtils.mapToString(opts, "=", "\n\t")+"\n"+
-               "args:\n\t"+StringUtils.collectionToString(args, "\n\t");
+               "args:\n\t"+StringUtils.collectionToString(posargs, "\n\t");
     }
     
     public static void main(String[] pArgs) throws Exception {

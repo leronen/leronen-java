@@ -117,15 +117,15 @@ public class NonBlockingSender {
             try {
                 byte[] msg = messageQueue.take(); // Will block until a message is available.
                 if (msg == POISON) {
-                    log("Received stop request");
+                    dbg("Received stop request");
                     stopped = true;
                     continue;
                 }
                 try {
-                    log("Writing a message of "+msg.length+" bytes");
+                    dbg("Writing a message of "+msg.length+" bytes");
                     IOUtils.writeBytes(os, msg);
                     os.flush();
-                    log("Wrote "+msg.length+" bytes");
+                    dbg("Wrote "+msg.length+" bytes");
                 } catch (IOException e) {
                     error("Failed writing, giving up", e);                    
                     stopped = true;
@@ -140,7 +140,7 @@ public class NonBlockingSender {
             }
         }
         
-        log("Ended main loop");
+        dbg("Ended main loop");
         listener.senderFinished();
     }
         
@@ -179,6 +179,10 @@ public class NonBlockingSender {
     
     private void log(String msg) {
         log.info(name+": "+msg);
+    }
+    
+    private void dbg(String msg) {
+        log.dbg(name+": "+msg);
     }
         
 }
