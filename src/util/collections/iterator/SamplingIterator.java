@@ -3,6 +3,11 @@ package util.collections.iterator;
 import util.*;
 import java.util.*;
 
+/**
+ * Samples a number of objects WITHOUT replacement. Naturally,
+ * the number of objects to be iterated has to be known beforehand,
+ * as an iterator can only be iterated once. 
+ */
 public class SamplingIterator<T> implements Iterator<T> {
 
     private Iterator<T> mBaseIter;    

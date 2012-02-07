@@ -1,6 +1,7 @@
 package util.io;
 
 import util.*;
+import util.IOUtils.LineIterator;
 import util.dbg.*;
 import util.collections.*;
 import util.collections.tree.*;
@@ -2233,16 +2234,26 @@ public final class FileUtils {
                 IOUtils.setFastStdout();
                 String file1 = args[0];
                 String file2 = args[1];
-                Set<String> set1 = new LinkedHashSet(Arrays.asList(IOUtils.readLineArray(file1)));
-                Set<String> set2 = new HashSet(Arrays.asList(IOUtils.readLineArray(file2)));                
-                Set<String> result = CollectionUtils.minus(set1, set2);
-                
-                if (result.size() > 0) {
-//                    System.out.println(StringUtils.collectionToString(result));
-                    for (String line: result) {
-                        System.out.println(line);
-                    }
+                Set<String> set = new HashSet(Arrays.asList(IOUtils.readLineArray(file1)));
+                LineIterator i = new LineIterator(file2);
+                while (i.hasNext()) {
+                	String line = i.next();
+                	set.remove(line);
                 }
+                
+                for (String line: set) {
+                    System.out.println(line);
+                }
+//                for (String line: IO)
+//                Set<String> set2 = new HashSet(Arrays.asList(IOUtils.readLineArray(file2)));                
+//                Set<String> result = CollectionUtils.minus(set1, set2);
+                
+//                if (result.size() > 0) {
+//                    System.out.println(StringUtils.collectionToString(result));
+//                    for (String line: result) {
+//                        System.out.println(line);
+//                    }
+//                }
                 System.out.flush();
             }
             else if (cmd.equals(CMD_PICK_BALANCED_SET)) {                
@@ -2277,7 +2288,7 @@ public final class FileUtils {
                 Logger.info("Pick at least "+numToPickOfEach+" of each key");
                 Logger.info("Pick 1 more of "+remainder+" keys");
                 MultiSet<String> picksLeft = new HashMultiSet();
-                Set<String> oneMorePick = new HashSet(RandUtils.sample(new ArrayList(keys), remainder)); 
+                Set<String> oneMorePick = new HashSet(RandUtils.sampleWithoutReplacement(new ArrayList(keys), remainder)); 
                 for (String key: keys) {
                     int n = numToPickOfEach;
                     if (oneMorePick.contains(key)) {

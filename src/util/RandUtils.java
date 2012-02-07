@@ -22,6 +22,8 @@ public class RandUtils {
     public static final String CMD_RANDINT = "randint";
     public static final String CMD_RANDINTS = "randints";
     public static final String CMD_SAMPLE = "sample";
+    public static final String CMD_SAMPLE_WITHOUT_REPLACEMENT = "sample_without_replacement";
+    public static final String CMD_SAMPLE_WITH_REPLACEMENT = "sample_with_replacement";
     public static final String CMD_SAMPLEPAIRS = "samplepairs";
     public static final String CMD_SAMPLEPAIRS2 = "samplepairs2";
     public static final String CMD_BERNOULLI = "bernoulli";
@@ -105,7 +107,7 @@ public class RandUtils {
     }
     
     public static <T> SymmetricPair<T> samplePair(List<T> pList) {
-        return new SymmetricPair(sample(pList, 2));
+        return new SymmetricPair(sampleWithoutReplacement(pList, 2));
     }
     
     public static <T> SymmetricPair<T> samplePairFromCollection(Collection<T> pCollection) {
@@ -116,21 +118,21 @@ public class RandUtils {
      * Sample one element from a collection. Implementation delegated to multi-element sampling,
      * consequently being less efficient as it could be.
      * */
-    public static <T> T sample(Collection<T> pList) {
+    public static <T> T sampleWithoutReplacement(Collection<T> pList) {
         return sampleFromCollection(pList, 1).iterator().next();
     }
-
+        
     
     /**
      * Sample one element from a list. Implementation delegated to multi-element sampling,
      * consequently being less efficient as it could be.
      * */
     public static <T> T sample(List<T> pList) {
-        return sample(pList, 1).iterator().next();
+        return sampleWithoutReplacement(pList, 1).iterator().next();
     }
     
-    /** Sample with no bootstrapping */
-    public static <T> List <T> sample(List<T> pList, int pNumToSample) {        
+    /** Sample WITHOUT replacement  */
+    public static <T> List <T> sampleWithoutReplacement(List<T> pList, int pNumToSample) {        
         int numObjects = pList.size();
         if (pNumToSample > numObjects) {
             throw new RuntimeException("Not enough objects in list: asked for "+pNumToSample+ "and we have only "+numObjects);
@@ -337,6 +339,7 @@ public class RandUtils {
             }
         }
         else if (args[0].equals(CMD_SAMPLE)) {
+        	// legacy backwards compatibility; same as CMD_SAMPLE_WITHOUT_REPLACEMENT
             int numToSample; 
         
             if (args.length == 1) {
@@ -352,14 +355,58 @@ public class RandUtils {
             
             try {
                 List<String> data = IOUtils.readLines();
-                List<String> result = RandUtils.sample(data, numToSample); 
+                List<String> result = RandUtils.sampleWithoutReplacement(data, numToSample); 
                 IOUtils.writeCollection(result);
             }
             catch (IOException e) {
                 Utils.die(e);
-            }
-                
+            }                
         }
+        else if (args[0].equals(CMD_SAMPLE_WITHOUT_REPLACEMENT)) {
+            int numToSample; 
+        
+            if (args.length == 1) {
+                numToSample = 1;
+            }
+            else if (args.length == 2) {
+                numToSample = Integer.parseInt(args[1]);
+            }
+            else {
+                Utils.die("Too many args");
+                throw new RuntimeException("WhatWhatWhat?!?!?!?");
+            }
+            
+            try {
+                List<String> data = IOUtils.readLines();
+                List<String> result = RandUtils.sampleWithoutReplacement(data, numToSample); 
+                IOUtils.writeCollection(result);
+            }
+            catch (IOException e) {
+                Utils.die(e);
+            }                
+        }
+        else if (args[0].equals(CMD_SAMPLE_WITH_REPLACEMENT)) {
+            int numToSample; 
+            String file = null;
+            
+            if (args.length == 3) {
+                file = args[1];
+                numToSample = Integer.parseInt(args[2]);
+            }
+            else {
+                Utils.die("Invalid number of arguments (!=3)");
+                throw new RuntimeException("Not going to end up here, as we have just died");
+            }
+            
+            try {
+                List<String> data = IOUtils.readLines(file);
+                List<String> result = RandUtils.sampleWithReplacement(data, numToSample); 
+                IOUtils.writeCollection(result);
+            }
+            catch (IOException e) {
+                Utils.die(e);
+            }                
+        }        
         else if (args[0].equals(CMD_SAMPLEAVERAGES)) {
             try {
                 List<Double> data = IOUtils.readObjects(System.in, new StringToDoubleConverter());
@@ -375,6 +422,9 @@ public class RandUtils {
             catch (IOException e) {
                 Utils.die(e);
             }
+        }
+        else {
+        	Utils.die("No such command: "+args[0]);
         }
         
         // test1();
@@ -454,7 +504,7 @@ public class RandUtils {
         int[] vals = range.asIntArr();
         List valList = ConversionUtils.asList(vals);
         System.out.println("original vals:\n"+StringUtils.listToString(valList));
-        List sample = sample(valList,  K);
+        List sample = sampleWithoutReplacement(valList,  K);
         System.out.println("sampled "+K+"vals:\n"+StringUtils.listToString(sample));
     }
     
