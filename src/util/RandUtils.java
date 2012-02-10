@@ -118,7 +118,7 @@ public class RandUtils {
      * Sample one element from a collection. Implementation delegated to multi-element sampling,
      * consequently being less efficient as it could be.
      * */
-    public static <T> T sampleWithoutReplacement(Collection<T> pList) {
+    public static <T> T sampleOne(Collection<T> pList) {
         return sampleFromCollection(pList, 1).iterator().next();
     }
         
