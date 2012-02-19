@@ -83,6 +83,7 @@ public final class FileUtils {
     // check whether numbers in input (single col) are ordered 
     public static final String CMD_IS_ORDERED = "is_ordered";
     public static final String CMD_FIND_GAPS = "find_gaps";
+    public static final String CMD_FIND = "find";
     public static final String CMD_SELECT = "select";
     public static final String CMD_REPLACE_IN_FILE = "replaceinfile";
     public static final String CMD_REPLACE_LINE = "replaceline";
@@ -416,20 +417,32 @@ public final class FileUtils {
         copy(pSrcFile, pDstFile);
         pSrcFile.delete();                    
     }
+
+    /** A drop-in replacement for unix find */
+    public static List<File> find(File dir) {
+        return find(dir, null);
+    }
     
-    /**
-     * Works by horridly calling ProcessUtils.executeCommand("rm <foo>"...) 
-     * Why not just File.delete()!?!?
-     */
-//    public static void remove(File pSrcFile) throws IOException {
-//        // a bit unly impl...
-//        String cmd = "rm "+pSrcFile.getCanonicalPath();
-//        ProcessUtils.executeCommand(cmd,
-//                                    null,  // no special working dir
-//                                    null); // no stream listener
-//    }
+    /** Condition is allowed to be null */
+    public static List<File> find(File dir, Condition<File> condition) {
+        List<File> result = new ArrayList<File>();
+        internalFind(dir, result, condition);
+        return result;
+    }
     
-                         
+    /** Condition is allowed to be null */
+    private static void internalFind(File pDir, Collection<File> result, Condition<File> condition) {
+        for (File f: pDir.listFiles()) {
+            if (condition == null || condition.fulfills(f)) {
+                result.add(f);
+            }
+            
+            if (f.isDirectory()) {
+                internalFind(f, result, condition);
+            }
+        }
+    }
+                            
     /** Non-recursively get the list of files in directory. The result will not include directories. */                         
     private static List internalFilesInDir(File pDir) {
         ArrayList result = new ArrayList();
@@ -1638,6 +1651,45 @@ public final class FileUtils {
                 Matrix resultMatrix = inputMatrix.select(args);
                 System.out.println(resultMatrix);                
             }
+            else if (cmd.equals(CMD_FIND)) {
+                System.out.println("args: "+StringUtils.arrayToString(args));
+                String pattern = argParser.getOpt("name");
+                Condition<File> condition;
+                if (pattern != null) {
+                    condition = new FileNameCondition(pattern);
+                }
+                else {
+                    condition = null;
+                }
+                List<File> files;
+                if (args.length == 0) {
+                    files = Collections.singletonList(new File("."));
+                }
+                else {
+                    files = new ArrayList<File>();
+                    for (String name: args) {                        
+                        files.add(new File(name));
+                    }
+                }
+                
+                for (File d: files) {
+                    if (!d.exists()) {
+                        System.err.println("No such file: "+d);
+                    }
+                    else if (d.isDirectory()) {                     
+                        List<File> foundFiles = find(d, condition);
+                        for (File f: foundFiles) {
+                            System.out.println(f.getPath());
+                        }
+                    }
+                    else {
+                        // actually, only a pesky file
+                        if (condition == null || condition.fulfills(d)) {
+                            System.out.println(d.getPath());
+                        }
+                    }
+                }
+            }            
             else if (cmd.equals(CMD_COLSUMS)) {
                 Matrix inputMatrix = new Matrix(true);
                 inputMatrix.readFromStream(System.in);                 
