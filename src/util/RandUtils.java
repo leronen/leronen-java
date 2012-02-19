@@ -131,6 +131,13 @@ public class RandUtils {
         return sampleWithoutReplacement(pList, 1).iterator().next();
     }
     
+   /**
+    *@deprecated
+    */
+    public static <T> List <T> sample(List<T> pList, int pNumToSample) {
+        return sampleWithoutReplacement(pList, pNumToSample);
+    }
+    
     /** Sample WITHOUT replacement  */
     public static <T> List <T> sampleWithoutReplacement(List<T> pList, int pNumToSample) {        
         int numObjects = pList.size();

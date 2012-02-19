@@ -109,7 +109,7 @@ public class CmdLineArgs2 {
     public static class IllegalArgumentsException extends Exception {        
         private static final long serialVersionUID = -843421106449840299L;
 
-        private IllegalArgumentsException(String msg) {
+        public IllegalArgumentsException(String msg) {
             super(msg);
         }
     }
