@@ -264,6 +264,25 @@ public class IOUtils {
         ps.close();
     }
         
+    /** column indexing starts from 0. No header assumed. */
+    public static List<String> readColumn(String file, String delimRegex, int column) throws IOException {
+    	FileInputStream fis = new FileInputStream(file);
+    	List<String> result = readColumn(fis,  delimRegex, column);    			
+    	fis.close();
+    	return result;
+    }
+    
+    /** column indexing starts from 0. No header assumed. */
+    public static List<String> readColumn(InputStream pInputStream, String delimRegex, int column) throws IOException {
+        String[] lines = readLineArray(pInputStream);
+        List<String> result = new ArrayList<String>();
+        for (String line: lines) {
+            String[] tokens = line.split(delimRegex);
+            result.add(tokens[column]);
+        }
+        return result;        
+    }
+    
     public static void writeCollection(String pFile,
                                        Collection pCollection) throws FileNotFoundException {
         
