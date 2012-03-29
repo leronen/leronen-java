@@ -85,6 +85,9 @@ public final class FileUtils {
     public static final String CMD_FIND_GAPS = "find_gaps";
     public static final String CMD_FIND = "find";
     public static final String CMD_SELECT = "select";
+    // select a subset of rows where value of a given col is in a subset specified in another file
+    public static final String CMD_SELECT_BY_ID_LIST = "select_by_id_list";
+    public static final String CMD_SELECT_BY_ID_LIST_2KEY = "select_by_id_list_2key";
     public static final String CMD_REPLACE_IN_FILE = "replaceinfile";
     public static final String CMD_REPLACE_LINE = "replaceline";
     public static final String CMD_REPLACE_IN_FILES = "replaceinfiles";
@@ -1644,6 +1647,49 @@ public final class FileUtils {
                     System.out.println(header);
                 }
                 System.out.println(StringUtils.arrayToString(result, "\n"));                
+            }
+            else if (cmd.equals(CMD_SELECT_BY_ID_LIST)) {
+            	IOUtils.setFastStdout();                
+                String subsetidfile = argParser.shift();
+                int col = argParser.shiftInt(); 
+                Logger.info("subsetidfile: "+subsetidfile);
+                Logger.info("col: "+col);
+                HashSet<String> ids = new HashSet<String>(IOUtils.readLines(subsetidfile));
+                Iterator<String> iter = IOUtils.lineIterator();
+                while (iter.hasNext()) {
+                	String line = iter.next();
+                	String key = StringUtils.extractCol(line, ' ', col);
+                	if (ids.contains(key)) {
+                		System.out.println(line);
+                	}
+                }
+                System.out.flush();
+                System.out.close();
+                
+            }            
+            else if (cmd.equals(CMD_SELECT_BY_ID_LIST_2KEY)) {
+            	// ad hoc, read code plz
+            	IOUtils.setFastStdout();                
+                String subsetidfile = argParser.shift();
+                int col1 = argParser.shiftInt();
+                int col2 = argParser.shiftInt();
+                Logger.info("subsetidfile: "+subsetidfile);
+                Logger.info("col1: "+col1);
+                Logger.info("col2: "+col2);
+                HashSet<String> ids = new HashSet<String>(IOUtils.readLines(subsetidfile));
+                Iterator<String> iter = IOUtils.lineIterator();
+                while (iter.hasNext()) {
+                	String line = iter.next();
+                	String key1 = StringUtils.extractCol(line, ' ', col1);
+                	String key2 = StringUtils.extractCol(line, ' ', col2);
+                	String key = key1+" "+key2;
+                	if (ids.contains(key)) {
+                		System.out.println(line);
+                	}
+                }
+                System.out.flush();
+                System.out.close();
+                
             }
             else if (cmd.equals(CMD_SELECT)) {
                 Matrix inputMatrix = new Matrix(true);
