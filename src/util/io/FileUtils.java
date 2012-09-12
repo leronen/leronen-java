@@ -1649,7 +1649,7 @@ public final class FileUtils {
                 System.out.println(StringUtils.arrayToString(result, "\n"));                
             }
             else if (cmd.equals(CMD_SELECT_BY_ID_LIST)) {
-            	IOUtils.setFastStdout();                
+            	IOUtils.setFastStdout();
                 String subsetidfile = argParser.shift();
                 int col = argParser.shiftInt(); 
                 Logger.info("subsetidfile: "+subsetidfile);
@@ -1824,8 +1824,7 @@ public final class FileUtils {
                     }
                 }
             }
-            else if (cmd.equals(CMD_COMPARE_SETS)) {
-                // täällä
+            else if (cmd.equals(CMD_COMPARE_SETS)) {                // 
                 boolean outputFiles = argParser.isDefined("o"); 
                                 
                 ArrayList<Set<String>> sets = new ArrayList<Set<String>>();
@@ -1834,7 +1833,10 @@ public final class FileUtils {
                     set.addAll(IOUtils.readLines(f));
                     sets.add(set);
                 }
-                compareSets(sets, outputFiles);
+                List<String> setNames = Arrays.asList(args);
+                setNames = StringUtils.removeLongestCommonPrefix(setNames);
+                setNames = StringUtils.removeLongestCommonSuffix(setNames);
+                compareSets(sets, setNames, outputFiles);
             }
             else if (cmd.equals(CMD_JACCARDDISTANCE)) {
             	String f1 = argParser.shift();
@@ -2515,16 +2517,26 @@ public final class FileUtils {
         return gaps;
     }
     
-    private static void compareSets(List<Set<String>> sets, boolean outputFiles) {
+    private static void compareSets(List<Set<String>> sets, List<String> pSetNames, boolean outputFiles) {
 
         Map<String, Integer> setIndices= new HashMap();
-        List<String> setNames = new ArrayList();
+        
         int nSets = sets.size();
-                               
-        for (int i=0; i<sets.size(); i++) {
-            String name = "set"+i;
-            setIndices.put(name, i);
-            setNames.add(name);
+
+        List<String> setNames;
+        
+        if (pSetNames != null) {
+        	// set names given
+        	setNames = pSetNames;
+        }
+        else {
+        	// set names not given, generate names based on the order of the list
+        	setNames = new ArrayList();
+        	for (int i=0; i<sets.size(); i++) {
+	            String name = "set"+i;
+	            setIndices.put(name, i);
+	            setNames.add(name);
+	        }
         }
         
         Set<String> union = CollectionUtils.union(sets);
@@ -2548,12 +2560,12 @@ public final class FileUtils {
         
             for (int i=0; i<nSets; i++) {
                 if (bs.get(i)) {
-                    String setName = "set"+i;
+                    String setName = setNames.get(i);
                     if (rep.length() == 0) {
                         rep.append(setName);
                     }
                     else {
-                        rep.append("_"+setName);
+                        rep.append(" ∩ "+setName);
                     }
                 }                
             }
@@ -2581,7 +2593,7 @@ public final class FileUtils {
                 }
             }
             else {
-                System.out.println(rep+" has "+items.size()+" items");
+                System.out.println(rep+": "+items.size()+" items");
             }
         }
 
