@@ -230,9 +230,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     public Set<V> get(K pKey) {
         Set<V> set = mToplevelMap.get(pKey);
         if (set==null) {
-//            set = mSetFactory.makeObject();
-//            mToplevelMap.put(pKey, set);
-            return Collections.EMPTY_SET;
+        	return Collections.emptySet();
         }
         else {
             return Collections.unmodifiableSet(set);

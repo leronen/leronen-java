@@ -85,6 +85,9 @@ public final class FileUtils {
     public static final String CMD_FIND_GAPS = "find_gaps";
     public static final String CMD_FIND = "find";
     public static final String CMD_SELECT = "select";
+    // select a subset of rows where value of a given col is in a subset specified in another file
+    public static final String CMD_SELECT_BY_ID_LIST = "select_by_id_list";
+    public static final String CMD_SELECT_BY_ID_LIST_2KEY = "select_by_id_list_2key";
     public static final String CMD_REPLACE_IN_FILE = "replaceinfile";
     public static final String CMD_REPLACE_LINE = "replaceline";
     public static final String CMD_REPLACE_IN_FILES = "replaceinfiles";
@@ -1645,6 +1648,49 @@ public final class FileUtils {
                 }
                 System.out.println(StringUtils.arrayToString(result, "\n"));                
             }
+            else if (cmd.equals(CMD_SELECT_BY_ID_LIST)) {
+            	IOUtils.setFastStdout();
+                String subsetidfile = argParser.shift();
+                int col = argParser.shiftInt(); 
+                Logger.info("subsetidfile: "+subsetidfile);
+                Logger.info("col: "+col);
+                HashSet<String> ids = new HashSet<String>(IOUtils.readLines(subsetidfile));
+                Iterator<String> iter = IOUtils.lineIterator();
+                while (iter.hasNext()) {
+                	String line = iter.next();
+                	String key = StringUtils.extractCol(line, ' ', col);
+                	if (ids.contains(key)) {
+                		System.out.println(line);
+                	}
+                }
+                System.out.flush();
+                System.out.close();
+                
+            }            
+            else if (cmd.equals(CMD_SELECT_BY_ID_LIST_2KEY)) {
+            	// ad hoc, read code plz
+            	IOUtils.setFastStdout();                
+                String subsetidfile = argParser.shift();
+                int col1 = argParser.shiftInt();
+                int col2 = argParser.shiftInt();
+                Logger.info("subsetidfile: "+subsetidfile);
+                Logger.info("col1: "+col1);
+                Logger.info("col2: "+col2);
+                HashSet<String> ids = new HashSet<String>(IOUtils.readLines(subsetidfile));
+                Iterator<String> iter = IOUtils.lineIterator();
+                while (iter.hasNext()) {
+                	String line = iter.next();
+                	String key1 = StringUtils.extractCol(line, ' ', col1);
+                	String key2 = StringUtils.extractCol(line, ' ', col2);
+                	String key = key1+" "+key2;
+                	if (ids.contains(key)) {
+                		System.out.println(line);
+                	}
+                }
+                System.out.flush();
+                System.out.close();
+                
+            }
             else if (cmd.equals(CMD_SELECT)) {
                 Matrix inputMatrix = new Matrix(true);
                 inputMatrix.readFromStream(System.in);                 
@@ -1778,8 +1824,7 @@ public final class FileUtils {
                     }
                 }
             }
-            else if (cmd.equals(CMD_COMPARE_SETS)) {
-                // täällä
+            else if (cmd.equals(CMD_COMPARE_SETS)) {                // 
                 boolean outputFiles = argParser.isDefined("o"); 
                                 
                 ArrayList<Set<String>> sets = new ArrayList<Set<String>>();
@@ -1788,7 +1833,10 @@ public final class FileUtils {
                     set.addAll(IOUtils.readLines(f));
                     sets.add(set);
                 }
-                compareSets(sets, outputFiles);
+                List<String> setNames = Arrays.asList(args);
+                setNames = StringUtils.removeLongestCommonPrefix(setNames);
+                setNames = StringUtils.removeLongestCommonSuffix(setNames);
+                compareSets(sets, setNames, outputFiles);
             }
             else if (cmd.equals(CMD_JACCARDDISTANCE)) {
             	String f1 = argParser.shift();
@@ -2469,16 +2517,26 @@ public final class FileUtils {
         return gaps;
     }
     
-    private static void compareSets(List<Set<String>> sets, boolean outputFiles) {
+    private static void compareSets(List<Set<String>> sets, List<String> pSetNames, boolean outputFiles) {
 
         Map<String, Integer> setIndices= new HashMap();
-        List<String> setNames = new ArrayList();
+        
         int nSets = sets.size();
-                               
-        for (int i=0; i<sets.size(); i++) {
-            String name = "set"+i;
-            setIndices.put(name, i);
-            setNames.add(name);
+
+        List<String> setNames;
+        
+        if (pSetNames != null) {
+        	// set names given
+        	setNames = pSetNames;
+        }
+        else {
+        	// set names not given, generate names based on the order of the list
+        	setNames = new ArrayList();
+        	for (int i=0; i<sets.size(); i++) {
+	            String name = "set"+i;
+	            setIndices.put(name, i);
+	            setNames.add(name);
+	        }
         }
         
         Set<String> union = CollectionUtils.union(sets);
@@ -2502,12 +2560,12 @@ public final class FileUtils {
         
             for (int i=0; i<nSets; i++) {
                 if (bs.get(i)) {
-                    String setName = "set"+i;
+                    String setName = setNames.get(i);
                     if (rep.length() == 0) {
                         rep.append(setName);
                     }
                     else {
-                        rep.append("_"+setName);
+                        rep.append(" ∩ "+setName);
                     }
                 }                
             }
@@ -2535,7 +2593,7 @@ public final class FileUtils {
                 }
             }
             else {
-                System.out.println(rep+" has "+items.size()+" items");
+                System.out.println(rep+": "+items.size()+" items");
             }
         }
 
