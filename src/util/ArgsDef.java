@@ -44,40 +44,7 @@ public class ArgsDef {
             }
             else {
                 addDef(argDef);
-            }
-            
-//            if (mShortNameToLongNameMap.containsKey(argDef.mShortName)) {
-//                throw new RuntimeException("Duplicate short name: "+argDef.mShortName);
-//            }
-//                                                                      
-//            mValidOptionNames.add(argDef.mLongName);
-//            
-//            if (argDef.mShortName != null) {
-//                mValidOptionNames.add(argDef.mShortName);
-//                mShortNameToLongNameMap.put(argDef.mShortName, argDef.mLongName);                    
-//            }
-//            else {
-//                mOptionsWithoutShortName.add(argDef.mLongName);    
-//            }
-//            
-//            if (argDef.mHasValue) {
-//                mNamesOfOptionsRequiringValue.add(argDef.mLongName);
-//            }                   
-//            
-//            if (argDef.mDefaultValue != null) {
-//                // a little sanity check, if you permit...
-//                if (!(argDef.mHasValue)) {
-//                    throw new RuntimeException("Illegal situation: parameter "+
-//                                               argDef.mLongName+" has no value, "+
-//                                               "but still has default value "+argDef.mDefaultValue);
-//                }
-//                mDefaultValues.put(argDef.mLongName, argDef.mDefaultValue);
-//            }
-//            
-//            if (argDef.mPossibleValues != null) {
-//                // for an "enum" type parameter
-//                mPossibleValues.putMultiple(argDef.mLongName, argDef.mPossibleValues);                                        
-//            }
+            }           
         }
     }
     

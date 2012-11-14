@@ -25,6 +25,7 @@ public final class StringUtils extends CommandLineTests {
     public static final String CMD_TESTDOUBLEQUOTEDSTRINGS = "testdoublequotedstrings";
     public static final String CMD_TESTFASTSPLIT = "testfastsplit";
     public static final String CMD_EXPANDBASHLIST = "expandBashList";
+    public static final String CMD_REMOVETRAILINGZEROS = "removetrailingzeros";
     public static final String CMD_FORMATINT = "formatint";
     public static final String CMD_DEC2HEX = "dec2hex";
     public static final String CMD_TESTEXTRACTCOL = "testextractcol";
@@ -94,28 +95,33 @@ public final class StringUtils extends CommandLineTests {
         else if (cmd.equals("testdoublequotedstrings")) {            
             testDoubleQuotedStrings(args.posargs);            
         }
-        else if (cmd.equals("testfastsplit")) {
+        else if (cmd.equals(CMD_TESTFASTSPLIT)) {
             testFastSplit();            
         }
-        else if (cmd.equals("expandBashList")) {
+        else if (cmd.equals(CMD_REMOVETRAILINGZEROS)) {
+            for (String line: IOUtils.readLines()) {
+            	System.out.println(removeTrailingZeros(line));
+            }
+        }
+        else if (cmd.equals(CMD_EXPANDBASHLIST)) {
             expandBashListCmdLIne();
         }
-        else if (cmd.equals("formatint")) {
+        else if (cmd.equals(CMD_FORMATINT)) {
             long val = Long.parseLong(args.shift());
             System.out.println(formatLargeInteger(val));
         }
-        else if (cmd.equals("dec2hex")) {
+        else if (cmd.equals(CMD_DEC2HEX)) {
             long i = Long.parseLong(args.shift());
             System.out.println(Long.toHexString(i));
         }
-        else if (cmd.equals("testextractcol")) {
+        else if (cmd.equals(CMD_TESTEXTRACTCOL)) {
             int col = Integer.parseInt(args.shift());
             Iterator<String> lineIter = IOUtils.lineIterator(System.in);             
             while(lineIter.hasNext()) {
                 System.out.println(extractCol(lineIter.next(), '\t', col));
             }             
         }
-        else if (cmd.equals("testescapebacklashes")) {
+        else if (cmd.equals(CMD_TESTESCAPEBACKLASHES)) {
             List<String> data = CollectionUtils.makeList("foobar", "foobar\\", "\"quoted\"", "\\\"complex\\\"");
             Logger.info("Escape backlashes:");
             for (String s: data) {
@@ -783,6 +789,14 @@ public final class StringUtils extends CommandLineTests {
         }        
     }       
     
+    /** if a string has only zeros, return an empty string */
+    public static String removeTrailingZeros(String pString) {        
+        int i = pString.length()-1;
+        while (i >= 0 && pString.charAt(i) == '0') {
+        	i--;
+        }
+        return pString.substring(0, i+1);
+    }         
     
     public static String removeLastComponent(String pString, String pDelim) {
         List components = new ArrayList(Arrays.asList(pString.split(pDelim)));

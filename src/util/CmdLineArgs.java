@@ -77,11 +77,9 @@ public class CmdLineArgs implements IArgs {
         init(args, pDef, pLoggingEnabled);
     }
     
-    public CmdLineArgs(String[] args, boolean pEnableLogging) {
-        // init(args, pEnableLogging, null, null, null);    
+    public CmdLineArgs(String[] args, boolean pEnableLogging) {  
         init(args, null, pEnableLogging);
     }        
-
     
     public CmdLineArgs(String[] args, 
       				   boolean pEnableLogging, 

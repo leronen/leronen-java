@@ -71,6 +71,8 @@ public final class FileUtils {
     /** only preserve certain keys of a map file (with lines like "foo=bar"), given in another file. Edit happens inplace. */
     public static final String CMD_PRUNE_MAP = "prunemap";
     public static final String CMD_IS_SUBMAP = "is-submap";
+    /** if FILE1 a sublist of FILE2 */
+    public static final String CMD_IS_SUBLIST = "is-sublist";
     /** only preserve the smallest p val for each key. input: file with 2 cols: $1=key, $2=p-val */
     public static final String CMD_PRUNE_P_VALS = "prune_p_vals";
     public static final String CMD_APPEND_COLS = "appendcols";
@@ -1751,6 +1753,15 @@ public final class FileUtils {
                 boolean result = CollectionUtils.isSubMap(subMap, superMap);
                 System.out.println(result);                
             }            
+            else if (cmd.equals(CMD_IS_SUBLIST)) {
+                // usage: java util.io.FileUtils is-submap <submapfile> <supermapfile>
+                String subListFile = argParser.shift("sublistfile");
+                String superListFile = argParser.shift("superlistfile");
+                List<String> subList = IOUtils.readLines(subListFile);
+                List<String> superList = IOUtils.readLines(superListFile);
+                boolean result = CollectionUtils.isSubList(subList, superList);
+                System.out.println(result);                
+            }
             else if (cmd.equals(CMD_COLAVERAGES)) {
                 Matrix inputMatrix = new Matrix(false);
                 inputMatrix.readFromStream(System.in);                 
@@ -2444,13 +2455,13 @@ public final class FileUtils {
                 IOUtils.setFastStdout();
                 String file1 = args[0];
                 String file2 = args[1];
-                Logger.info("Reading file2 ("+file2+") into RAM...");
+                // Logger.info("Reading file2 ("+file2+") into RAM...");
                 Set set2 = new HashSet();
                 for (String line2: IOUtils.lines(file2)) {
                     set2.add(line2);
                 }        
                 
-                Logger.info("Scanning file1 ("+file1+")...");
+                // Logger.info("Scanning file1 ("+file1+")...");
                 for (String line1: IOUtils.lines(file1)) {
                     if (!(set2.contains(line1))) {
                         System.out.println(line1);

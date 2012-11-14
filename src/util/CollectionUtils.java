@@ -1101,6 +1101,43 @@ public final class CollectionUtils {
         return true;
     }
     
+    /** Does not allow for duplicate entries; these will throw a runtimeexception! */
+    public static <T> boolean isSubList(List<T> subListCandidate, List<T> superList) {
+    	
+    	// first, check both lists for duplicates, and fail if ones found
+    	if (containsDuplicates(subListCandidate)) {
+    		throw new RuntimeException("Sublist candidate contains duplicate items");
+    	}
+    	if (containsDuplicates(superList)) {
+    		throw new RuntimeException("Superlist contains duplicate items");
+    	}
+    	    	
+    	int j = 0;    	    	
+        for (T subListItem : subListCandidate) {
+        	while (j+1<superList.size() && !(subListItem.equals(superList.get(j)))) {
+        		// current sublist element not found at superlist[j], and there are more elements in superlist
+        		// => move to next element of superlist
+        		j++;
+        	}
+        	if (j >= superList.size()) {
+        		// exhausted superlist without finding the current sublist element
+        		return false;
+        	}
+        	
+        	if (subListItem.equals(superList.get(j))) {
+        		// current sublist element found in superlist[j], move to next element of superlist
+        		j++;
+        	}
+        	else {
+        		// current sublist element not found in superlist
+        		return false;
+        	}
+        }
+        
+        // all entries of sublist candidate were found in the superlist
+        return true;
+    }
+    
     /** Implemented by creating a new linkedhashmap (some kind of wrapper could be more efficient...) */
     public static <K,V> Map<K,V> subMap(Map<K,V> pMap, Collection<K> pKeys, boolean getNullValues) {
         Map<K,V> result = new LinkedHashMap<K,V>();
@@ -1122,7 +1159,7 @@ public final class CollectionUtils {
             if (val != null) {
                 result.add(val);
             }
-        }
+        } 
         return result;
     }
         
