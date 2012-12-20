@@ -1099,6 +1099,7 @@ public final class StringUtils extends CommandLineTests {
         return mapToString(pDistribution.asObjToWeightMap(), pValCountDelim, pEntryDelim);            
     }
     
+    /* count occurences of char in string */
     public static int countOccurences(String pString, char pChar) {
         
         int count = 0;  

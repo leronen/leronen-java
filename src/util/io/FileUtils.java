@@ -2278,14 +2278,34 @@ public final class FileUtils {
                     // A hash-based uniq (hopefully more efficient than standard unix
                     // sort in some cases where the number of different entries is small)
                     // line order in result is arbitrary
+                	
+                	// Logger.enableLogging();
+                	// Logger.setLogLevel(1);
+                	
+                	// dbgMsg("no counts!");
+                	
+                	// if -col defined, only consider column col. column indexing begins from 0
+                	Integer col = argParser.getIntOpt("col");
+                	// dbgMsg("col: "+col);
+                	
                     Iterator<String> lineIterator = IOUtils.lineIterator(System.in);
-                    Set<String> uniqueLines = new HashSet();
-                    while(lineIterator.hasNext()) {
-                        uniqueLines.add(lineIterator.next());
-                    }
-                    for (String line: uniqueLines) { 
-                        System.out.println(line);
-                    }
+                    Set<String> seen = new HashSet();
+                    while (lineIterator.hasNext()) {
+                    	String line = lineIterator.next();
+                    	String val;
+                    	if (col != null) {
+                    		val = line.split("\\s+")[col];
+                    		// dbgMsg("val: "+val);
+                    	}
+                    	else {
+                    		val = line;
+                    	}
+                    	if (!(seen.contains(val))) {
+                    		// new line                    		
+                    		System.out.println(line);
+                    		seen.add(val);
+                    	}                       
+                    }                    
                 }                
                 System.out.flush();
             }
