@@ -80,8 +80,10 @@ public class CurlyBracketAnalyzer {
         LineType type;
         int num;
         /** only for lines beginning a block */
+        @SuppressWarnings("unused")
         Line closingLine;
         /** only for lines ending a block */
+        @SuppressWarnings("unused")
         Line openingLine;
         /** indent level, according to curly braces */
         int indentLevel;
