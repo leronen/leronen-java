@@ -106,6 +106,17 @@ public class CmdLineArgs2 {
         
     }
     
+    public Long getLongOpt(String name) {
+        String s = opts.get(name);
+        if (s != null) {
+            return Long.parseLong(s);
+        }        
+        else {
+        	return null;
+        }
+        
+    }
+    
     public static class IllegalArgumentsException extends Exception {        
         private static final long serialVersionUID = -843421106449840299L;
 

@@ -75,6 +75,17 @@ public class ProcessUtils {
                 null); // no process owner
     }
     
+    public static ProcessOutput executeCommand(String[] cmdArr) throws IOException {
+        return executeCommand(cmdArr, 
+                			  null, // no work dir
+                			  null, // no listener for stdout
+                			  null, // no listener for stderr
+                			  null,
+                			  false,
+                			  false); // no process owner
+    	
+    }
+    
     /** see below for explanation */    
     public static ProcessOutput executeCommand(String pCommand,
                                                String pDir,
@@ -105,7 +116,7 @@ public class ProcessUtils {
                               false); // Do not output stderr                                                        
     }                                                        
     
-    
+
     /** 
      * Executes process in give directory and waits for it's termination. 
      *  Lines outputted by stdout and stderr of the process are returned.
@@ -117,24 +128,41 @@ public class ProcessUtils {
                                                StreamListener pErrorStreamListener,
                                                ProcessOwner pProcessOwner,
                                                boolean pOutputStdOut,
+                                               boolean pOutputStdErr) throws IOException {
+    	String[] cmdArr = pCommand.split("\\s+");
+    	return executeCommand(cmdArr, pDir, pOutputStreamListener, pErrorStreamListener, pProcessOwner, pOutputStdOut, pOutputStdErr);
+    }
+    
+    /** 
+     * Executes process in give directory and waits for it's termination. 
+     *  Lines outputted by stdout and stderr of the process are returned.
+     * the listeners may be null.      
+     */ 
+    public static ProcessOutput executeCommand(String[] pCommandArray,
+                                               String pDir, 
+                                               StreamListener pOutputStreamListener,
+                                               StreamListener pErrorStreamListener,
+                                               ProcessOwner pProcessOwner,
+                                               boolean pOutputStdOut,
                                                boolean pOutputStdErr) throws IOException {                
     	File dir = null;
+    	String cmdAsString = StringUtils.arrayToString(pCommandArray, " ");
         if (pDir!=null) {
-            dbgMsg("Executing command: "+pCommand+" in dir "+pDir);
+            dbgMsg("Executing command: "+cmdAsString+" in dir "+pDir);
             dir = new File(pDir);
             if (!dir.exists() || !dir.isDirectory()) {
                 throw new RuntimeException("cannot exec in dir: directory does not exist!");
             }
         }
         else {
-            dbgMsg("Executing command: "+pCommand+" in current dir");
+            dbgMsg("Executing command: "+cmdAsString+" in current dir");
         }               
         
-        Process proc = Runtime.getRuntime().exec(pCommand, null, dir);
+        Process proc = Runtime.getRuntime().exec(pCommandArray, null, dir);
         sExecCount++;
         
         if (pProcessOwner != null) {
-            pProcessOwner.registerExternalProcess(proc, pCommand);
+            pProcessOwner.registerExternalProcess(proc, cmdAsString);
         }                                        
                 
         // store output and errors
@@ -145,7 +173,7 @@ public class ProcessUtils {
         inStream.close();
         // out streams shall be closed by their respective readers... 
                 
-        String arg0 = pCommand.split("\\s+")[0];                
+        String arg0 = pCommandArray[0];                
         String commandName = new File(arg0).getName();                
         RunnableStreamReader stdoutReader = new RunnableStreamReader(commandName, "stdout", outStream, pOutputStreamListener, pOutputStdOut);
         RunnableStreamReader stderrReader = new RunnableStreamReader(commandName, "stderr", errStream, pErrorStreamListener, pOutputStdErr);
@@ -171,14 +199,14 @@ public class ProcessUtils {
             // wait for process to terminate, just in case...
             proc.waitFor();                                
             // all seems to have went well, return output of process
-            dbgMsg("finished executing command: "+pCommand);
+            dbgMsg("finished executing command: "+cmdAsString);
             // dbgMsg("Returning process output...");                  
             return new ProcessOutput(outlist, errlist, proc.exitValue(), proc);
         }        
         catch (InterruptedException e) {
-            Logger.info("interrupted while executing command: "+pCommand);
+            Logger.info("interrupted while executing command: "+cmdAsString);
             e.printStackTrace();
-            Logger.info("Destroying process: "+pCommand);
+            Logger.info("Destroying process: "+cmdAsString);
             // try to close streams, just in case...
             closeStreamsAndDestroy(proc);
 //            outStream = proc.getInputStream();

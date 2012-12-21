@@ -67,7 +67,7 @@ public final class StringUtils extends CommandLineTests {
     
     @Override
     public void run(String cmd) throws Exception {
-        if (cmd.equals("h")) {
+        if (cmd.equals(CMD_H)) {
             if (args.getNonOptArgs().size() == 0) {
                 try {
                     List<String> lines = IOUtils.readLines(System.in);
@@ -2295,7 +2295,7 @@ public final class StringUtils extends CommandLineTests {
         System.out.println(arrayToString(result));
     }
     
-    private static String h(long p) {
+    public static String h(long p) {
     	Formatter formatter = new Formatter(Locale.US);
     	
     	if (p >= 1000000000) {
