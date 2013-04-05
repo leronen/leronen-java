@@ -38,6 +38,10 @@ public class CurlyBracketAnalyzer {
 				else if (numOpening == 0 && numClosing == 1) {
 					type = LineType.CLOSING;
 				}
+				else if (numOpening == numClosing) {
+					// balanced
+					type = LineType.NORMAL;
+				}
 				else {					
 					type = LineType.INVALID;
 					throw new RuntimeException("More than one curly bracket on line "+(i+1)+": "+text);
@@ -97,19 +101,16 @@ public class CurlyBracketAnalyzer {
         }
         
         public String toString() {
-//        	if (closingLine != null) {
-//        		return ""+type+" (CLOSES AT: "+closingLine.num+") : "+num+": "+text +" ";
-//        	}
-//        	if (openingLine != null) {
-//        		return ""+type+" (OPENS AT: "+openingLine.num+") : "+num+": "+text +" ";
-//        	}
-//        	else {
-//        		return ""+type+": "+num+": "+text;
-//        	}
         	String tmp = StringUtils.removeLeadingWhiteSpaces(text);
         	String indent = StringUtils.stringMultiply(4*indentLevel, " ");
         	if (type == LineType.EMPTY) {
         		return "";
+        	}
+        	else if (type == LineType.COMMENT && text.startsWith(" *")) {
+        		return text;
+        	}
+        	else if (type == LineType.COMMENT && text.startsWith(" *")) {
+        		return text;
         	}
         	else {
         		return indent+tmp; 
