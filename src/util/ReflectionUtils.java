@@ -168,9 +168,9 @@ public final class ReflectionUtils {
         return getPublicStaticStringFieldsWithPrefix(pClass, null);
     }
     
-    //** if pPrefix is null or "", just get all string fields */ 
+    //** if pPrefix is null or "", just get all string fields. Return in alphabetical order */ 
     public static Set<String> getPublicStaticStringFieldsWithPrefix(Class pClass, String pPrefix) {
-    	Set<String> result = new HashSet<String>();
+    	Set<String> result = new TreeSet<String>();
     	Field[] fields = pClass.getFields();
     	// Logger.info("There are "+fields.length+" fields in class "+pClass);
     	for (Field f:fields) {    		

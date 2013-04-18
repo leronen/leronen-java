@@ -65,6 +65,8 @@ public final class StringUtils extends CommandLineTests {
         super(args);
     }
     
+    
+    
     @Override
     public void run(String cmd) throws Exception {
         if (cmd.equals(CMD_H)) {
@@ -673,6 +675,19 @@ public final class StringUtils extends CommandLineTests {
         return result;             
     }
                 
+    
+    public static String arrToStr(StringBuffer[] pArr, String pDelim) {
+        if (pArr.length==0) {
+            return "";
+        }                        
+        StringBuffer buf = new StringBuffer();
+        buf.append(pArr[0]);        
+        for (int i=1; i<pArr.length; i++) {
+            buf.append(pDelim);
+            buf.append(pArr[i]);
+        } 
+        return buf.toString();            
+    }
     
     public static String arrayToString(int[] pArr) {
         return arrayToString(pArr, " ");

@@ -59,7 +59,8 @@ public final class FileUtils {
     public static final String CMD_REMOVEROWSWITHZEROVALUEINCOLUMN = "removerowswithzerovalueincolumn";
     public static final String CMD_INSERT_LINE_INTO_FILE = "insert_line_into_file";
     public static final String CMD_CONVERTCOL = "convertcol";
-    public static final String CMD_MAKE_PLOT = "makeplot"; // plot 2 values from a set of "summary" files ($1 as x, $2 as y)  
+    public static final String CMD_MAKE_PLOT = "makeplot"; // plot 2 values from a set of "summary" files ($1 as x, $2 as y)
+    public static final String FORMAT_TABDELIMITED = "format_csv_file"; // tääl
     
     
     /**
@@ -1178,6 +1179,7 @@ public final class FileUtils {
             else if (cmd.equals(CMD_NO_OP)) {
                 Matrix m = new Matrix(false);
                 m.readFromStream(System.in);
+                m.setPrettyPrinting(true);
                 m.writeToStream(System.out);                
             }
             else if (cmd.equals(CMD_SPLIT_TO_BATCHES)) {
@@ -2637,6 +2639,8 @@ public final class FileUtils {
 		System.exit(-1);		
 	}
         
+
+    
     public static void recursivelyRemoveDir(File pDir) throws IOException {
         if (!(pDir.isDirectory())) {
             throw new RuntimeException("Not a directory!");
