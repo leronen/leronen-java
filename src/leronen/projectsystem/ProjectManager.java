@@ -43,7 +43,7 @@ public class ProjectManager {
 			    "   NF == 3 { print $0 \"\\t\"}\n"+
 				"   NF == 4 { print $0 }'> projects.tmp\n"+
 				"mv -v projects.tmp "+LSS.getProjectsFile());
-		// System.out.println(output);		
+		System.out.println(output);		
 	}
 	
 	public static void main(String[] args) throws Exception {
