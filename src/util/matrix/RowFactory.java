@@ -9,6 +9,8 @@ public interface RowFactory extends Converter {
     
     public List makeRow();
     public List makeRow(String pDataString);
-    public List makeRow(List pRowToClone);        
+    public List makeRow(List pRowToClone);
+    public void setSeparator(String separatorRegex);
+    public String getSeparator();
                   
 }
