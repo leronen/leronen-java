@@ -1679,7 +1679,7 @@ public final class StringUtils extends CommandLineTests {
                                          Converter<T, String> pFormatter,
                                          String pNullRep) {                 
          if (pList.size() != pColWidths.length) {
-             throw new RuntimeException("Kehnot parametrit.");
+             throw new RuntimeException("Kehnot parametrit. list size: "+pList.size()+" vs. colWidhts len: "+pColWidths.length);
          }
              
          StringBuffer result = new StringBuffer(MathUtils.sum(pColWidths));
@@ -1760,7 +1760,7 @@ public final class StringUtils extends CommandLineTests {
     
     /** Keywords: replaceSuffix, replaceType, replace suffix, replace type*/
     public static String replaceExtension(String pOriginalPath, String pNewExtension) {
-        String[] tokens = split(pOriginalPath, "\\.");
+        String[] tokens = split_with_whitespace_removal(pOriginalPath, "\\.");
         ArrayList tokenList = new ArrayList(Arrays.asList(tokens));
         String prefix = collectionToString(tokenList.subList(0, tokenList.size()-1), ".");
         return prefix+"."+pNewExtension;        
@@ -1772,7 +1772,7 @@ public final class StringUtils extends CommandLineTests {
     
     
     public static String removeExtension(String pOriginalPath) {
-        String[] tokens = split(pOriginalPath, "\\.");
+        String[] tokens = split_with_whitespace_removal(pOriginalPath, "\\.");
         ArrayList tokenList = new ArrayList(Arrays.asList(tokens));
         return collectionToString(tokenList.subList(0, tokenList.size()-1), ".");        
     }
@@ -1781,7 +1781,7 @@ public final class StringUtils extends CommandLineTests {
     public static String getExtension(File file) {         
          String name = file.getName();         
          if (name.contains(".")) {
-             String[] tokens = split(name, "\\.");
+             String[] tokens = split_with_whitespace_removal(name, "\\.");
              return tokens[tokens.length-1];
          }
          else {
@@ -1814,7 +1814,7 @@ public final class StringUtils extends CommandLineTests {
     
     /** fiksumpi kuin Stringtokenizer, sillä käyttää regexpejä */ 
     public static String[] split(String pString) {
-        return split(pString, "\\s+");        
+        return split_with_whitespace_removal(pString, "\\s+");        
     }
     
     /** fiksumpi kuin Stringtokenizer, sillä käyttää regexpejä */ 
@@ -1849,15 +1849,20 @@ public final class StringUtils extends CommandLineTests {
       *
       * Note that this enforces the invariant: sum(pGroups) = number of tokens in pString
       * If the invariant is not fulfilled, throws a ParseException.
+      * 
+      * Note that this previously removed leading and trailing white space; this is no longer the case!
       *        
       */
     public static String[] split(String pString, String pDelim, int[] pGroups) throws RuntimeParseException {
-        String[] tokens = split(pString, pDelim);
+        String[] tokens = pString.split(pDelim);
         
         int numTokensExpected = MathUtils.sum(pGroups);        
         if (tokens.length != numTokensExpected) {
-            throw new RuntimeParseException("The number of tokens on line("+tokens.length+") does not match the number sum of groups("+numTokensExpected+")");
+        	// Logger.importantInfo("LINE: "+pString+"ENDLINE");
+        	// Logger.importantInfo("TOKENS:\n"+StringUtils.arrayToString(tokens));
+            throw new RuntimeParseException("The number of tokens on line("+tokens.length+") does not match the number sum of groups ("+numTokensExpected+")");
         }
+        
         ArrayList result = new ArrayList(pGroups.length);
         int tokenInd = 0;
         for (int i=0; i<pGroups.length; i++) {
@@ -1881,12 +1886,14 @@ public final class StringUtils extends CommandLineTests {
      * Indexing starts from 0.
      */
     public static String replaceNthElement(String pString, String pReplacementText, String pDelim, int pInd) {
-        String [] strings = split(pString, pDelim);
+        String [] strings = pString.split(pDelim);
         strings[pInd] = pReplacementText;
         return arrayToString(strings, pDelim);        
     }
     
-    public static String[] split(String pString, String pDelim) {
+    
+    /** String.split so that leading and trailing white space is removed first */ 
+    public static String[] split_with_whitespace_removal(String pString, String pDelim) {
         String tmp = removeLeadingWhiteSpaces(pString);
         tmp = removeTrailingWhiteSpaces(tmp);        
         return tmp.split(pDelim);        

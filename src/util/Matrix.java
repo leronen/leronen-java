@@ -67,11 +67,19 @@ public final class Matrix  {
     private RowFormatFactory mRowFormatFactory;              
               
     private boolean mPrettyPrinting = false;              
-              
+
+    /** column separator used for output */
+    private String mOutputColumnSeparator = " ";
+    
     public void setPrettyPrinting(boolean pVal) {
         mPrettyPrinting = pVal;
     }              
               
+    /** Only takes effect for "non-pretty" printing... */
+    public void setOutputColumnSeparator(String p) {
+    	mOutputColumnSeparator = p;
+    }
+    
     /** Create empty matrix with no rows or columns, and specify that no header shall be included */
     public Matrix() {
         this(false);                
@@ -1161,12 +1169,25 @@ public final class Matrix  {
             dataList = lineList;             
         }                             
                 
-        try {                        
-            mRows = new ArrayList(ConversionUtils.convert(dataList, getRowFactory()));
+        RowFactory rowFactory = getRowFactory();
+        String separator = rowFactory.getSeparator();
+        Logger.dbg("separator: <"+separator+">");
+        Logger.dbg("row format factory: "+getRowFormatFactory());
+        Logger.dbg("row factory: "+getRowFactory());
+        
+        mRows = new ArrayList(dataList.size());
+        for (int i=0; i<dataList.size(); i++) {
+        	try {                        
+        		Object row = getRowFactory().convert(dataList.get(i));
+        		mRows.add(row);
+        	}
+        	catch (RuntimeParseException e) {
+        		throw new InvalidMatrixFormatException(
+        				"Failed parsing row "+i+": "+e.getMessage()+"\n"+
+        	            "row text: "+dataList.get(i));	
+        	}        	
         }
-        catch(RuntimeParseException e) {
-             throw new InvalidMatrixFormatException(e.getMessage());   
-        }        
+                                                               
         // dbgMsg("read "+mRows.size()+" rows");
         
         // crucial assertion. In case this fails, we throw axe into the well
@@ -1616,15 +1637,14 @@ public final class Matrix  {
         return buf.toString();
     }                    
                     
-    public String toString_ugly() {
+    public String toString_ugly() {    	
         StringBuffer buf = new StringBuffer();
         
         if (mHeader != null && !mDoNotWriteHeader) {            
             // write header
             // dbgMsg("colWidths_int: "+StringUtils.arrayToString(colWidths_int));
             // dbgMsg("Header as list "+mHeader.asList());            
-            // buf.append(StringUtils.collectionToString(mHeader.getFieldNameList(), " "));//
-            buf.append(StringUtils.collectionToString(mHeader.getFieldIdList(), " "));//            
+            buf.append(StringUtils.collectionToString(mHeader.getFieldIdList(), mOutputColumnSeparator));            
             buf.append("\n");
         }           
         
@@ -1633,7 +1653,7 @@ public final class Matrix  {
                                     
             for (int j=0; j<row.size(); j++) {
                 if (j>0) {
-                    buf.append(" ");
+                    buf.append(mOutputColumnSeparator);
                 }
                 if (row instanceof Row) {
                     buf.append(((Row)row).formatField(j));                    
@@ -1665,9 +1685,8 @@ public final class Matrix  {
         if (mHeader != null && !mDoNotWriteHeader) {            
             // write header
             // dbgMsg("colWidths_int: "+StringUtils.arrayToString(colWidths_int));
-            // dbgMsg("Header as list "+mHeader.asList());            
-            // buf.append(StringUtils.collectionToString(mHeader.getFieldNameList(), " "));//
-            ps.append(StringUtils.collectionToString(mHeader.getFieldIdList(), " "));//            
+            // dbgMsg("Header as list "+mHeader.asList());                        // 
+            ps.append(StringUtils.collectionToString(mHeader.getFieldIdList(), mOutputColumnSeparator));//            
             ps.append("\n");
         }           
         
@@ -1676,7 +1695,7 @@ public final class Matrix  {
                                     
             for (int j=0; j<row.size(); j++) {
                 if (j>0) {
-                    ps.append(" ");
+                    ps.append(mOutputColumnSeparator);
                 }
                 if (row instanceof Row) {
                     ps.append(((Row)row).formatField(j));                    
@@ -1755,11 +1774,6 @@ public final class Matrix  {
                 StringUtils.formatList(row, colWidths_int);                                                         
             buf.append(stringToAppend);
             
-            // if (stringToAppend.split("\\s+").length != getNumCols()) {
-                // throw new RuntimeException("Wrong number of cols in stringToAppend (row="+i+": "+stringToAppend.split("\\s+").length+"\n"+
-                                           // "colWidths: "+StringUtils.arrayToString(colWidths_int));                    
-            // }
-            // buf.append(StringUtils.formatList(row, colWidths_int));
             buf.append("\n");
         }
                 

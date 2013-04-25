@@ -6,9 +6,34 @@ import java.util.regex.*;
 
 public class RegExTester {
 
-    public static void main (String[] args) {
+    public static void main (String[] args) throws Exception {
         // test1(args);
-        test2(args);
+        // test2(args);
+    	// test3(args);
+    	test4(args);
+    }
+    
+    public static void test3 (String[] args) {
+    	String pattern = ".*foo.*";
+    	System.out.println("pattern: "+pattern);
+    	for (String s: args) {
+    		boolean matches = s.matches(pattern);
+    		if (matches) {
+    			System.out.println(s+" matches");
+    		}
+    		else {
+    			System.out.println(s+"does not match");
+    		}
+    	}
+    }
+    
+    public static void test4 (String[] args) throws IOException  {
+    	Pattern pattern1 = Pattern.compile("\t");    	    
+    	for (String s: IOUtils.readLines()) {
+    		log("Split using pattern1: "+pattern1);
+    		String[] tok1 = pattern1.split(s);
+    		log(StringUtils.arrayToString(tok1,","));    		    		
+    	}
     }
     
     public static void test2 (String[] args) {
@@ -51,6 +76,10 @@ public class RegExTester {
             e.printStackTrace();
         }
         
+    }
+
+    private static void log(String pMsg) {
+        Logger.info(pMsg);
     }
     
     private static void dbgMsg(String pMsg) {

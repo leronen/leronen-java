@@ -133,7 +133,7 @@ public final class Logger {
     
     public static void setLogLevel(int pLevel) {        
         getInstance().mSharedLogLevel=pLevel;
-        System.err.println("Log level set to: "+pLevel);
+        // System.err.println("Log level set to: "+pLevel);
     }
     
     private void internalEndLog()  {

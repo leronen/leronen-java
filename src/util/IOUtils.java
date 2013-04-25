@@ -277,7 +277,7 @@ public class IOUtils {
         String[] lines = readLineArray(pInputStream);
         List<String> result = new ArrayList<String>();
         for (String line: lines) {
-            String[] tokens = line.split(delimRegex);
+            String[] tokens = line.split(delimRegex, -1);
             result.add(tokens[column]);
         }
         return result;        
@@ -404,7 +404,7 @@ public class IOUtils {
             if (StringUtils.isEmpty(line)) {
                 continue;
             }
-            String[] tokens = line.split(pDelimRegex);
+            String[] tokens = line.split(pDelimRegex, -1);
             if (tokens.length >= 2) {
                 String key = tokens[0];
                 String val = tokens[1];
@@ -416,7 +416,9 @@ public class IOUtils {
                     continue; 
                 }
                 else {
-                    throw new RuntimeException("Not enough columns on line of map file: "+pLines);
+                    throw new RuntimeException("Not enough columns on line "+(i+1)+" of map file: <"+line+">"+
+                                               "DELIM: <"+pDelimRegex+">\n"+
+                    						   "TOKENS: "+StringUtils.arrayToString(tokens, ","));
                 }
                     
             }
@@ -561,7 +563,7 @@ public class IOUtils {
         String[] lines = readLineArray(pInputStream);
         ArrayList<Pair<T1,T2>> result = new ArrayList();
         for (String line: lines) {
-            String[] tokens = line.split("\\s+");
+            String[] tokens = line.split("\\s+", -1);
             result.add(new Pair(pConverter1.convert(tokens[0]),
                                 pConverter2.convert(tokens[1])));                            
         }
@@ -578,7 +580,7 @@ public class IOUtils {
         String[] lines = readLineArray(pInputStream);
         ArrayList<Triple<T1,T2,T3>> result = new ArrayList();
         for (String line: lines) {
-            String[] tokens = line.split("\\s+");
+            String[] tokens = line.split("\\s+", -1);
             result.add(new Triple(pConverter1.convert(tokens[0]),
                                   pConverter2.convert(tokens[1]),                            
                                   pConverter3.convert(tokens[2])));
@@ -633,7 +635,7 @@ public class IOUtils {
         String[] lines = readLineArray(pInputStream);
         List<List<String>> result = new ArrayList<List<String>>();
         for (String line: lines) {
-            String[] tokens = line.split(delimRegex);
+            String[] tokens = line.split(delimRegex,-1);
             result.add(Arrays.asList(tokens));
         }
         return result;

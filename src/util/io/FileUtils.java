@@ -464,15 +464,29 @@ public final class FileUtils {
         return result;
     }
        
-    public static void convertCol(File pFile, int pColInd, Converter pConverter, boolean pIncludesHeader) throws IOException {
+    public static void convertCol_inplace(File pFile, int pColInd, Converter pConverter, 
+    		                      		  boolean pIncludesHeader, String pOutputSeparator) throws IOException {
         Logger.startSubSection("convertCol");                
-        Matrix m = new Matrix(pIncludesHeader);
+        Matrix m = new Matrix(pIncludesHeader);        
         m.readFromFile(pFile);
         // dbgMsg("original matrix\n:"+m);
         m.convertCol(pColInd, pConverter);
-        // dbgMsg("converted matrix:\n"+m);        
+        // dbgMsg("converted matrix:\n"+m);
+        m.setOutputColumnSeparator(pOutputSeparator);
         m.writeToFile(pFile);
         Logger.endSubSection("convertCol");            
+    }
+    
+    public static void convertCol_streaming(int pColInd, Converter pConverter, 
+    		  								boolean pIncludesHeader, boolean tabbedinput, String pOutputSeparator) throws IOException {    	   
+    	Matrix m = new Matrix(pIncludesHeader);
+    	if (tabbedinput) {
+    		m.setRowFormatFactory(RowFormatFactory.DEFAULT_TABBED_FACTORY);
+    	}    	
+    	m.readFromStream(System.in);
+    	m.convertCol(pColInd, pConverter);// 	
+    	m.setOutputColumnSeparator(pOutputSeparator);
+    	m.writeToStream(System.out);    	            
     }
     
     /** Get the subdirectories of a given dir */
@@ -1056,7 +1070,10 @@ public final class FileUtils {
     			usageAndExit("First argument must be a command.");
     		}
             
-            Logger.setProgramName("FileUtils "+args[0]);            
+            if (!argParser.isDefined("loglevel")) {
+            	Logger.setLogLevel(Logger.LOGLEVEL_IMPORTANT_INFO);
+            }
+            // Logger.setProgramName("FileUtils "+args[0]);            
             
             String cmd = argParser.shift("Command");
             args = argParser.getNonOptArgs();
@@ -1136,26 +1153,79 @@ public final class FileUtils {
                 // usage: java blahblah convertcol <filename> <colind> <converterclassname>                                                 
                 String fileName = argParser.shift("filename");
                 int colInd = argParser.shiftInt("colind");
-                String converterClassName = argParser.shift("converterclassname");
-                boolean includesHeader = argParser.isDefined("includesheader");                 
-                convertCol(new File(fileName), 
-                           colInd,
-                           (Converter)ReflectionUtils.createInstance(converterClassName),
-                           includesHeader);                                             
+                String converterClassName = argParser.shift("converterclassname");                                
+                boolean includesHeader = argParser.getBooleanOpt("includesheader", false);
+                boolean tabbed = argParser.getBooleanOpt("tabbed", false);
+                String outputSeparator;
+                if (tabbed) {                	
+                	outputSeparator = "\t";
+                }
+                else {                	
+                	outputSeparator = " ";
+                }
+                convertCol_inplace(new File(fileName), 
+                        		   colInd,
+                        		   (Converter)ReflectionUtils.createInstance(converterClassName),
+                        		   includesHeader,
+                        		   outputSeparator);                                             
             }
             else if (cmd.equals(CMD_CONVERTCOL_MAPPINGFILE)) {
-                // usage: java blahblah convertcol <filename> <colind> <mappingfile>                                                 
-                String fileName = argParser.shift("filename");
-                int colInd = argParser.shiftInt("colind");
-                File mappingFile = new File(argParser.shift("mappingfile"));
-                Map mapping = IOUtils.readMap(mappingFile, "\\s+"); 
-                Converter converter = new MapConverter(mapping, MapConverter.NotFoundBehauvior.RETURN_ORIGINAL_AND_WARN);                
+                // usage: java util.io.FileUtils convertcol FILENAME COLIND MAPPINGFILE [-tabbed=BOOL] [-includesheader=BOOL]
+            	//    or: java util.io.FileUtils convertcol COLIND MAPPINGFILE [-tabbed=BOOL] [-includesheader=BOOL]
+            	// converts in-place if file given!!
+            	String fileName = null;
+            	File mappingFile = null;
+                int colInd;                                
+            	
+            	if (argParser.getNumNonOptArgs() == 2) {
+            		// read stdin, write stdout
+            		colInd = argParser.shiftInt("colind");                    
+                    mappingFile = new File(argParser.shift("mappingfile"));            		
+            	}
+            	else if (argParser.getNumNonOptArgs() == 3) {
+            		// in-place!!
+            		colInd = argParser.shiftInt("colind");
+                    fileName = argParser.shift("filename");
+                    mappingFile = new File(argParser.shift("mappingfile"));            		
+            	}
+            	else {
+            		throw new RuntimeException(
+            				"Illegal number of arguments: "+argParser.getNumNonOptArgs()+".\n"+
+            	            "Usage: java util.io.FileUtils convertcol FILENAME COLIND MAPPINGFILE [-tabbed=BOOL] [-includesheader=BOOL]\n"+
+            	            "   or: java util.io.FileUtils convertcol COLIND MAPPINGFILE [-tabbed=BOOL] [-includesheader=BOOL]\n");
+            	}
+            	
+            	boolean tabbed = argParser.getBooleanOpt("tabbed", false);
+            	boolean includesHeader = argParser.getBooleanOpt("includesheader", false);
                 
-                boolean includesHeader = argParser.isDefined("includesheader");                 
-                convertCol(new File(fileName), 
-                           colInd,
-                           converter,
-                           includesHeader);                                             
+                Map<String,String> mapping;
+                String outputSeparator = null;
+                if (tabbed) {
+                	mapping = IOUtils.readMap(mappingFile, "\t");
+                	outputSeparator = "\t";
+                }
+                else {
+                	mapping = IOUtils.readMap(mappingFile, "\\s+");
+                	outputSeparator = " ";
+                }
+                                
+                Converter converter = new MapConverter(mapping, MapConverter.NotFoundBehauvior.RETURN_ORIGINAL_AND_WARN);                                                                
+                
+                if (fileName != null) {
+                	convertCol_inplace(new File(fileName), 
+                			   		   colInd,
+                			   		   converter,
+                			   		   includesHeader, 
+                			   		   outputSeparator);
+                }
+                else {
+                	convertCol_streaming(colInd,
+     			   		   				 converter,
+     			   		   				 includesHeader,
+     			   		   				 tabbed,
+     			   		   				 outputSeparator);
+                }
+                                                            
             }                                                            
             else if (cmd.equals(CMD_CONVERT_ALL_TOKENS_MAPPINGFILE)) {
                 // usage: java blahblah convertcol <filename> <colind> <converterclassname>                                                                                 
@@ -1201,7 +1271,15 @@ public final class FileUtils {
 //                m.readFromStream(System.in);
 //                m.setPrettyPrinting(true);
 //                m.writeToStream(System.out);
-                List<List<String>> rows = IOUtils.readTable2(System.in);
+            	boolean tabbed = argParser.getBooleanOpt("tabbed", false);
+            	String sep;
+            	if (tabbed) {
+            		sep = "\t";
+            	}
+            	else {
+            		sep = "\\s+";
+            	}
+                List<List<String>> rows = IOUtils.readTable2(System.in, sep);
                 String formatted = StringUtils.formatTable(rows, "");
                 System.out.println(formatted);
             }
