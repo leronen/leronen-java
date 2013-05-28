@@ -5,7 +5,7 @@ import util.converter.*;
 import java.util.*;
 
 /** The official way to make Rows. */
-public interface RowFactory extends Converter {
+public interface RowFactory extends Converter<String,List> {
     
     public List makeRow();
     public List makeRow(String pDataString);

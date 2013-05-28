@@ -481,10 +481,11 @@ public final class FileUtils {
     		  								boolean pIncludesHeader, boolean tabbedinput, String pOutputSeparator) throws IOException {    	   
     	Matrix m = new Matrix(pIncludesHeader);
     	if (tabbedinput) {
-    		m.setRowFormatFactory(RowFormatFactory.DEFAULT_TABBED_FACTORY);
+    		m.setRowFormatFactory(RowFormatFactory.DEFAULT_TABBED_FACTORY);    		
+    		m.setInputColumnSeparator("\t");
     	}    	
     	m.readFromStream(System.in);
-    	m.convertCol(pColInd, pConverter);// 	
+    	m.convertCol(pColInd, pConverter);	
     	m.setOutputColumnSeparator(pOutputSeparator);
     	m.writeToStream(System.out);    	            
     }
@@ -1183,9 +1184,9 @@ public final class FileUtils {
                     mappingFile = new File(argParser.shift("mappingfile"));            		
             	}
             	else if (argParser.getNumNonOptArgs() == 3) {
-            		// in-place!!
-            		colInd = argParser.shiftInt("colind");
-                    fileName = argParser.shift("filename");
+            		// in-place!!            		
+            		fileName = argParser.shift("filename");
+            		colInd = argParser.shiftInt("colind");                    
                     mappingFile = new File(argParser.shift("mappingfile"));            		
             	}
             	else {
@@ -1194,10 +1195,10 @@ public final class FileUtils {
             	            "Usage: java util.io.FileUtils convertcol FILENAME COLIND MAPPINGFILE [-tabbed=BOOL] [-includesheader=BOOL]\n"+
             	            "   or: java util.io.FileUtils convertcol COLIND MAPPINGFILE [-tabbed=BOOL] [-includesheader=BOOL]\n");
             	}
-            	
+            	            	
             	boolean tabbed = argParser.getBooleanOpt("tabbed", false);
-            	boolean includesHeader = argParser.getBooleanOpt("includesheader", false);
-                
+            	boolean includesHeader = argParser.getBooleanOpt("includesheader", false);            	
+            	
                 Map<String,String> mapping;
                 String outputSeparator = null;
                 if (tabbed) {
@@ -1208,7 +1209,7 @@ public final class FileUtils {
                 	mapping = IOUtils.readMap(mappingFile, "\\s+");
                 	outputSeparator = " ";
                 }
-                                
+                               
                 Converter converter = new MapConverter(mapping, MapConverter.NotFoundBehauvior.RETURN_ORIGINAL_AND_WARN);                                                                
                 
                 if (fileName != null) {
@@ -1219,6 +1220,7 @@ public final class FileUtils {
                 			   		   outputSeparator);
                 }
                 else {
+                	// System.err.println("header: "+includesHeader+", tabbed: "+tabbed);
                 	convertCol_streaming(colInd,
      			   		   				 converter,
      			   		   				 includesHeader,
