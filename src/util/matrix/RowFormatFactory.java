@@ -51,18 +51,34 @@ public final class RowFormatFactory {
             
     private Set mNumericFieldNames = new LinkedHashSet();
 
-    private Set mRegisteredFieldNames = new LinkedHashSet();            
+    private Set mRegisteredFieldNames = new LinkedHashSet();
+    
+    private String columnSeparatorRegex;
+    
+	public static RowFormatFactory DEFAULT_FACTORY;
+	public static RowFormatFactory DEFAULT_TABBED_FACTORY;
+	
+	static {
+		DEFAULT_FACTORY = new RowFormatFactory("Default rowformat factory");
+		DEFAULT_TABBED_FACTORY = new RowFormatFactory("Default rowformat factory, tabbed version");
+		DEFAULT_TABBED_FACTORY.setSeparator("\t");
+	}
             
     /** 
      * Creates a default factory; it can then be configured by calls to following methods 
      *  - registerMultiPartField
      *  - registerRepFactory
      *  - setFieldNameByFieldCharacterMap
+     *  - setSeparator
      */
     public RowFormatFactory(String pName) {
-        mName = pName;   
-    }        
+        mName = pName;
+        columnSeparatorRegex = "\\s+";
+    }            
     
+    public void setSeparator(String separatorRegex) {
+    	this.columnSeparatorRegex = separatorRegex;
+    }
     
     public String toString() {
         return getName();
@@ -140,12 +156,17 @@ public final class RowFormatFactory {
     
     /** Quite ridiculous, indeed: */
     public RowFactory makeRowFactory(RowFormat pFormat) {
+    	RowFactory result = null;
         if (mRowFactoryFactory == null) {
-            return new DefaultRowFactory(pFormat);
+        	result = new DefaultRowFactory(pFormat);
         }
         else {            
-            return mRowFactoryFactory.makeRowFactory(pFormat);
+        	result = mRowFactoryFactory.makeRowFactory(pFormat);
         }            
+        
+        result.setSeparator(columnSeparatorRegex);
+        
+        return result;
     }
     
     public void setFieldNameByFieldCharacterMap(Map pMap) {
@@ -214,7 +235,7 @@ public final class RowFormatFactory {
     public RowFormat makeFromHeaderString(String pHeaderString) {
         // dbgMsg("makeFromHeaderString: "+pHeaderString);
         // dbgMsg("deducing format from header string: "+pHeaderString);            
-        Pattern delim = Pattern.compile("\\s+");
+        Pattern delim = Pattern.compile(columnSeparatorRegex);
         String[] tokens = delim.split(pHeaderString);
         // dbgMsg("Header string has "+tokens.length+" tokens.");
         List tokenList = Arrays.asList(tokens);

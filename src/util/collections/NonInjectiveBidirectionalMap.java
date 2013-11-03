@@ -12,7 +12,7 @@ import java.util.*;
  * to be an injection, that is, the backward mapping may map a tgt 
  * element to several src elements. 
  * 
- * The inverse mapping may be (and indeed is implemented as a) multimap.  
+ * The inverse mapping may be (and indeed is) implemented as a multimap.  
  *
  * search terms: two-way map, bipartite graph, many-to-one, manytone
  *

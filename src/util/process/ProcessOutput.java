@@ -45,11 +45,11 @@ public class ProcessOutput {
     
     public String toString() {
         return "Process output:\n"+
-               "  stdout: \n\t"+StringUtils.arrayToString(stdoutlines, "\n\t")+
+               "  stdout:\n\t"+StringUtils.arrayToString(stdoutlines, "\n\t")+
                "\n"+
-               "  stderr: \n\t"+StringUtils.arrayToString(stdoutlines, "\n\t")+
+               "  stderr:\n\t"+StringUtils.arrayToString(stderrlines, "\n\t")+
                "\n"+
-               "Exit value:"+exitValue;
+               "Exit value: "+exitValue;
     }
         
 }

@@ -9,12 +9,22 @@ import java.util.*;
 public class DefaultRowFactory implements RowFactory  {
     
     protected RowFormat mRowFormat;
+
+    private String columnSeparatorRegex = "\\s+";
     
     public DefaultRowFactory(RowFormat pFormat) {
         if (pFormat == null) {
             throw new RuntimeException("Format cannot be null!");
         }
         mRowFormat = pFormat;
+    }
+    
+    public void setSeparator(String separatorRegex) { 
+    	columnSeparatorRegex = separatorRegex;
+    }
+    
+    public String getSeparator() {
+    	return columnSeparatorRegex;
     }
     
     public List makeRow() {
@@ -39,7 +49,7 @@ public class DefaultRowFactory implements RowFactory  {
         int[] groups = mRowFormat.getNumFieldsArray();
         // dbgMsg("Groups of the format: "+StringUtils.collectionToString(ConversionUtils.asList(groups), " "));
         // dbgMsg("Row("+pDataString+","+mRowFormat+")");                                        
-        String[] tokens = StringUtils.split(pDataString, "\\s+", groups);
+        String[] tokens = StringUtils.split(pDataString, columnSeparatorRegex, groups);
         // dbgMsg("Tokens: "+StringUtils.arrayToString(tokens, "\n"));
         // ArrayList fields = new ArrayList(mRowFormat.getNumFields());
         for (int i=0; i<tokens.length; i++) {
@@ -58,7 +68,7 @@ public class DefaultRowFactory implements RowFactory  {
     }
     
     public String toString() {
-        return "DefaultRowFactory";
+        return "DefaultRowFactory, separator: <"+getSeparator()+">";        
     }        
 
               

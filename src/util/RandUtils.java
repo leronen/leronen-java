@@ -21,6 +21,9 @@ public class RandUtils {
 
     public static final String CMD_RANDINT = "randint";
     public static final String CMD_RANDINTS = "randints";
+    public static final String CMD_RANDHEX = "randhex";
+    public static final String CMD_RANDHEXES = "randhexes";       
+    public static final String CMD_RAND_XTERM_COLOR = "rand_xterm_color";
     public static final String CMD_SAMPLE = "sample";
     public static final String CMD_SAMPLE_WITHOUT_REPLACEMENT = "sample_without_replacement";
     public static final String CMD_SAMPLE_WITH_REPLACEMENT = "sample_with_replacement";
@@ -137,6 +140,31 @@ public class RandUtils {
     public static <T> List <T> sample(List<T> pList, int pNumToSample) {
         return sampleWithoutReplacement(pList, pNumToSample);
     }
+
+    /** emit something in [0-9] ∪ [A-F], naturally with uniform probabilities */   
+    public static char randHex() {
+    	int r = randInt(0,15);
+        if (r <= 9) {
+        	return (char)('0'+r);
+        }
+        else {
+        	int offset = r-10;
+        	return (char)('A'+offset);        	
+        }
+    }
+    
+    public static String randXTermColorComponent() {
+    	StringBuffer buf = new StringBuffer();
+    	for (int i=0; i<4; i++) {
+    		buf.append(randHex());
+    	}
+    	return buf.toString();
+    }
+    
+    /** emit something like 'rgb:FFFF/CCCC/DDDD' */  
+    public static String randXTermColor() {
+    	return "rgb:"+randXTermColorComponent()+"/"+randXTermColorComponent()+"/"+randXTermColorComponent();    	
+    }
     
     /** Sample WITHOUT replacement  */
     public static <T> List <T> sampleWithoutReplacement(List<T> pList, int pNumToSample) {        
@@ -219,6 +247,29 @@ public class RandUtils {
             int num = Integer.parseInt(args[3]);                
             for (int i=0; i<num; i++) {
                 System.out.println(randInt(min, max));
+            }
+        }
+        else if (args[0].equals(CMD_RANDHEXES)) {
+            int num = Integer.parseInt(args[1]);                
+            for (int i=0; i<num; i++) {
+                System.out.println(randHex());
+            }
+        }
+        else if (args[0].equals(CMD_RANDHEX)) {                                                   
+            System.out.println(randHex());
+        }
+        else if (args[0].equals(CMD_RAND_XTERM_COLOR)) {                                                   
+            System.out.println(randXTermColor());
+        }        
+        else if (args[0].equals(CMD_RANDHEX)) {                                       
+            int r = randInt(0,15);
+            if (r <= 9) {
+            	System.out.println(r);
+            }
+            else {
+            	int offset = r-10;
+            	char hex = (char)('A'+offset);
+            	System.out.println(hex);
             }
         }
         else if (args[0].equals(CMD_SAMPLEPAIRS)) {

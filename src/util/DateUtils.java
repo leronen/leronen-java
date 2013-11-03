@@ -114,7 +114,7 @@ public class DateUtils {
    public static String formatBmzDate() {
        Calendar cal = Calendar.getInstance();
        String prefix = formatOrderableDate_no_time_of_day();             
-       String suffix = ""+(cal.get(Calendar.HOUR_OF_DAY)-23)+":"+cal.get(Calendar.MINUTE)+":"+cal.get(Calendar.SECOND);
+       String suffix = ""+(cal.get(Calendar.HOUR_OF_DAY)-21)+":"+cal.get(Calendar.MINUTE)+":"+cal.get(Calendar.SECOND);
        return prefix+"_"+suffix+" BMZ";
    }
     

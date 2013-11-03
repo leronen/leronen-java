@@ -16,7 +16,9 @@ public class ArrayListRowFactory implements RowFactory  {
      /** note: -1 indicates that the number of fields is not fixed */
      private int mNumFields;     
      private RowFormat mFormat;
-               
+
+     private String columnSeparatorRegex = "\\s+";
+     
     /** 
      * No enforced row format
      * note: -1 indicates that the number of fields is not fixed
@@ -32,6 +34,14 @@ public class ArrayListRowFactory implements RowFactory  {
         mFormat = pFormat;
     }                
 
+    public void setSeparator(String separatorRegex) { 
+    	columnSeparatorRegex = separatorRegex;
+    }
+    
+    public String getSeparator() {
+    	return columnSeparatorRegex;
+    }
+    
     /** With no data */
     public List makeRow() {
         ArrayList row = new ArrayList(mNumFields);        
@@ -60,7 +70,7 @@ public class ArrayListRowFactory implements RowFactory  {
             int[] groups = mFormat.getNumFieldsArray();
             dbgMsg("Groups of the format: "+StringUtils.collectionToString(ConversionUtils.asList(groups), " "));
             dbgMsg("Row("+pDataString+","+mFormat+")");                               
-            String[] tokens = StringUtils.split(pDataString, "\\s+", groups);
+            String[] tokens = StringUtils.split(pDataString, columnSeparatorRegex, groups);
             dbgMsg("Tokens: "+StringUtils.arrayToString(tokens, "\n"));            
             for (int i=0; i<tokens.length; i++) {
                 row.add(mFormat.makeFieldRep(i, tokens[i]));
@@ -68,7 +78,7 @@ public class ArrayListRowFactory implements RowFactory  {
         }
         else {
             // we do not have a format
-            String[] tokens = StringUtils.split(pDataString, "\\s+");
+            String[] tokens = pDataString.split(columnSeparatorRegex);
             // note: -1 indicates that the number of fields is not fixed!
             if (mNumFields != -1 && tokens.length != mNumFields) {
                 throw new RuntimeException("Cannot make row: numFieds = "+mNumFields+" != numTokens = "+tokens.length);
@@ -78,6 +88,10 @@ public class ArrayListRowFactory implements RowFactory  {
             }
         }
         return row;                                          
+    }
+
+    public String toString() {
+    	return "ArrayListRowFactory, separator: <"+getSeparator()+">";
     }
     
     /** For Converter-compatibility; just calls makeRow */

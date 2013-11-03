@@ -4,7 +4,9 @@ import util.*;
 import util.dbg.*;
 
 import java.io.*;
-import java.util.*;
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.List;
 
 public class ProcessUtils {            
                     
@@ -73,6 +75,27 @@ public class ProcessUtils {
                 null, // no listener for stdout
                 null, // no listener for stderr
                 null); // no process owner
+    }
+    
+    
+    public static ProcessOutput bash(String script) throws IOException {
+    	File tmpFile = null;
+    	try {
+	    	String pidStr = ManagementFactory.getRuntimeMXBean().getName();
+	    	String threadName = Thread.currentThread().getName();
+	    	long nanos = System.nanoTime();
+	    	tmpFile = new File(pidStr+"."+threadName+"."+nanos+"."+"processutils.executeBash.tmp");
+	    	script = "#!/bin/bash\n"+script+"\n";     	         
+	    	IOUtils.writeToFile(tmpFile, script);
+	    	executeCommand("chmod u+x "+tmpFile);
+	    	ProcessOutput out = executeCommand(tmpFile.getPath());	    	
+	    	return out;    	
+    	}
+    	finally {
+    		if (tmpFile != null && tmpFile.exists()) {
+    			tmpFile.delete();
+    		}
+    	}
     }
     
     public static ProcessOutput executeCommand(String[] cmdArr) throws IOException {
@@ -244,26 +267,40 @@ public class ProcessUtils {
         sDestroyCount++;
     }
     
-    public static void main(String[] args) {
-    	int intervalInMilliSeconds = Integer.parseInt(args[0])*1000;
-    	List restOfArgs = CollectionUtils.tailList(Arrays.asList(args), 1);
-    	String cmd = StringUtils.collectionToString(restOfArgs, " ");    	
-    	while (true) {    		    		    	
-    		System.err.println("Executing command: "+cmd);
-    		try {
-    			Runtime.getRuntime().exec(cmd);
-    		}
-    		catch (IOException e) {
-    			System.err.println("Failed to an IOException.");
-       		}
-    		try {
-    			Thread.sleep(intervalInMilliSeconds);
-    		}
-    		catch (InterruptedException e) {
-    			System.err.println("Interrupted.");
-    		}
-    		
+    public static void main(String[] pArgs) throws Exception {
+    	String cmd = pArgs[0];
+    	List<String> args = CollectionUtils.tailList(Arrays.asList(pArgs), 1);
+    	if (cmd.equals("bash")) {    		
+    		String script = StringUtils.collectionToString(args, " ");
+        	ProcessOutput out = ProcessUtils.bash(script);        	
+        	System.out.println(""+out.toString());
+        	System.exit(out.exitValue);
     	}
+    	else {
+    		System.err.println("No such command: "+cmd);
+    		System.exit(1);
+    	}
+    	    	
+    	
+//    	int intervalInMilliSeconds = Integer.parseInt(args[0])*1000;
+//    	List restOfArgs = CollectionUtils.tailList(Arrays.asList(args), 1);
+//    	String cmd = StringUtils.collectionToString(restOfArgs, " ");    	
+//    	while (true) {    		    		    	
+//    		System.err.println("Executing command: "+cmd);
+//    		try {
+//    			Runtime.getRuntime().exec(cmd);
+//    		}
+//    		catch (IOException e) {
+//    			System.err.println("Failed to an IOException.");
+//       		}
+//    		try {
+//    			Thread.sleep(intervalInMilliSeconds);
+//    		}
+//    		catch (InterruptedException e) {
+//    			System.err.println("Interrupted.");
+//    		}
+//    		
+//    	}
     }
               
     private static void dbgMsg(String pMsg) {

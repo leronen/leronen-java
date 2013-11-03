@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import util.ArgsDef;
 import util.CmdLineArgs2;
 import util.DateUtils;
 import util.StringUtils;
@@ -17,15 +16,13 @@ import util.process.ProcessOutput;
 import util.process.ProcessUtils;
 
 public class RecursiveDU {
-
-	private CmdLineArgs2 args;
+	
 	
 	private List<String> files;
 	/** limit in bytes to report */
-	private long minsize;
+	private long minsize_kilos;
 		
-	private RecursiveDU(CmdLineArgs2 args) {
-		this.args = args;
+	private RecursiveDU(CmdLineArgs2 args) {		
 		
 		files = args.getNonOptArgs();
 		if (files.size() == 0) {
@@ -41,14 +38,30 @@ public class RecursiveDU {
 			minszStr = minszStr.replace("M", "000000");
 			minszStr = minszStr.replace("m", "000000");
 			minszStr = minszStr.replace("K", "000");
-			minszStr = minszStr.replace("k", "000");
-			System.err.println("Using minsize: "+minszStr+" bytes");
-			long minsz = Long.parseLong(minszStr);
-			minsize = minsz/1000;
+			minszStr = minszStr.replace("k", "000");			
+			long minsize_bytes = Long.parseLong(minszStr);
+			minsize_kilos = minsize_bytes/1000;
+			
+			if (minsize_kilos >= 1000) {				
+				double minsize_megas = minsize_kilos / 1000;
+				if (minsize_megas >= 1000) {
+					// x >= 1G
+					double minsize_gigas = minsize_megas / 1000;
+					System.err.println("Using minsize: "+minsize_gigas+"G");
+				}
+				else {
+					// 1M <= x < 1G
+					System.err.println("Using minsize: "+minsize_megas+"M");
+				}
+			}
+			else {
+				// x < 1M
+				System.err.println("Using minsize: "+minsize_kilos+"k");
+			}
 		}
 		else {
-			minsize = 100000;
-			System.err.println("Using default minsize of 100M");
+			minsize_kilos = 10000000;
+			System.err.println("Using default minsize of 10G");
 		}		
 	}
 
@@ -108,7 +121,7 @@ public class RecursiveDU {
 	
 	private void recurse(Entry e) throws IOException {
 			
-		if (e.size > minsize) {
+		if (e.size > minsize_kilos) {
 			System.out.println(e);
 			if (e.file.isDirectory()) {
 				ArrayList<Entry> childEntries = new ArrayList<Entry>();
