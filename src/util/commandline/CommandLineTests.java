@@ -1,10 +1,12 @@
 package util.commandline;
 
-import util.*;
+import java.util.TreeSet;
+
+import util.CmdLineArgs2;
+import util.ReflectionUtils;
+import util.StringUtils;
 import util.dbg.ILogger;
 import util.dbg.StdErrLogger;
-
-import java.util.*;
 
 
 /**
@@ -14,48 +16,48 @@ import java.util.*;
  * see e.g. biomine3000.objects.ABBOETests for an example usage.
  */
 public abstract class CommandLineTests {
-	
+
 	protected CmdLineArgs2 args;
 	protected ILogger log = new StdErrLogger();
-		
+
 	protected CommandLineTests(String[] pArgs) {
         try {
             args = new CmdLineArgs2(pArgs);
         }
         catch (CmdLineArgs2.IllegalArgumentsException e) {
-            System.err.println("Illegal arguments: "+e.getMessage());            
+            System.err.println("Illegal arguments: "+e.getMessage());
             System.exit(1);
             return;
-        }             
-        
+        }
+
         if (args.getNonOptArgs().size() == 0) {
         	printUsageAndExit("First argument should be a command!");
         }
-        
+
         String cmd = args.getNonOptArgs().get(0);
-        
+
         if (!(allCommands().contains(cmd))) {
-        	printUsageAndExit("No such command: "+cmd);        	
+        	printUsageAndExit("No such command: "+cmd);
         }
 	}
-	
+
 	/**
 	 * Should be called as first and only thing in subclass main after constructing.
-	 * Just shifts the first argument from args as the command name, and 
+	 * Just shifts the first argument from args as the command name, and
 	 * calls subclass run(command). All checked exceptions thrown in subclass are caught
-	 * and handled trivially.  
+	 * and handled trivially.
 	 */
 	protected final void run()  {
 		String cmd = args.shift();
-		try {			
+		try {
 			run(cmd);
 		}
 		catch (Exception e) {
-			log.error("Failed running command: "+cmd, e);
+			log.error("Failed running command: "+cmd+" with args:\n"+args, e);
 			System.exit(-1);
 		}
 	}
-	
+
 	/**
 	 * Subclasses should implement running. Note that this class always processes
 	 * the first argument on the command line, which should always be the name
@@ -63,15 +65,15 @@ public abstract class CommandLineTests {
 	 * argument is args.get(0), as seen by the subclass.
 	 */
 	protected abstract void run(String cmd) throws Exception;
-	
+
 	protected void printUsageAndExit(String msg) {
 		log.error(msg);
 		TreeSet<String> availableCommands = allCommands();
 		log.info("List of available commands:\n"+StringUtils.colToStr(availableCommands, "\n"));
 		System.exit(-1);
 	}
-		
-	
+
+
 	public TreeSet<String> allCommands() {
     	return new TreeSet<String>(ReflectionUtils.getPublicStaticStringFieldsWithPrefix(this.getClass(), "CMD_"));
     }
