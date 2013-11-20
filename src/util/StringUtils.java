@@ -1887,10 +1887,9 @@ public final class StringUtils extends CommandLineTests {
       * If the invariant is not fulfilled, throws a ParseException.
       *
       * Note that this previously removed leading and trailing white space; this is no longer the case!
-      *
       */
     public static String[] split(String pString, String pDelim, int[] pGroups) throws RuntimeParseException {
-        String[] tokens = pString.split(pDelim);
+        String[] tokens = pString.split(pDelim, -1);
 
         int numTokensExpected = MathUtils.sum(pGroups);
         if (tokens.length != numTokensExpected) {
