@@ -1,2 +1,7 @@
 ant-build/
 leronen.jar
+.classpath
+.project
+.settings/
+classes/
+leronen.jar.manifest

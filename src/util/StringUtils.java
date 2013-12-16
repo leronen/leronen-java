@@ -258,7 +258,7 @@ public final class StringUtils extends CommandLineTests {
     		String prefix = p.substring(0, i1);
     		String listString = p.substring(i1+1,i2);
     		String suffix = p.substring(i2+1);
-    		String[] tok = listString.split(",");
+    		String[] tok = listString.split(",", -1);
     		ArrayList<String> result = new ArrayList<String>(tok.length);
     		for (String t: tok) {
     			result.add(prefix+t+suffix);
@@ -274,8 +274,8 @@ public final class StringUtils extends CommandLineTests {
     		String middle = p.substring(i2+1, i1B);
     		String listString2 = p.substring(i1B+1,i2B);
     		String suffix = p.substring(i2B+1);
-    		String[] tok1 = listString1.split(",");
-    		String[] tok2 = listString2.split(",");
+    		String[] tok1 = listString1.split(",", -1);
+    		String[] tok2 = listString2.split(",", -1);
     		ArrayList<String> result = new ArrayList<String>(tok1.length*tok2.length);
     		for (String t1: tok2) {
     			for (String t2: tok2) {
@@ -299,9 +299,9 @@ public final class StringUtils extends CommandLineTests {
     		String middle2 = p.substring(i2B+1, i1C);
     		String listString3 = p.substring(i1C+1,i2C);
     		String suffix = p.substring(i2C+1);
-    		String[] tok1 = listString1.split(",");
-    		String[] tok2 = listString2.split(",");
-    		String[] tok3 = listString3.split(",");
+    		String[] tok1 = listString1.split(",", -1);
+    		String[] tok2 = listString2.split(",", -1);
+    		String[] tok3 = listString3.split(",", -1);
     		ArrayList<String> result = new ArrayList<String>(tok1.length*tok2.length*tok3.length);
     		for (String t1: tok2) {
     			for (String t2: tok2) {
@@ -331,10 +331,10 @@ public final class StringUtils extends CommandLineTests {
     		String middle3 = p.substring(i2C+1, i1D);
     		String listString4 = p.substring(i1D+1,i2D);
     		String suffix = p.substring(i2D+1);
-    		String[] tok1 = listString1.split(",");
-    		String[] tok2 = listString2.split(",");
-    		String[] tok3 = listString3.split(",");
-    		String[] tok4 = listString4.split(",");
+    		String[] tok1 = listString1.split(",", -1);
+    		String[] tok2 = listString2.split(",", -1);
+    		String[] tok3 = listString3.split(",", -1);
+    		String[] tok4 = listString4.split(",", -1);
     		ArrayList<String> result = new ArrayList<String>(tok1.length*tok2.length*tok3.length*tok4.length);
     		for (String t1: tok2) {
     			for (String t2: tok2) {
@@ -499,7 +499,7 @@ public final class StringUtils extends CommandLineTests {
      * @return a list of tokens, all of which are guaranteed to be non-empty strings
      */
     public static String[] reconstructDoubleQuotedTokens(String pLine) throws ParseException {
-        String[] tokens = pLine.split(" ");
+        String[] tokens = pLine.split(" ", -1);
         ArrayList<String> result = new ArrayList(tokens.length);
         // boolean inDoubleQuotedString = false;
         StringBuffer dqString = null;
@@ -850,7 +850,7 @@ public final class StringUtils extends CommandLineTests {
     }
 
     public static String removeLastComponent(String pString, String pDelim) {
-        List components = new ArrayList(Arrays.asList(pString.split(pDelim)));
+        List components = new ArrayList(Arrays.asList(pString.split(pDelim, -1)));
         CollectionUtils.pop(components);
         if (pDelim.equals("\\.")) {
             // args, kludge forced by the evil nature of regexps...
@@ -866,7 +866,7 @@ public final class StringUtils extends CommandLineTests {
     }
 
     public static String removeLastComponents(String pString, String pDelim, int pNumComponentsToRemove) {
-        List components = new ArrayList(Arrays.asList(pString.split(pDelim)));
+        List components = new ArrayList(Arrays.asList(pString.split(pDelim, -1)));
         for (int i=0; i<pNumComponentsToRemove; i++) {
             CollectionUtils.pop(components);
         }
@@ -895,7 +895,7 @@ public final class StringUtils extends CommandLineTests {
     }
 
     public static String removeWhiteSpaces(String pString) {
-        String[] components = pString.split("\\s+");
+        String[] components = pString.split("\\s+", -1);
         return arrayToString(components, "");
     }
 
@@ -1921,7 +1921,7 @@ public final class StringUtils extends CommandLineTests {
      * Indexing starts from 0.
      */
     public static String replaceNthElement(String pString, String pReplacementText, String pDelim, int pInd) {
-        String [] strings = pString.split(pDelim);
+        String [] strings = pString.split(pDelim, -1);
         strings[pInd] = pReplacementText;
         return arrayToString(strings, pDelim);
     }
@@ -2116,7 +2116,7 @@ public final class StringUtils extends CommandLineTests {
 
     public static String lastComponent(String pString, String pDelim) {
         Pattern p = Pattern.compile(pDelim);
-        String[] tokens = p.split(pString);
+        String[] tokens = p.split(pString, -1);
         return tokens[tokens.length-1];
     }
 
