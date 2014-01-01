@@ -2,6 +2,7 @@ package util;
 
 import util.collections.*;
 import util.collections.tree.NodeAdapter;
+import util.collections.tree.TreeNodeAdapter;
 import util.commandline.CommandLineTests;
 import util.condition.*;
 import util.converter.*;
@@ -14,6 +15,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.io.*;
 import java.lang.reflect.Field;
+
 
 
 public final class StringUtils extends CommandLineTests {
@@ -2457,6 +2459,66 @@ public final class StringUtils extends CommandLineTests {
         return StringUtils.stringMultiply(pLevel*pIndent, " ");        
     }
     
+    
+    /**
+     * keywords: printtree, outputtree, print tree, output tree
+     */
+    public static <T> String formatTree(T pRoot,
+                                        TreeNodeAdapter<T> pNodeAdapter,
+                                        int pIndent,
+                                        boolean pIncludeRoot) {
+        return formatTree(pRoot,
+                          pNodeAdapter,
+                          pIndent,
+                          pIncludeRoot,
+                          new ObjectToStringConverter<T>());
+    }
+
+    /** Element formatting for method @link{formatTree} */
+    private static <T> void formatElement(T elem,
+            							  TreeNodeAdapter<T> nodeAdapter,
+            							  int level,
+            							  int indent,
+            							  StringBuffer buf,
+            							  Converter<T, String> nodeFormatter,
+            							  Set<T> visitedNodes) {
+    	
+    	if (visitedNodes.contains(elem)) {
+    		throw new RuntimeException("Not a tree: trying to revisit node: "+nodeFormatter.convert(elem));
+    	}
+    	
+    	visitedNodes.add(elem);
+    	
+        // print element
+        buf.append(indentString(level, indent)+nodeFormatter.convert(elem)+"\n");
+
+        // print children
+        for (T child: nodeAdapter.children(elem)) {
+            formatElement(child, nodeAdapter, level+1, indent, buf, nodeFormatter, visitedNodes);
+        }
+    }
+    
+    public static <T> String formatTree(T root,
+                                        TreeNodeAdapter<T> nodeAdapter,
+                                        int indent,
+                                        boolean includeRoot,
+                                        Converter<T, String> nodeFormatter) {
+        StringBuffer result = new StringBuffer();
+        Set<T> visitedNodes = new HashSet<T>();        
+
+        if (includeRoot) {        	
+            formatElement(root,  nodeAdapter, 0, indent, result, nodeFormatter, visitedNodes);
+        }
+        else {
+            // exclude root
+            for (T e: nodeAdapter.children(root)) {
+                formatElement(e,  nodeAdapter, 0, indent, result, nodeFormatter, visitedNodes);
+            }
+        }
+
+        return result.toString();
+    }
+    
     /** 
      * keywords: printtree, outputtree, print tree, output tree
      */
@@ -2596,7 +2658,7 @@ public final class StringUtils extends CommandLineTests {
         }
     }
     
-    public static class UnexpectedNumColumnsException extends Exception {
+    public static class UnexpectedNumColumnsException extends RuntimeException {
         public static final long serialVersionUID = 123123122345345L;
         
         public String line;

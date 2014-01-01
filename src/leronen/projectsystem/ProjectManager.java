@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import util.StringUtils;
-import util.io.BCFileReader;
+import util.io.TableFileReader;
 import util.io.NoSuchColumnException;
 import util.process.ProcessOutput;
 import util.process.ProcessUtils;
@@ -21,7 +21,7 @@ public class ProjectManager {
 	}
 	
 	private void readProjects(String projectFile) throws StringUtils.UnexpectedNumColumnsException, NoSuchColumnException, IOException {
-		BCFileReader reader = new BCFileReader(projectFile);
+		TableFileReader reader = new TableFileReader(projectFile);
 		Map<String, Map<String,String>> dataMap = reader.readAsMapMap(COLUMN_NAME_ID);		
 		for (String idStr: dataMap.keySet()) {
 			Map<String,String> data = dataMap.get(idStr);

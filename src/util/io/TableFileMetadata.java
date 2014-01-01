@@ -3,23 +3,25 @@ package util.io;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import util.IOUtils;
-import util.StringUtils.UnexpectedNumColumnsException;
+import util.collections.IndexMap;
 import util.collections.Pair;
+import util.StringUtils.UnexpectedNumColumnsException;
 
 public class TableFileMetadata {
 	protected String fileName;
-    protected String originalHeader;
+	/** The original header in the file as is */
+    protected String header;
     protected int numCols;
     protected ColumnSeparator columnSeparator;
-    protected List<String> columnNames;
-    protected Map<String, Integer> columnByName;
     protected String chrFromFileName;    
     protected boolean deducedChrFromFileName;
+    /** 
+     * Mapping from column indices to column names.
+     * Currently duplicates data in columnNames and columnByName */ 
+    protected IndexMap<String> columnMap;
     
     /** No action, subclasses are responsible for initializing all fields */
     protected TableFileMetadata() {
@@ -28,32 +30,28 @@ public class TableFileMetadata {
         
     public TableFileMetadata(String pFilename) throws IOException, UnexpectedNumColumnsException {
         fileName = pFilename;
-        String header = IOUtils.readFirstLine(new File(pFilename));
+        header = IOUtils.readFirstLine(new File(pFilename));
         Pair<ColumnSeparator, Integer> tmp = deduceSeparatorAndNumCols(header);
         columnSeparator = tmp.getObj1();
         numCols = tmp.getObj2();
         String[] colNamesArr= new String[numCols];
         columnSeparator.split(header, colNamesArr);
-        columnNames = Arrays.asList(colNamesArr);            
-        columnByName = makeColumnByNameMap(columnNames);
+        columnMap = new IndexMap<String>(Arrays.asList(colNamesArr)); 
     }
     
-    protected Map<String, Integer> makeColumnByNameMap(List<String> pColNames) {
-        Map<String, Integer> result = new HashMap<String, Integer>();
-        for (int i=0; i<pColNames.size(); i++) {
-            String cn = pColNames.get(i);
-            result.put(cn, i);
-        }
-        return result;
+    public String getFilename() {
+    	return fileName;
     }
+        
     
+    /** list of column names in file */ 
     public List<String> getColumnNames() {
-        return columnNames;
+        return columnMap.asList();
     }
        
     /** return -1 if no such column */
     public int getColumnInd(String columnName) {
-    	Integer result = columnByName.get(columnName);
+    	Integer result = columnMap.getIndex(columnName);
     	if (result != null) {
     		return result;
     	}
@@ -63,12 +61,12 @@ public class TableFileMetadata {
     }
     
     public String getColumnName(int index) {
-    	return columnNames.get(index);
+    	return columnMap.asList().get(index);
     }
     
     /** Get the (original) header line of the file */
     public String getHeaderLine() {
-        return originalHeader;
+        return header;
     }    
     
     public int getNumCols() {
@@ -112,8 +110,6 @@ public class TableFileMetadata {
             	return new Pair<ColumnSeparator, Integer>(ColumnSeparator.WHITE_SPACES, numColsWithWhiteSpaces);                
             }
         }               
-    }
-    
-    
+    }        
 }
 

@@ -6,7 +6,6 @@ import util.IOUtils;
 
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.io.*;
 
@@ -114,7 +113,7 @@ public class MantisSOAPClient {
        
     }
     
-
+    @SuppressWarnings("unused")
     private static void log(String msg) {
     	System.err.println(msg);
     }

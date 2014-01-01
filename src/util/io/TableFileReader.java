@@ -3,19 +3,19 @@ package util.io;
 import java.io.IOException;
 import java.util.*;
 
+
 import util.IOUtils;
-import util.StringUtils;
 import util.IOUtils.LineIterator;
+import util.StringUtils;
 import util.StringUtils.UnexpectedNumColumnsException;
 
 
 /**
- * Reader for tab-,white-space- and comma-delimited data files with a header row.
+ * Reader for table-like data files with a header row.
+ * tab-,white-space- and comma-delimited files are supported.  
  * 
- * Main use case is reading bc-formatted files.
- * 
- * Simple example usage to read marker name and position from a file (exception handling omitted for clarity):   
- *   
+ * Simple example usage to extract marker name and position from 
+ * a file (exception handling omitted for clarity):   
  *    TableFileReader reader = new TableFileReader(file, "MARKER", "DIST");
  *    while (reader.hasNextLine()) {
  *        reader.readLine();
@@ -23,39 +23,41 @@ import util.StringUtils.UnexpectedNumColumnsException;
  *        String bp = reader.get("DIST");
  *        System.out.println(name+"\t"+bp);
  *    }
- *       
+ *  
+ * @see FileReader
+ * @see FiletypeBasedFileReader
  */  
 public class TableFileReader {
          
     TableFileMetadata meta;
 	
-    /** Always columns resulting from the last readline */
+    /** Field values from the last readline */
     private StringBuffer[] curColumns;
     
-    /** Always read one line ahead into this buffer */
+    /** Always read one line ahead into this buffer. */
     private StringBuffer[] nextColumns;
     
-    /** iterator for actual, unprocessed lines of input */
+    /** iterator for actual, unprocessed lines of input. */
     private LineIterator lineIter;
     
-    /** Actually, a projection into these columns. */ 
+    /** only these columns are read. */ 
     private int[] columnsOfInterest;
 
     private String curLine;
-    private String nextLine;
-    
+    private String nextLine;    
     private int lineNr = 0;
+        
     
     public TableFileReader(String pFileName) throws IOException, StringUtils.UnexpectedNumColumnsException, NoSuchColumnException {
         this(pFileName, (List<String>)null);
-    }
-           
-    
+    }    
+               
     public TableFileReader(String pFileName, String... pColumnsOfInterest) throws IOException, StringUtils.UnexpectedNumColumnsException, NoSuchColumnException {
         this(pFileName, Arrays.asList(pColumnsOfInterest));
     }
            
-        
+             
+      
     public TableFileReader(String pFileName, List<String> pColumnsOfInterest) throws IOException, StringUtils.UnexpectedNumColumnsException, NoSuchColumnException {    	
     	meta = new TableFileMetadata(pFileName);
         // dbgMsg("Metadata: "+meta);
@@ -106,7 +108,113 @@ public class TableFileReader {
         // read first line into nextColumns
         internalReadLine();        
     }       
-        
+    
+    public String getFileName() {
+    	return meta.getFilename();
+    }
+    
+    /** read all lines for validation purposes. just returns if successful, otherwise throws an checked exception */
+    public void validateLines() throws UnexpectedNumColumnsException, NoSuchElementException, IOException {    	            
+        while (hasNextLine()) {
+        	readLine();
+        }        
+    }
+    
+    /** Read all rows into a List of Maps */
+    public List<Map<String,String>> readAsMapList() throws UnexpectedNumColumnsException, NoSuchElementException, IOException {
+    	List<Map<String,String>> result = new ArrayList<Map<String,String>>();    	
+                
+        while (hasNextLine()) {
+            readLine();
+            Map<String,String> rowAsMap = getRowAsMap(); 
+            result.add(rowAsMap);            
+        }        
+        return result;            
+    }
+    
+    /** Read all rows into a map indexed by the given field */
+    public Map<String, Map<String,String>> readAsMapMap(String keyColumn) throws UnexpectedNumColumnsException, NoSuchElementException, IOException {
+    	Map<String, Map<String,String>> result = new HashMap<String, Map<String,String>>();    	
+                
+        while (hasNextLine()) {
+            readLine();
+            Map<String,String> rowAsMap = getRowAsMap(); 
+            String key = rowAsMap.get(keyColumn);
+            result.put(key, rowAsMap);
+        }        
+        return result;            
+    }
+    
+    /** Read all rows into a map indexed by the given field */
+    public Map<List<String>, Map<String,String>> readAsMapMap(List<String> keyColumns) throws UnexpectedNumColumnsException, NoSuchElementException, IOException {
+    	Map<List<String>, Map<String,String>> result = new HashMap<List<String>, Map<String,String>>();    	
+                
+        while (hasNextLine()) {
+            readLine();
+            Map<String,String> rowAsMap = getRowAsMap();
+            List<String> key = new ArrayList<String>();
+            for (String keyColumn: keyColumns) {
+            	key.add(rowAsMap.get(keyColumn));
+            }
+            result.put(key, rowAsMap);
+        }        
+        return result;            
+    }
+    
+    
+    /** Read all rows into a map indexed by the given field */
+    public Map<String, List<String>> readAsListMap(String keyColumn) throws UnexpectedNumColumnsException, NoSuchElementException, IOException {
+    	Map<String, List<String>> result = new HashMap<String, List<String>>();    	
+            
+    	int keyInd = getMetadata().getColumnInd(keyColumn);
+        while (hasNextLine()) {
+            readLine();
+            List<String> rowAsList = getRowAsList();            
+            String key = rowAsList.get(keyInd);
+            result.put(key, rowAsList);
+        }        
+        return result;            
+    }
+    
+    public List<String> getRowAsList() {
+    	List<String> row = new ArrayList<String>(columnsOfInterest.length);
+    	for (int i: columnsOfInterest) {
+    		int ind = columnsOfInterest[i];    		
+    		String val;
+    		try {
+    			val = get(ind);
+    		}
+    		catch (NoSuchColumnException e) {
+				// should not occur
+    			throw new RuntimeException(e);
+			}
+    		row.add(val);
+    	}
+    	return row;
+    }
+    
+    /**
+     * Return the current row as map (iteration order of fields will be as in original file.
+     * A new map is created for each call, so the caller is free to modify the returned map.
+     */
+    public Map<String,String> getRowAsMap() {    	
+    	LinkedHashMap<String,String> row = new LinkedHashMap<String,String>(columnsOfInterest.length);
+    	for (int i: columnsOfInterest) {
+    		int ind = columnsOfInterest[i];
+    		String key = meta.getColumnName(ind);
+    		String val;
+    		try {
+    			val = get(ind);
+    		}
+    		catch (NoSuchColumnException e) {
+				// should not occur
+    			throw new RuntimeException(e);
+			}
+    		row.put(key, val);
+    	}
+    	return row;
+    }
+    
     public TableFileMetadata getMetadata() {
         return meta;
     }
@@ -122,6 +230,11 @@ public class TableFileReader {
      */
     public String makeHeaderRow() {
     	return makeHeaderRow(meta.columnSeparator);
+    }
+    
+    /** Get header line of original file */ 
+    public String getHeader() {
+    	return meta.getHeaderLine();
     }
     
     /** Make a header row that only contains columns of interest, if ones are specified */
@@ -144,21 +257,29 @@ public class TableFileReader {
         return buf.toString();       
     }
     
-    // read data from next line of input into nextColumns
+    // set curline to nextline, read data from next line of input into nextLine and nextColumns
     private void internalReadLine() throws UnexpectedNumColumnsException {
+    	curLine = nextLine;
+    	
         if (!(lineIter.hasNext())) {
             // no more lines in input
             nextColumns = null;
+            nextLine = null;
             return;
         }
-
-        curLine = nextLine;
+        
         nextLine = lineIter.next();                   
         meta.getColumnSeparator().split(nextLine, nextColumns);        
         
         lineNr++;
     }    
     
+    /**
+     * Read next line. The line read last is to be accessed using methods such
+     * as {@link #getString(String)} 
+     * @throws UnexpectedNumColumnsException
+     * @throws NoSuchElementException
+     */
     public void readLine() throws UnexpectedNumColumnsException, NoSuchElementException {
         
         if (nextColumns == null) {
@@ -183,9 +304,30 @@ public class TableFileReader {
     }          
     
     /** get value of column by index */
-    public String getValue(int col) {
-        return curColumns[col].toString();
+    public String get(int ind) throws NoSuchColumnException {
+    	StringBuffer buf = curColumns[ind];
+    	if (buf == null) {
+    		throw new NoSuchColumnException("No such column in file "+meta.getFilename()+": "+ind);	
+    	}
+    	else {
+    		return buf.toString();
+    	}
     }                 
+    
+    /** get value of column by name */
+    public String getString(String columnName) throws NoSuchColumnException {
+        int ind = meta.getColumnInd(columnName);
+        if (ind == -1) {
+            throw new NoSuchColumnException("No such column in file "+meta.getFilename()+": "+columnName);
+        }
+        
+        StringBuffer buf = curColumns[ind];
+        if (buf == null) {
+    		throw new NoSuchColumnException("No such column in file "+meta.getFilename()+": "+columnName);	
+    	}        
+        
+        return buf.toString();        
+    }
       
     /** Project current line to columns of interest */
     public String project() {
@@ -205,8 +347,11 @@ public class TableFileReader {
         }
     }
     
-    /** Output the read file in BCOS format */ 
-    public void outputDataLines() throws UnexpectedNumColumnsException {    
+    /**
+     * Read and output all (remaining) lines to stdout. Only columns of interest
+     * are outputted. No header is outputted by this method.
+     */ 
+    public void readAndOutputDataLines() throws UnexpectedNumColumnsException {    
         IOUtils.setFastStdout();
         while (hasNextLine()) {
             readLine();
@@ -215,10 +360,17 @@ public class TableFileReader {
         }
         System.out.flush();
     }
+
+    /** read all (remaining) lines and write them to stdout. */
+    public void cat() throws UnexpectedNumColumnsException {
+    	while (hasNextLine()) {
+    	    readLine();    		
+    		System.out.println(getCurrentLine());
+        }
+    }
     
     /**
      * Unit test by performing a simple projection on a file. If no columns given, output all columns.
-     * Use the notorious ISO-8859-1 encoding.
      */ 
     public static void main(String[] args) throws Exception {
     	TableFileReader reader;
@@ -239,17 +391,9 @@ public class TableFileReader {
     	}            
     	
         System.out.println(reader.makeHeaderRow());
-        reader.outputDataLines();
+        reader.readAndOutputDataLines();
         System.out.flush();    	
     }
 
-    @SuppressWarnings("serial")
-    public class NoSuchColumnException extends Exception {
-        
-        public NoSuchColumnException (String message) {
-            super(message);
-        }       
-        
-    }
 }
 
