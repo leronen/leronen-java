@@ -1,0 +1,2 @@
+at a new checkout, consider replacing files in .settings with versions here
+(preferably using meld, in order not to overwrite necessary new settings)
