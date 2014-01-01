@@ -63,8 +63,8 @@ public class DefaultRowFactory implements RowFactory  {
     }
     
     /** For Converter-compatibility; just calls makeRow */
-    public Object convert(Object pObj) {
-        return makeRow((String)pObj);   
+    public List convert(String s) {
+        return makeRow(s);   
     }
     
     public String toString() {

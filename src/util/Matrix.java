@@ -43,7 +43,7 @@ public final class Matrix  {
      *   the list must only contain ArrayList objects 
      *   all contained lists must have size() equal to mNumCols.     
      */
-    private ArrayList mRows;  
+    private ArrayList<List> mRows;  
 
     /** -1 indicates we dont know yet */          
     private int mNumCols = -1;            
@@ -71,6 +71,9 @@ public final class Matrix  {
     /** column separator used for output */
     private String mOutputColumnSeparator = " ";
     
+    /** column separator used for input (only when no row format?) */
+    private String mInputColumnSeparator = "\\s+";
+    
     public void setPrettyPrinting(boolean pVal) {
         mPrettyPrinting = pVal;
     }              
@@ -78,6 +81,11 @@ public final class Matrix  {
     /** Only takes effect for "non-pretty" printing... */
     public void setOutputColumnSeparator(String p) {
     	mOutputColumnSeparator = p;
+    }
+    
+    /** Only takes effect for "non-pretty" printing... */
+    public void setInputColumnSeparator(String p) {
+    	mInputColumnSeparator = p;
     }
     
     /** Create empty matrix with no rows or columns, and specify that no header shall be included */
@@ -390,7 +398,9 @@ public final class Matrix  {
             return mHeader.getRowFactory();  
         }
         else {
-            return new ArrayListRowFactory(mNumCols);
+            ArrayListRowFactory rowFactory = new ArrayListRowFactory(mNumCols);
+            rowFactory.setSeparator(mInputColumnSeparator);
+            return rowFactory;
         }
     }
     
@@ -1092,7 +1102,9 @@ public final class Matrix  {
         int godGivenLen = ((List)mRows.get(0)).size();
         for (int i=1; i<mRows.size(); i++) {
             if (((List)mRows.get(i)).size() != godGivenLen) {
-                throw new InvalidMatrixFormatException("Rows 0 and "+i+" cannot agree on the number of cols, abandon ship.");
+                throw new InvalidMatrixFormatException("Rows 0 and "+i+" cannot agree on the number of cols, abandon ship.\n"+
+                                                       "Row 0 (len: "+mRows.get(0).size()+"): "+mRows.get(0)+"\n"+
+                                                       "Row "+i+"(len: "+mRows.get(i).size()+"): "+mRows.get(i));
             }
         }     
         mNumCols = godGivenLen;
@@ -1149,13 +1161,13 @@ public final class Matrix  {
     public void readFromStream(InputStream pStream) throws IOException, InvalidMatrixFormatException {        
         // read lines
         String[] lineArray = IOUtils.readLineArray(pStream);
-        List lineList = Arrays.asList(lineArray);
+        List<String> lineList = Arrays.asList(lineArray);
         // remove empty lines
         lineList = (List)CollectionUtils.extractMatchingObjects(lineList, new IsNonEmptyStringCondition());
         if (lineList.size()==0) {
             throw new InvalidMatrixFormatException("No lines found in the input stream!");     
         }
-        List dataList;
+        List<String> dataList;
         if (mIncludeHeader) {
             // the first line is the header
             String headerLine = lineArray[0];            
@@ -1178,7 +1190,7 @@ public final class Matrix  {
         mRows = new ArrayList(dataList.size());
         for (int i=0; i<dataList.size(); i++) {
         	try {                        
-        		Object row = getRowFactory().convert(dataList.get(i));
+        		List row = getRowFactory().convert(dataList.get(i));
         		mRows.add(row);
         	}
         	catch (RuntimeParseException e) {
@@ -1973,19 +1985,19 @@ public final class Matrix  {
      * Wraps the Matrix as an (unmodifiable through this interface!) List (elements of the list are the
      * rows of the matrix, which are always ArrayList instances.
      */
-    private class ListWrapper extends AbstractList {
+    private class ListWrapper extends AbstractList<List> {
         // by default the matrix cannot be modified through this wrapper!
         // this flag is meant to be set only when sorting the matrix
         private boolean mAllowSModifications = false;
         
-        public Object get(int index) {
+        public List get(int index) {
             return mRows.get(index);
         }
         public int size() {
             return mRows.size();
         }            
                 
-        public Object set(int index, Object element) {
+        public List set(int index, List element) {
             if (!mAllowSModifications) {
                 throw new UnsupportedOperationException("List wrapper for Matrix does not support modifications!");
             }

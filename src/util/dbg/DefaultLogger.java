@@ -69,13 +69,11 @@ public class DefaultLogger implements ILogger {
         infoStream.println("WARNING: "+warning);
     }
     
-    /** Report error and exit with exit code 1. */
     @Override
     public void error(String msg) {
         System.err.println("ERROR: "+msg);
         warningStream.println("ERROR: "+msg);
         infoStream.println("ERROR: "+msg);
-        System.exit(1);
     }
     
     @Override
@@ -83,8 +81,7 @@ public class DefaultLogger implements ILogger {
         System.err.println("ERROR: "+msg);
         e.printStackTrace();
         warningStream.println("ERROR: "+msg);
-        infoStream.println("ERROR: "+msg);
-        System.exit(1);
+        infoStream.println("ERROR: "+msg);        
     }
 
     @Override
