@@ -10,8 +10,12 @@ import java.util.Stack;
 import util.IOUtils;
 import util.StringUtils;
 
-public class CurlyBracketAnalyzer {
-	
+/**
+ * CMD LINE class Suitable for indenting curly-bracket-blocky code, including, but not limited to c, java and awk
+ *   Usage: java util.coding.CurlyBracketIndenter infile > outfile
+ */
+public class CurlyBracketsIndenter {
+
 	private List<Line> readLines(InputStream is) throws IOException {
 		List<String> rawLines = IOUtils.readLines(is);
 		List<Line> lines = new ArrayList<Line>(rawLines.size());
@@ -21,7 +25,7 @@ public class CurlyBracketAnalyzer {
 			boolean empty = StringUtils.isEmpty(text);
 			LineType type;
 			if (commented) {
-				type = LineType.COMMENT; 
+				type = LineType.COMMENT;
 			}
 			else if (empty) {
 				type = LineType.EMPTY;
@@ -42,16 +46,16 @@ public class CurlyBracketAnalyzer {
 					// balanced
 					type = LineType.NORMAL;
 				}
-				else {					
+				else {
 					type = LineType.INVALID;
 					throw new RuntimeException("More than one curly bracket on line "+(i+1)+": "+text);
 				}
 			}
-			lines.add(new Line(text, type, i+1));			
+			lines.add(new Line(text, type, i+1));
 		}
 		return lines;
 	}
-	
+
 	private void run(InputStream is) throws IOException {
 		List<Line> lines = readLines(is);
 		Stack<Line> stack = new Stack<Line>();
@@ -61,7 +65,7 @@ public class CurlyBracketAnalyzer {
 					System.err.println("No opening bracket for line "+l.num);
 				}
 				else {
-					Line beginLine = stack.pop();				
+					Line beginLine = stack.pop();
 					beginLine.closingLine = l;
 					l.openingLine = beginLine;
 				}
@@ -69,16 +73,16 @@ public class CurlyBracketAnalyzer {
 			l.indentLevel = stack.size();
 			if (l.type == LineType.OPENING) {
 				stack.add(l);
-			}			
-			
+			}
+
 		}
-		
+
 		for (Line l: lines) {
-			System.out.println(l);			
+			System.out.println(l);
 		}
 	}
-		
-	
+
+
 	private class Line {
         String text;
         LineType type;
@@ -91,15 +95,16 @@ public class CurlyBracketAnalyzer {
         Line openingLine;
         /** indent level, according to curly braces */
         int indentLevel;
-        
+
         Line(String text,
              LineType type,
              int num) {
             this.text = text;
             this.type = type;
-            this.num = num;            
+            this.num = num;
         }
-        
+
+        @Override
         public String toString() {
         	String tmp = StringUtils.removeLeadingWhiteSpaces(text);
         	String indent = StringUtils.stringMultiply(4*indentLevel, " ");
@@ -113,14 +118,14 @@ public class CurlyBracketAnalyzer {
         		return text;
         	}
         	else {
-        		return indent+tmp; 
+        		return indent+tmp;
         	}
-        }             
+        }
     }
-	
-	
+
+
 	public static void main(String[] args) throws Exception {
-		CurlyBracketAnalyzer cba = new CurlyBracketAnalyzer();
+		CurlyBracketsIndenter cba = new CurlyBracketsIndenter();
 		if (args.length == 0) {
 			cba.run(System.in);
 		}
@@ -128,7 +133,7 @@ public class CurlyBracketAnalyzer {
 			cba.run(new FileInputStream(args[0]));
 		}
 	}
-	
+
 	private enum LineType {
 		COMMENT,
 		OPENING,
@@ -137,6 +142,6 @@ public class CurlyBracketAnalyzer {
 		EMPTY,
 		INVALID;
 	}
-	
-	
+
+
 }
