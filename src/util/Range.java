@@ -173,12 +173,16 @@ public class Range {
         return end-start;
     }
 
-
-
-    public Range intersection(Range pRange) {
-        int maxStart = Math.max(start, pRange.start);
-        int minEnd = Math.min(end, pRange.end);
-        return new Range(maxStart, minEnd);
+    /** return null, if no intersection of at least length 0 */
+    public Range intersection(Range other) {
+        int start = Math.max(this.start, other.start);
+        int end   = Math.min(this.end,   other.end);
+        if (end-start >= 1) {
+            return new Range(start, end);
+        }
+        else {
+            return null;
+        }
     }
 
     public static boolean hasOverlap(Range[] pRanges) {
