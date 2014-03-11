@@ -62,7 +62,7 @@ public class IOUtils {
     /**
      * Read bytes from an input stream until the end of the stream is reached. Note
      * that reading may block if no bytes are available at the time of call.
-     * The stream is not closed by this method.
+     * The stream is NOT closed by this method.
      */
     public static byte[] readBytes(InputStream is) throws IOException  {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -105,6 +105,43 @@ public class IOUtils {
         else {
             // got the desired number of bytes
             return buffer;
+        }
+    }
+    
+    /** 
+     * Read bytes from an input stream until the first zero byte in encountered, or the given max bytes limit is exceeded. 
+     * Read the zero byte as well, but do not include it in the result.
+     * 
+     * @return null, if end of stream has already been reached.
+     * @throws UnexpectedEndOfStreamException if some bytes are read, and the end stream ends with a non-zero byte
+     * before any zero bytes are read.  
+     * @throws RuntimeException when maxBytes bytes have already been read and the next byte is not null */     
+    public static byte[] readBytesUntilNull(InputStream is, int maxBytes) throws UnexpectedEndOfStreamException, IOException, TooManyNonNullBytesException {
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int b;        
+        while ( (b=is.read()) > 0 ) {            
+            baos.write(b);
+            if (baos.size() > maxBytes) {
+                throw new TooManyNonNullBytesException("More than "+maxBytes+" non-null bytes read from stream");
+            }
+        }        
+
+        if (b == 0) {        
+            return baos.toByteArray();
+        }
+        else if (b == -1) {
+            if (baos.size() == 0) {
+                // no more bytes available
+                return null;
+            }
+            else {
+                throw new UnexpectedEndOfStreamException();
+            }
+        }
+        else {
+            // should not be possible
+            throw new RuntimeException("foo");
         }
     }
     
@@ -1414,75 +1451,15 @@ public class IOUtils {
     }
     
     public static class UnexpectedEndOfStreamException extends Exception {
-        // foo
+        // just tag
     }
     
-    /*
-    private static class RunnableStreamReader implements Runnable {
-        private InputStream mInputStream;  
-        private String mProcessName;
-        private String mStreamName;
-        private String[] mResult;
-        private StreamListener mListener;
-        private Pattern[] mListenerPatterns;
-        private boolean mOutputAsInfo;        
-        
-        RunnableStreamReader(String pProcessName, String pStreamName, 
-                             InputStream pInStream, 
-                             StreamListener pListener,
-                             boolean pOutputAsInfo) {
-            mStreamName = pStreamName;
-            mProcessName = pProcessName;
-            mInputStream = pInStream;
-            mOutputAsInfo = pOutputAsInfo;
-            if (pListener != null) {
-                mListener = pListener;
-                String[] patternStrings = pListener.getRegularExpressions();
-                mListenerPatterns = new Pattern[patternStrings.length];
-                for (int i=0; i<patternStrings.length; i++) {
-                    mListenerPatterns[i] = Pattern.compile(patternStrings[i]);                        
-                }                
-            }
+    public static class TooManyNonNullBytesException extends Exception {
+        public TooManyNonNullBytesException(String message) {
+            super(message);
         }
-                
-        public void run() {
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(mInputStream));
-                LinkedList lines = new LinkedList();
-                String line = reader.readLine();                                
-                while (line!=null) {
-                    lines.add(line);
-                    output(line);
-                    if (mListener != null) {
-                        for (int i=0; i<mListenerPatterns.length; i++) {
-                            Matcher m = mListenerPatterns[i].matcher(line);
-                            if (m.matches()) {
-                                mListener.notify(line, i);
-                            }
-                        }
-                    }                    
-                    
-                    line = reader.readLine();                    
-                }
-                mResult = (String[])lines.toArray(new String[lines.size()]);
-            }     
-            catch (Exception e) {
-                e.printStackTrace();                        
-            }
-        }
-        
-        public String[] getResult() {
-            return mResult;    
-        }
-        
-        private void output(String pMsg) {
-            if (mOutputAsInfo) {
-                Logger.info(mProcessName+" output ("+mStreamName+"): "+pMsg);
-            }
-        }                
     }
-    */
-    
+            
     public static void main (String[] args) {
         String cmd = args[0];
                 
