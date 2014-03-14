@@ -123,7 +123,7 @@ public class IOUtils {
         while ( (b=is.read()) > 0 ) {            
             baos.write(b);
             if (baos.size() > maxBytes) {
-                throw new TooManyNonNullBytesException("More than "+maxBytes+" non-null bytes read from stream");
+                throw new TooManyNonNullBytesException();
             }
         }        
 
@@ -1451,13 +1451,11 @@ public class IOUtils {
     }
     
     public static class UnexpectedEndOfStreamException extends Exception {
-        // just tag
+        //
     }
     
     public static class TooManyNonNullBytesException extends Exception {
-        public TooManyNonNullBytesException(String message) {
-            super(message);
-        }
+        // 
     }
             
     public static void main (String[] args) {
