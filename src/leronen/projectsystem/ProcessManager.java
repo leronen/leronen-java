@@ -67,7 +67,7 @@ public class ProcessManager {
 		}
 	}
 	
-	class Process extends HashMap<String, String> {
+	public static class Process extends HashMap<String, String> {
 		List<Process> children = new ArrayList<Process>();
 		
 		public Process(Map<String, String> data)  {
@@ -93,6 +93,10 @@ public class ProcessManager {
 		public String toString() { 
 			return getPid() + " (" +getCommand()+ ")";
 		}
+	}
+	
+	public Process get(int procId) {
+		return processById.get(""+procId);
 	}
 	
 	private class ProcessTreeNodeAdapter implements TreeNodeAdapter<Process> {

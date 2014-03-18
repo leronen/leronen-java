@@ -1318,8 +1318,8 @@ public final class CollectionUtils {
      */
     public static <K,V> MultiMap<K,V> makeMultiMap(Collection<V> pCollection,
                                                    Converter<V,K> pFieldExtractor,
-                                                   MultiMap<V,K> pResult) {
-        MultiMap<K,V> map = pResult != null ? pResult : new MultiMap();
+                                                   MultiMap<K,V> pResult) {
+        MultiMap<K,V> map = pResult != null ? pResult : new MultiMap<K,V>();
         Iterator<V> i = pCollection.iterator();
         while(i.hasNext()) {
             V o = i.next();

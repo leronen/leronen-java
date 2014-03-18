@@ -96,7 +96,7 @@ public class IOUtils {
     /**
      * Read bytes from an input stream until the end of the stream is reached. Note
      * that reading may block if no bytes are available at the time of call.
-     * The stream is not closed by this method.
+     * The stream is NOT closed by this method.
      */
     public static byte[] readBytes(InputStream is) throws IOException  {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -141,7 +141,44 @@ public class IOUtils {
             return buffer;
         }
     }
+    
+    /** 
+     * Read bytes from an input stream until the first zero byte in encountered, or the given max bytes limit is exceeded. 
+     * Read the zero byte as well, but do not include it in the result.
+     * 
+     * @return null, if end of stream has already been reached.
+     * @throws UnexpectedEndOfStreamException if some bytes are read, and the end stream ends with a non-zero byte
+     * before any zero bytes are read.  
+     * @throws RuntimeException when maxBytes bytes have already been read and the next byte is not null */     
+    public static byte[] readBytesUntilNull(InputStream is, int maxBytes) throws UnexpectedEndOfStreamException, IOException, TooManyNonNullBytesException {
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int b;        
+        while ( (b=is.read()) > 0 ) {            
+            baos.write(b);
+            if (baos.size() > maxBytes) {
+                throw new TooManyNonNullBytesException();
+            }
+        }        
 
+        if (b == 0) {        
+            return baos.toByteArray();
+        }
+        else if (b == -1) {
+            if (baos.size() == 0) {
+                // no more bytes available
+                return null;
+            }
+            else {
+                throw new UnexpectedEndOfStreamException();
+            }
+        }
+        else {
+            // should not be possible
+            throw new RuntimeException("foo");
+        }
+    }
+    
     /**
      * Read bytes from an input stream until the first zero byte in encountered.
      * Read the zero byte as well, but do not include it in the result.
@@ -1452,8 +1489,9 @@ public class IOUtils {
     }
 
     public static class UnexpectedEndOfStreamException extends Exception {
-        // foo
+        //
     }
+
 
     /*
     private static class RunnableStreamReader implements Runnable {
@@ -1521,6 +1559,12 @@ public class IOUtils {
     }
     */
 
+
+    
+    public static class TooManyNonNullBytesException extends Exception {
+        // 
+    }
+            
     public static void main (String[] args) {
         String cmd = args[0];
 
