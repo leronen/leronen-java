@@ -2,14 +2,13 @@ package util;
 
 
 
-import util.commandline.CommandLineTests;
-import java.text.ParseException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,13 +29,14 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import util.collections.tree.NodeAdapter;
-import util.collections.tree.TreeNodeAdapter;
 import util.collections.Distribution;
 import util.collections.IMultiMapReadOps;
 import util.collections.MultiMap_old;
 import util.collections.MultiSet;
 import util.collections.StringMultiMap;
+import util.collections.tree.NodeAdapter;
+import util.collections.tree.TreeNodeAdapter;
+import util.commandline.CommandLineTests;
 import util.condition.Condition;
 import util.condition.IsEmptyStringCondition;
 import util.condition.NotCondition;
@@ -236,6 +236,8 @@ public final class StringUtils extends CommandLineTests {
         }
     }
 
+
+
     /** Expand all lists of style "FOO{foo,bar,baz}BAR" to (FOOfooBAR, FOObarBAR, FOObazBAR). Nested lists not supported! */
     public static List<String> expandBashLists(String p) {
     	int [] openBracketInds = findOccurences(p, '{');
@@ -249,17 +251,11 @@ public final class StringUtils extends CommandLineTests {
     	}
     	int n = openBracketInds.length;
 
-    	// check unnestedness
-    	for (int i=0; i<n-1; i++) {
-    	     if (closeBracketInds[0] > openBracketInds[i+1]) {
-    	         System.err.println("Warning: nested curly brackets in string, cannot perform expansion: "+p);
-    	         return Collections.singletonList(p);
-    	     }
-    	}
 
-    	int i1 = openBracketInds[0];
-    	int i2 = closeBracketInds[0];
     	if (n == 1) {
+    	    // one pair of brackets
+    	    int i1 = openBracketInds[0];
+            int i2 = closeBracketInds[0];
     		String prefix = p.substring(0, i1);
     		String listString = p.substring(i1+1,i2);
     		String suffix = p.substring(i2+1);
@@ -271,28 +267,58 @@ public final class StringUtils extends CommandLineTests {
     		return result;
     	}
     	if (n == 2) {
-    		// more than
-    		int i1B = openBracketInds[1];
-        	int i2B = closeBracketInds[1];
-    		String prefix = p.substring(0, i1);
-    		String listString1 = p.substring(i1+1,i2);
-    		String middle = p.substring(i2+1, i1B);
-    		String listString2 = p.substring(i1B+1,i2B);
-    		String suffix = p.substring(i2B+1);
-    		String[] tok1 = listString1.split(",", -1);
-    		String[] tok2 = listString2.split(",", -1);
-    		ArrayList<String> result = new ArrayList<String>(tok1.length*tok2.length);
-    		for (String t1: tok2) {
-    			for (String t2: tok2) {
-    				result.add(prefix+t1+middle+t2+suffix);
-    			}
-    		}
-    		return result;
+    		// 2 pairs of brackets
+    	    //  • case 1: {} {}
+    	    //  • case 2: { { } }
+
+    	    if (closeBracketInds[0] < openBracketInds[1]) {
+    	         // case 1: 2 consecutive pairs of brackets
+    	        int i1 = openBracketInds[0];
+    	        int i2 = closeBracketInds[0];
+        		int i1B = openBracketInds[1];
+            	int i2B = closeBracketInds[1];
+        		String prefix = p.substring(0, i1);
+        		String listString1 = p.substring(i1+1,i2);
+        		String middle = p.substring(i2+1, i1B);
+        		String listString2 = p.substring(i1B+1,i2B);
+        		String suffix = p.substring(i2B+1);
+        		String[] tok1 = listString1.split(",", -1);
+        		String[] tok2 = listString2.split(",", -1);
+        		ArrayList<String> result = new ArrayList<String>(tok1.length*tok2.length);
+        		for (String t1: tok2) {
+        			for (String t2: tok2) {
+        				result.add(prefix+t1+middle+t2+suffix);
+        			}
+        		}
+        		return result;
+    	    }
+    	    else {
+    	        // assume case 2
+    	        // expend outer brackets here, expand inner brackets recursively
+    	        int i1 = openBracketInds[1];
+    	        int i2 = closeBracketInds[0];
+                String prefix = p.substring(0, i1);
+                String listString = p.substring(i1+1,i2);
+                String suffix = p.substring(i2+1);
+//                Logger.info("prefix: "+prefix);
+//                Logger.info("listString: "+listString);
+//                Logger.info("suffix: "+suffix);
+                String[] tok = listString.split(",", -1);
+                ArrayList<String> result = new ArrayList<String>(tok.length);
+                for (String t: tok) {
+                    String inner = prefix+t+suffix;
+//                    Logger.info("inner: "+inner);
+                    result.addAll(expandBashLists(inner));
+                }
+                return result;
+    	    }
     	}
     	if (n == 3) {
         	if (n > 4) {
         		System.err.println("Warning: expanding "+n+" > 3 brackets currently unsupported (line: "+p+"); only considering 2 first");
         	}
+        	int i1 = openBracketInds[0];
+            int i2 = closeBracketInds[0];
     		int i1B = openBracketInds[1];
         	int i2B = closeBracketInds[1];
         	int i1C = openBracketInds[2];
@@ -321,6 +347,8 @@ public final class StringUtils extends CommandLineTests {
         	if (n > 4) {
         		System.err.println("Warning: expanding "+n+" > 3 brackets currently unsupported (line: "+p+"); only considering 2 first");
         	}
+        	int i1 = openBracketInds[0];
+            int i2 = closeBracketInds[0];
     		int i1B = openBracketInds[1];
         	int i2B = closeBracketInds[1];
         	int i1C = openBracketInds[2];
@@ -2203,122 +2231,6 @@ public final class StringUtils extends CommandLineTests {
     public static void main(String[] args) throws Exception {
         StringUtils su = new StringUtils(args);
         su.run();
-
-//    	 String cmd = args[0];
-//         if (cmd.equals("h")) {
-//        	 if (args.length == 1) {
-//        		 try {
-//        			 List<String> lines = IOUtils.readLines(System.in);
-//        			 for (String line: lines) {
-//            			 System.out.println(h(Long.parseLong(line)));
-//            		 }
-//        		 }
-//        		 catch (IOException e) {
-//        			 e.printStackTrace();
-//        		 }
-//        	 }
-//        	 else {
-//        		 System.out.println(h(Integer.parseInt(args[1])));
-//        	 }
-//         }
-//         else if (cmd.equals("testallstringsiterator")) {
-//             testAllStringsIterator();
-//         }
-//         else if (cmd.equals("testformatterasetc")) {
-//             CmdLineArgs cmdLineArgs = new CmdLineArgs(args);
-//             cmdLineArgs.shift();
-//             for (String s: cmdLineArgs.getNonOptArgs()) {
-//                 Long l = Long.parseLong(s);
-//                 System.out.println(formatBytesKilosMegasGigasOrTeras(l));
-//             }
-//         }
-//         else if (cmd.equals("testdoublequotedstrings")) {
-//             testDoubleQuotedStrings(args.);
-//         }
-//         else if (cmd.equals("testfastsplit")) {
-//             testFastSplit();
-//         }
-//         else if (cmd.equals("expandBashList")) {
-//             expandBashListCmdLIne();
-//         }
-//         else if (cmd.equals("formatint")) {
-//             long val = Long.parseLong(args[1]);
-//             System.out.println(formatLargeInteger(val));
-//         }
-//         else if (cmd.equals("dec2hex")) {
-//             long i = Long.parseLong(args[1]);
-//             System.out.println(Long.toHexString(i));
-//         }
-//         else if (cmd.equals("testextractcol")) {
-//             int col = Integer.parseInt(args[1]);
-//             Iterator<String> lineIter = IOUtils.lineIterator(System.in);
-//             while(lineIter.hasNext()) {
-//                 System.out.println(extractCol(lineIter.next(), '\t', col));
-//             }
-//         }
-//         else if (cmd.equals("testescapebacklashes")) {
-//             List<String> data = CollectionUtils.makeList("foobar", "foobar\\", "\"quoted\"", "\\\"complex\\\"");
-//             Logger.info("Escape backlashes:");
-//             for (String s: data) {
-//                 String escaped = escapeBacklashes(s);
-//                 Logger.info("Original: "+s);
-//                 Logger.info("Escaped: "+escaped);
-//             }
-//             Logger.info("");
-//             Logger.info("Escape double quotes:");
-//             for (String s: data) {
-//                 String escaped = escapeDoubleQuotes(s);
-//                 Logger.info("Original: "+s);
-//                 Logger.info("Escaped: "+escaped);
-//             }
-//         }
-//         else if (cmd.equals("testremovesubstring")) {
-//             String s = args[1];
-//             int start = Integer.parseInt(args[2]);
-//             int end = Integer.parseInt(args[3]);
-//             String result = removeSubString(s, start, end);
-//             System.out.println(result);
-//         }
-//         else if (cmd.equals("testuniquename")) {
-//             // Set<String> usedNames = new HashSet(CollectionUtils.makeList("foo", "fooA", "fooB", "fooC", "fooF"));
-//             String prefix = "foo_";
-//             Set<String> usedSuffixes = new LinkedHashSet(CollectionUtils.extractFirst(100, new AllStringsIterator(new ABAlphabet())));
-//             Set<String> usedNames = new LinkedHashSet();
-//             usedNames.add(prefix);
-//             for (String usedSuffix: usedSuffixes) {
-//                 usedNames.add(prefix+usedSuffix);
-//             }
-//             Logger.info("Used names:\n"+StringUtils.collectionToString(usedNames));
-//             String uniqueName = createUniqueName(prefix, usedNames, new AllStringsIterator(new ABAlphabet()));
-//             Logger.info("generated unique name: "+uniqueName);
-//         }
-//         else if (cmd.equals("parselines")) {
-//             int i=0;
-//             for (String line: IOUtils.readLines()) {
-//                 i++;
-//                 Logger.info("Parsed map "+i+":");
-//                 Logger.info(mapToString(parseMapLine(line)));
-//                 Logger.info("");
-//             }
-//         }
-//         else {
-//        	 System.err.println("Illegal command: "+cmd);
-//         }
-        // String original = "a:b:c:d";
-        // String result = replaceNthElement(original, "D", ":", 3);
-        // dbgMsg("result: "+result);
-
-        // String original = "foo.foo.foo";
-        // String result = replaceExtension(original, "bar.bar.bar");
-        // dbgMsg("result: "+result);
-
-        //String[] testStrings = new String[] {"a1", "abc2", "abcwefdfbvw"};
-        // String longestCommonPrefix = longestCommonPrefix(testStrings);
-        // System.out.println("longestCommonPrefix: "+longestCommonPrefix);
-        // testDecimalFormats();
-    	// testOrdinals();
-    	// testMultiMap();
-    	// testH();
     }
 
     private static void testAllStringsIterator() {
@@ -2499,8 +2411,8 @@ public final class StringUtils extends CommandLineTests {
     private static String indentString(int pLevel, int pIndent) {
         return StringUtils.stringMultiply(pLevel*pIndent, " ");
     }
-    
-    
+
+
     /**
      * keywords: printtree, outputtree, print tree, output tree
      */
@@ -2523,13 +2435,13 @@ public final class StringUtils extends CommandLineTests {
             							  StringBuffer buf,
             							  Converter<T, String> nodeFormatter,
             							  Set<T> visitedNodes) {
-    	
+
     	if (visitedNodes.contains(elem)) {
     		throw new RuntimeException("Not a tree: trying to revisit node: "+nodeFormatter.convert(elem));
     	}
-    	
+
     	visitedNodes.add(elem);
-    	
+
         // print element
         buf.append(indentString(level, indent)+nodeFormatter.convert(elem)+"\n");
 
@@ -2538,16 +2450,16 @@ public final class StringUtils extends CommandLineTests {
             formatElement(child, nodeAdapter, level+1, indent, buf, nodeFormatter, visitedNodes);
         }
     }
-    
+
     public static <T> String formatTree(T root,
                                         TreeNodeAdapter<T> nodeAdapter,
                                         int indent,
                                         boolean includeRoot,
                                         Converter<T, String> nodeFormatter) {
         StringBuffer result = new StringBuffer();
-        Set<T> visitedNodes = new HashSet<T>();        
+        Set<T> visitedNodes = new HashSet<T>();
 
-        if (includeRoot) {        	
+        if (includeRoot) {
             formatElement(root,  nodeAdapter, 0, indent, result, nodeFormatter, visitedNodes);
         }
         else {
@@ -2559,7 +2471,7 @@ public final class StringUtils extends CommandLineTests {
 
         return result.toString();
     }
-    
+
 
     /**
      * keywords: printtree, outputtree, print tree, output tree
@@ -2699,7 +2611,7 @@ public final class StringUtils extends CommandLineTests {
             }
         }
     }
-    
+
 
 
     public static List<String> wrapLines(List<String> lines, int maxLen) {

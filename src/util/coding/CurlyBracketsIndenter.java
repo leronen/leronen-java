@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 import util.IOUtils;
 import util.StringUtils;
@@ -15,6 +16,12 @@ import util.StringUtils;
  *   Usage: java util.coding.CurlyBracketIndenter infile > outfile
  */
 public class CurlyBracketsIndenter {
+
+    private final int n_spaces;
+
+    private CurlyBracketsIndenter(int n_spaces) {
+        this.n_spaces = n_spaces;
+    }
 
 	private List<Line> readLines(InputStream is) throws IOException {
 		List<String> rawLines = IOUtils.readLines(is);
@@ -106,8 +113,10 @@ public class CurlyBracketsIndenter {
 
         @Override
         public String toString() {
+            Pattern AND_PATTERN = Pattern.compile("^ *&&.*");
+            Pattern OR_PATTERN = Pattern.compile("^ *\\|\\|.*");
         	String tmp = StringUtils.removeLeadingWhiteSpaces(text);
-        	String indent = StringUtils.stringMultiply(4*indentLevel, " ");
+        	String indent = StringUtils.stringMultiply(n_spaces*indentLevel, " ");
         	if (type == LineType.EMPTY) {
         		return "";
         	}
@@ -117,6 +126,12 @@ public class CurlyBracketsIndenter {
         	else if (type == LineType.COMMENT && text.startsWith(" *")) {
         		return text;
         	}
+            else if (AND_PATTERN.matcher(text).matches()) {
+                return text;
+            }
+            else if (OR_PATTERN.matcher(text).matches()) {
+                return text;
+            }
         	else {
         		return indent+tmp;
         	}
@@ -125,7 +140,14 @@ public class CurlyBracketsIndenter {
 
 
 	public static void main(String[] args) throws Exception {
-		CurlyBracketsIndenter cba = new CurlyBracketsIndenter();
+	    String n_spaces_str = System.getenv("INDENT");
+	    if (n_spaces_str == null) {
+	        n_spaces_str = "4";
+	    }
+
+	    int n_spaces = Integer.parseInt(n_spaces_str);
+
+		CurlyBracketsIndenter cba = new CurlyBracketsIndenter(n_spaces);
 		if (args.length == 0) {
 			cba.run(System.in);
 		}

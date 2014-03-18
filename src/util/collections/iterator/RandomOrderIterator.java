@@ -1,40 +1,49 @@
 package util.collections.iterator;
 
-import util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 
-import java.util.*;
+import util.IOUtils;
+import util.IntDoublePair;
+import util.RandUtils;
 
-public class RandomOrderIterator implements Iterator {    
-    
-    private Iterator mIter;
-    
+public class RandomOrderIterator implements Iterator {
+
+    private final Iterator mIter;
+
     public RandomOrderIterator(Collection pCol) {
         ArrayList list = new ArrayList(pCol);
         Collections.shuffle(list);
-        mIter = list.iterator();            
+        mIter = list.iterator();
     }
-    
+
+    @Override
     public boolean hasNext() {
-        return mIter.hasNext();    
+        return mIter.hasNext();
     }
-            
+
+    @Override
     public Object next() {
-        return mIter.next();    
+        return mIter.next();
     }
-    
+
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }
-    
+
     /** read from stdin, write to stdout */
     public static void main(String[] args) {
-        try {       
+        try {
             if (args.length == 1) {
                 int randSeed = Integer.parseInt(args[0]);
                 System.err.println("Using random seed: "+randSeed);
-                RandUtils.setRandSeed(randSeed);                
+                RandUtils.setRandSeed(randSeed);
             }
-            
+
             String[] lines = IOUtils.readLineArray(System.in);
             int numLines = lines.length;
             IntDoublePair[] ordering = new IntDoublePair[numLines];
@@ -44,12 +53,13 @@ public class RandomOrderIterator implements Iterator {
             Arrays.sort(ordering);
             for (int i=0; i<numLines; i++) {
                 System.out.println(lines[ordering[i].mInt]);
-            }                                    
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
-        }                    
+        }
     }
-        
-    
+
+
 }
+
