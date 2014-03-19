@@ -45,8 +45,6 @@ public class CompileProblemAnnotator {
         public boolean matches(String line) {
             return pattern.matcher(line).matches();
         }
-
-
     }
 
     /** @return first matching type, or null if no matching type */
@@ -88,7 +86,6 @@ public class CompileProblemAnnotator {
                 }
 
                 System.err.println("UNMATCHED LINE: "+problemFile);
-
             }
         }
         return problems;
@@ -113,7 +110,6 @@ public class CompileProblemAnnotator {
                 errorsByKey.put(problem.key, (Error)problem);
             }
         }
-        log("Stored "+warningsByKey.size()+" keys to warningsByKey");
 
         warningsByFile = new MultiMap<>();
         for (Key key: warningsByKey.keySet()) {
@@ -159,17 +155,12 @@ public class CompileProblemAnnotator {
 
     private void run() throws IOException {
         Set<String> problematicFiles = problematicFiles();
-        log("Running (there are "+problematicFiles.size()+" problematic files");
+        log("Running with "+problematicFiles.size()+" problematic files...");
         for (String file: problematicFiles()) {
             List<Line> lines = readLines(file);
             fixLines(lines);
             String content = StringUtils.collectionToString(lines, "\n", new LineFormatter());
-            System.out.println(content);
-            // IOUtils.writeToFile(new File(file), content);
-//            for (Line line: lines) {
-//                System.out.println(line);
-//            }
-            // Set<Warning> fileWarnings = warningsByFile.get(file);
+            IOUtils.writeToFile(file, content);
         }
         log("There were problems in following files:\n\t"+StringUtils.collectionToString(problematicFiles, "\n\t"));
     }
@@ -181,18 +172,9 @@ public class CompileProblemAnnotator {
     }
 
     private static class Key extends Pair<String,Integer> {
-//        public String getFile() {
-//            return getObj1();
-//        }
-//
-//        public Integer getLine() {
-//            return getObj2();
-//        }
-
         Key(String file, int line) {
             super(file, line);
         }
-
     }
 
     private static class Problem {
@@ -268,14 +250,6 @@ public class CompileProblemAnnotator {
         }
     }
 
-//    private boolean hasWarning(String file, int line) {
-//        if (linesWithWarningByFile.get(file).contains(line)) {
-//            return true;
-//        }
-//        else {
-//            return false;
-//        }
-//    }
 
     private static String removeWarningSuffix(String original) {
         int warningBegin = original.indexOf(WARNING_SUFFIX);
@@ -299,8 +273,6 @@ public class CompileProblemAnnotator {
 
     /** read lines of code */
     private List<Line> readLines(String file) throws IOException {
-
-        System.err.println("Reading warnings for file: "+file);
 
         List<String> rawLines = IOUtils.readLines(file);
         List<Line> lines = new ArrayList<Line>(rawLines.size());
@@ -373,8 +345,6 @@ public class CompileProblemAnnotator {
                     + errorText + ", warning=" + warning + ", error=" + error
                     + ", file=" + file + "]";
         }
-
-
     }
 
     private enum LineType {
