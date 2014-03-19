@@ -316,7 +316,7 @@ public class CompileProblemAnnotator {
             this.text = removeErrorSuffix(this.text);
             this.num = num;
             this.type = type;
-            this.warningText = errorText;
+            this.warningText = warningText;
             this.errorText = errorText;
             this.warning = warning;
             this.error = error;
@@ -331,7 +331,7 @@ public class CompileProblemAnnotator {
                 return text + ERROR_SUFFIX +errorText;
             }
             else if (type == LineType.WARNING) {
-                return text + WARNING_SUFFIX +errorText;
+                return text + WARNING_SUFFIX +warningText;
             }
             else {
                 throw new RuntimeException("FOO");
