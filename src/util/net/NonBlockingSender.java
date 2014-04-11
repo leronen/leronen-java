@@ -21,20 +21,20 @@ public class NonBlockingSender {
     private ILogger log;
     
     /** Special "message" that is used to stop execution of sender thread */ 
-    private static final byte[] POISON = new byte[0];
+    private static final Packet POISON = new Packet(new byte[0], true);
     
     private String name;
     private Listener listener;
     private OutputStream os;    
     private Thread senderThread;    
-    private BlockingQueue<byte[]> messageQueue;
+    private BlockingQueue<Packet> messageQueue;
     private boolean stopped;
     // null if stopped cleanly because of being requested by calling {@link #stop()} 
     private Exception stopCause;
     
     public void setName(String name) {
         this.name = name; 
-    }
+    }       
     
     /** 
      * Listener should only close output stream of socket after receiving a finished notification,
@@ -63,7 +63,7 @@ public class NonBlockingSender {
         this.name = "NonBlockingSender-"+socket.getRemoteSocketAddress();
         this.listener = listener;
         this.stopped = false;        
-        this.messageQueue = new LinkedBlockingQueue<byte[]>();
+        this.messageQueue = new LinkedBlockingQueue<Packet>();
         this.os = socket.getOutputStream();    
                           
         // Create sender and receiver threads responsible for performing the I/O.
@@ -84,23 +84,36 @@ public class NonBlockingSender {
         }
     }
     
+    public synchronized void sendNullByte() throws IOException {
+        byte[] msg = new byte[1];
+        msg[0] = '\0';
+        send(msg);        
+    }
+    
+    /** Send with immediate flushing. See {@link #send(byte[], boolean)} */
+    public synchronized void send(byte[] msg) throws IOException {
+        send(msg, true);
+    }
+    
     /** 
      * Put message to queue of messages to be sent and return immediately
      * (assume queue has unlimited capacity).
+     *
+     * @param flush should a flush be done right after writing this packet (a logical packet boundary)
      * 
      * @throws IOException in the lack of a suitable exception type. In practice, there
      * are two cases: sender thread has already been stopped for some reason,
      * or sender thread was interrupted. In both cases, the cause is stored
      * to the IOException. 
      */
-    public synchronized void send(byte[] msg) throws IOException {
+    public synchronized void send(byte[] msg, boolean flush) throws IOException {
         
         if (stopped) {
             throw new IOException("Sender thread has been stopped", stopCause);
         }
         
         try {
-            messageQueue.put(msg);
+            messageQueue.put(new Packet(msg, flush));
         }
         catch (InterruptedException e) {
             // should not occur
@@ -115,17 +128,21 @@ public class NonBlockingSender {
 
         while (!stopped) {
             try {
-                byte[] msg = messageQueue.take(); // Will block until a message is available.
+                Packet msg = messageQueue.take(); // Will block until a message is available.
                 if (msg == POISON) {
                     dbg("Received stop request");
                     stopped = true;
                     continue;
                 }
                 try {
-                    dbg("Writing a message of "+msg.length+" bytes");
-                    IOUtils.writeBytes(os, msg);
-                    os.flush();
-                    dbg("Wrote "+msg.length+" bytes");
+                    dbg("Writing a message of "+msg.bytes.length+" bytes");
+                    IOUtils.writeBytes(os, msg.bytes);
+                    dbg("Wrote "+msg.bytes.length+" bytes");
+                    if (msg.flush) {
+                        os.flush();
+                        dbg("Flushed outgoing socket");
+                    }
+                    
                 } catch (IOException e) {
                     error("Failed writing, giving up", e);                    
                     stopped = true;
@@ -167,6 +184,14 @@ public class NonBlockingSender {
         }
     }
             
+    private static class Packet {
+        byte[] bytes;
+        boolean flush; // flush only at logical packet boundaries
+        public Packet(byte[] bytes, boolean flush) {            
+            this.bytes = bytes;
+            this.flush = flush;
+        }               
+    }
     
     @SuppressWarnings("unused")
     private void error(String msg) {
