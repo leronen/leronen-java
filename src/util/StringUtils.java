@@ -268,8 +268,8 @@ public final class StringUtils extends CommandLineTests {
     	}
     	if (n == 2) {
     		// 2 pairs of brackets
-    	    //  • case 1: {} {}
-    	    //  • case 2: { { } }
+    	    //    case 1: {} {}
+    	    //    case 2: { { } }
 
     	    if (closeBracketInds[0] < openBracketInds[1]) {
     	         // case 1: 2 consecutive pairs of brackets
@@ -1348,9 +1348,11 @@ public final class StringUtils extends CommandLineTests {
 
     /**
      * In other words, length of longest common prefix-1.
-     *   • -1 if no common characters
-     *   • -1 if collection is empty
-     *   • -1 if empty string is included
+     *   <ul>
+     *     <li> -1 if no common characters
+     *     <li> -1 if collection is empty
+     *     <li> -1 if empty string is included
+     *   </ul>
      */
     public static int indexOfLastCommonChar(Collection<String> pStrings) {
         int minLen = Integer.MAX_VALUE;
