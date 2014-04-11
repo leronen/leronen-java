@@ -2,6 +2,7 @@ package util.coding;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class CompileProblemAnnotator {
     private static final String ERROR_SUFFIX = "// _ERROR_: ";
 
     enum WarningType {
-        IGNORED_SYSTEM_RETURN_VALUE(".*ignoring return value of.*", true);
+        IGNORED_RETURN_VALUE(".*ignoring return value of.*", true);
 
         Pattern pattern;
         boolean fixable;
@@ -132,11 +133,17 @@ public class CompileProblemAnnotator {
         for (Line line: lines) {
             if (line.warning != null && line.warning.isFixable()) {
                 String newText = line.warning.fixLine(line.text);
-                line.text = newText;
-                line.warning = null;
-                line.errorText = null;
-                line.type = LineType.HARMLESS;
-                log("Fixed line: "+line);
+                if (newText != line.text) {
+                    line.text = newText;
+                    line.type = LineType.HARMLESS;
+                    line.warning = null;
+                    line.errorText = null;
+                    log("Fixed line: "+line);
+                    line.type = LineType.HARMLESS;
+                }
+                else {
+                    log("Warning: not able to fix line: "+line);
+                }
             }
         }
     }
@@ -215,12 +222,22 @@ public class CompileProblemAnnotator {
             }
         }
 
+        final List<String> UNSAFE_FUNCTIONS = Arrays.asList("system", "fgets", "ftruncate", "write");
+
         /** Fix a warning (assume fix is doable by replacing the warning-generating line with another */
         private String fixLine(String line) {
-            if (type == WarningType.IGNORED_SYSTEM_RETURN_VALUE) {
-                String tmp = line.replace("bc_unsafe_system", "system"); // unfix first, to avoid multiple "fixes"
-                tmp = tmp.replace("system(", "bc_unsafe_system(");
-                tmp = tmp.replace("system (", "bc_unsafe_system (");
+            if (type == WarningType.IGNORED_RETURN_VALUE) {
+                String tmp = line;
+                // unfix first, to avoid multiple "fixes"
+                for (String f: UNSAFE_FUNCTIONS) {
+                    tmp = tmp.replace("bc_unsafe_"+f, f);
+                }
+
+                // fix, e.g. "system(foo)" => bc_unsafe_system(foo)
+                for (String f: UNSAFE_FUNCTIONS) {
+                    tmp = tmp.replace(f+"(", "bc_unsafe_"+f+"(");
+                    tmp = tmp.replace(f+" (", "bc_unsafe_"+f+" (");
+                }
                 return tmp;
             }
             else {

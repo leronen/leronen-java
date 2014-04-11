@@ -215,7 +215,30 @@ public final class FileUtils {
         return TreeUtils.isDescendant(pPotentialDescendant.getCanonicalFile(), pAncestorDir.getCanonicalFile(), new FileNodeAdapter());
     }
 
-    /** Gets the path of pFile, relative to pAncestorDir. Return empty string if not a descendant. */
+    public static String getPathRelativeTo(String child, String parent) throws IOException {
+        child = new File(child).getAbsolutePath();
+        parent = new File(parent).getAbsolutePath();
+
+        if (child.equals(parent)) {
+            return "";
+        }
+
+        if (!parent.endsWith("/")) {
+            parent += "/";
+        }
+
+        if (child.startsWith(parent)) {
+            return child.substring(parent.length());
+        }
+        else {
+            throw new IOException("Supposed child: "+child+" not a child of supposed parent "+parent);
+        }
+    }
+
+    /** Gets the path of pFile, relative to pAncestorDir. Return empty string if not a descendant.
+     * @deprecated Does not work well for non-existent files
+     */
+    @Deprecated
     public static String getPathRelativeTo(File pFile, File pAncestorDir) throws IOException {
         if (!isDescendant(pFile, pAncestorDir)) {
             // sanity check
@@ -2645,10 +2668,14 @@ public final class FileUtils {
                 }
             }
             else if (cmd.equals(CMD_RELATIVE_PATH)) {
-                File child = new File(args[0]);
-                File parent = new File(args[1]);
-                String relativePath = getPathRelativeTo(child, parent);
-                System.out.println(relativePath);
+                // return empty string if child == parent
+
+                String child = args[0];
+                String parent = (args[1]);
+
+
+                String result = FileUtils.getPathRelativeTo(child, parent);
+                System.out.println(result);
             }
             else {
             	usageAndExit("Illegal command: "+cmd);
