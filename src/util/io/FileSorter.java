@@ -59,17 +59,18 @@ public class FileSorter {
             linePositions[i]=linePositions[i-1]+lineLengths[i-1]+1;
         }
         // pOstream.println("line lengths: "+StringUtils.arrayToString(lineLengths, " "));
-        // pOstream.println("line positions: "+StringUtils.arrayToString(linePositions, " "));        
-        RandomAccessFile file = new RandomAccessFile(fileName, "r");        
-        for(int i=0; i<numLines; i++) {
-            IntDoublePair orderingObject = (IntDoublePair)ordering.get(i);
-            lineNum = orderingObject.mInt;
-            file.seek(linePositions[lineNum]);  
-            byte[] buf = new byte[lineLengths[lineNum]];
-            file.read(buf, 0, lineLengths[lineNum]);            
-            // String s = new String(buf);
-            pOstream.write(buf, 0, buf.length);
-            pOstream.println();             
+        // pOstream.println("line positions: "+StringUtils.arrayToString(linePositions, " "));
+        try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {        
+	        for (int i=0; i<numLines; i++) {
+	            IntDoublePair orderingObject = (IntDoublePair)ordering.get(i);
+	            lineNum = orderingObject.mInt;
+	            file.seek(linePositions[lineNum]);  
+	            byte[] buf = new byte[lineLengths[lineNum]];
+	            file.read(buf, 0, lineLengths[lineNum]);            
+	            // String s = new String(buf);
+	            pOstream.write(buf, 0, buf.length);
+	            pOstream.println();
+	        }
         }
     }
          

@@ -308,8 +308,8 @@ public final class FileUtils {
      *
      * Uses channels, which presumably amounts to an efficient implementation...
      *
-     */
-    public static void copy(File pSrcFile, File pDstFile) throws IOException {
+     */    
+	public static void copy(File pSrcFile, File pDstFile) throws IOException {
         if (Logger.getLogLevel() <= 1) {
             Logger.dbg("Starting FileUtils.copy("+pSrcFile+","+pDstFile);
         }
@@ -336,22 +336,13 @@ public final class FileUtils {
 
         IOException lastException = null;
 
-        while (retry)  {
-            FileChannel srcChannel = null;
-            FileChannel dstChannel = null;
+        while (retry)  {            
 
-            try {
-                dstFile.delete();
-
-                srcChannel = new FileInputStream(pSrcFile).getChannel();
-                dstChannel = new FileOutputStream(dstFile).getChannel();
-
+            try (FileChannel srcChannel = new FileInputStream(pSrcFile).getChannel();
+                 FileChannel dstChannel = new FileOutputStream(dstFile).getChannel()){                
+                
                 // Copy file contents from source to destination
                 dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
-
-                // Close the channels
-                srcChannel.close();
-                dstChannel.close();
 
                 long srcSize = pSrcFile.length();
                 long dstSize = dstFile.length();
@@ -361,35 +352,14 @@ public final class FileUtils {
                     retry = false;
                 }
                 else {
-                    // let's keep the retry flag...
+                    // mismatch in sizes, let's keep the retry flag...
                 }
             }
             catch (IOException e) {
                 // something went wrong; do not clear the retry flag
                 lastException = e;
-
-                // make sure channels are closed
-                if (srcChannel != null) {
-                    try {
-                        srcChannel.close();
-                    }
-                    catch (Exception fe) {
-                        // foo
-                    }
-                }
-                if (dstChannel != null) {
-                    try {
-                        dstChannel.close();
-                    }
-                    catch (Exception fe) {
-                        // foo
-                    }
-                }
             }
-            finally {
-            	if (srcChannel != null) srcChannel.close();
-            	if (dstChannel != null) dstChannel.close();
-            }
+            
 
             if (retry) {
                 if (numRetries < maxNumRetries) {
