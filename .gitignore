@@ -7,3 +7,4 @@ classes/
 leronen.jar.manifest
 .gradle
 bin/
+build/

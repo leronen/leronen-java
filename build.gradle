@@ -1,0 +1,19 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenLocal()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+dependencies {
+    compile files('lib/json.jar', 'lib/json_src.jar')
+}
+
