@@ -12,11 +12,10 @@ import java.lang.reflect.Array;
  *  <pre>
  *  public int hashCode(){
  *     int result = HashUtils.SEED;
- *    //collect the contributions of various fields
- *    result = HashUtils.hash(result, fPrimitive);
- *    result = HashUtils.hash(result, fObject);
- *    result = HashUtils.hash(result, fArray);
- *    return result;
+ *     result = HashUtils.hash(result, fPrimitive);
+ *     result = HashUtils.hash(result, fObject);
+ *     result = HashUtils.hash(result, fArray);
+ *     return result;
  *  }
  * </pre>
  */

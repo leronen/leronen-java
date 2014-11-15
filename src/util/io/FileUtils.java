@@ -111,7 +111,7 @@ public final class FileUtils {
     public static final String CMD_INSERT_LINE_INTO_FILE = "insert_line_into_file";
     public static final String CMD_CONVERTCOL = "convertcol";
     public static final String CMD_MAKE_PLOT = "makeplot"; // plot 2 values from a set of "summary" files ($1 as x, $2 as y)
-    public static final String FORMAT_TABDELIMITED = "format_csv_file"; // tääl
+    public static final String FORMAT_TABDELIMITED = "format_csv_file"; //
 
 
     /**
