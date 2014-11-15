@@ -141,27 +141,27 @@ public class IOUtils {
             return buffer;
         }
     }
-    
-    /** 
-     * Read bytes from an input stream until the first zero byte in encountered, or the given max bytes limit is exceeded. 
+
+    /**
+     * Read bytes from an input stream until the first zero byte in encountered, or the given max bytes limit is exceeded.
      * Read the zero byte as well, but do not include it in the result.
-     * 
+     *
      * @return null, if end of stream has already been reached.
      * @throws UnexpectedEndOfStreamException if some bytes are read, and the end stream ends with a non-zero byte
-     * before any zero bytes are read.  
-     * @throws RuntimeException when maxBytes bytes have already been read and the next byte is not null */     
+     * before any zero bytes are read.
+     * @throws RuntimeException when maxBytes bytes have already been read and the next byte is not null */
     public static byte[] readBytesUntilNull(InputStream is, int maxBytes) throws UnexpectedEndOfStreamException, IOException, TooManyNonNullBytesException {
-        
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int b;        
-        while ( (b=is.read()) > 0 ) {            
+        int b;
+        while ( (b=is.read()) > 0 ) {
             baos.write(b);
             if (baos.size() > maxBytes) {
                 throw new TooManyNonNullBytesException();
             }
-        }        
+        }
 
-        if (b == 0) {        
+        if (b == 0) {
             return baos.toByteArray();
         }
         else if (b == -1) {
@@ -178,7 +178,7 @@ public class IOUtils {
             throw new RuntimeException("foo");
         }
     }
-    
+
     /**
      * Read bytes from an input stream until the first zero byte in encountered.
      * Read the zero byte as well, but do not include it in the result.
@@ -1284,8 +1284,6 @@ public class IOUtils {
         return ConversionUtils.convert(lines, pObjectFactory);
     }
 
-
-
     /** Read lines of a file and convert each line into some object using pObjectFactory */
     public static <T> List<T> readObjects(String pFile, Converter<String, T> pObjectFactory) throws IOException {
         return readObjects(new FileInputStream(pFile), pObjectFactory);
@@ -1560,11 +1558,11 @@ public class IOUtils {
     */
 
 
-    
+
     public static class TooManyNonNullBytesException extends Exception {
-        // 
+        //
     }
-            
+
     public static void main (String[] args) {
         String cmd = args[0];
 

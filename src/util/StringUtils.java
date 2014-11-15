@@ -240,6 +240,7 @@ public final class StringUtils extends CommandLineTests {
 
     /** Expand all lists of style "FOO{foo,bar,baz}BAR" to (FOOfooBAR, FOObarBAR, FOObazBAR). Nested lists not supported! */
     public static List<String> expandBashLists(String p) {
+        System.err.println("expanding: "+p);
     	int [] openBracketInds = findOccurences(p, '{');
     	int [] closeBracketInds = findOccurences(p, '}');
     	if (openBracketInds.length != closeBracketInds.length) {
@@ -1539,7 +1540,7 @@ public final class StringUtils extends CommandLineTests {
         }
     }
 
-    public static <T> String collectionToString(Collection pCol, String pDelim, Converter<T, String> pFormatter) {
+    public static <T> String collectionToString(Collection<T> pCol, String pDelim, Converter<T, String> pFormatter) {
         if (pCol.size()==0) {
             return "";
         }
@@ -2685,6 +2686,34 @@ public final class StringUtils extends CommandLineTests {
             this.numColumnsOnLine = numColumnsOnLine;
             this.numColumnsExpected = numColumnsExpected;
         }
+    }
+
+    public static String indentLines(String multilineString, int numSpaces) {
+        String spaceString = stringMultiply(numSpaces, " ");
+        List<String> tok = Arrays.asList(multilineString.split("\\n", -1));
+        boolean addNewline = false;
+        if (tok.get(tok.size()-1).equals("")) {
+            // terminated with a newline
+            tok = tok.subList(0, tok.size()-1);
+            addNewline = true;
+        }
+
+        StringBuffer buf = new StringBuffer();
+        for (int i=0; i<tok.size(); i++) {
+            String s = tok.get(i);
+            buf.append(spaceString);
+            buf.append(s);
+            if (i < tok.size() -1) {
+                buf.append("\n");
+            }
+        }
+
+        if (addNewline) {
+            buf.append("\n");
+        }
+
+        return buf.toString();
+
     }
 
 

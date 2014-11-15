@@ -2,6 +2,7 @@ package util.io;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -69,7 +70,6 @@ import util.math.UnaryOperator;
 import util.matrix.Row;
 import util.matrix.RowFormatFactory;
 
-
 /**
  * Instead of representing sensible file utils, this has begun to resemble something of a bulvane
  * to Matrixes stored in a file...
@@ -105,6 +105,7 @@ public final class FileUtils {
     public static final String CMD_COUNTCOLS = "countcols";
     public static final String CMD_REMOVECOLS = "removecols";
     public static final String CMD_SET_CLIPBOARD_CONTENTS = "set_clipboard_contents";
+    public static final String CMD_GET_CLIPBOARD_CONTENTS = "get_clipboard_contents";
     public static final String CMD_ENSURECONTAINSLINE = "ensurecontainsline";
     public static final String CMD_REMOVEROWSWITHZEROVALUEINCOLUMN = "removerowswithzerovalueincolumn";
     public static final String CMD_INSERT_LINE_INTO_FILE = "insert_line_into_file";
@@ -1212,6 +1213,13 @@ public final class FileUtils {
                 StringSelection data = new StringSelection(val);
                 Logger.info("Setting clipboard to: "+val);
                 clipboard.setContents(data, null);
+            }
+            else if (cmd.equals(CMD_GET_CLIPBOARD_CONTENTS)) {
+                String data = (String)Toolkit.getDefaultToolkit()
+                                             .getSystemClipboard()
+                                             .getData(DataFlavor.stringFlavor);
+                System.out.println(data);
+
             }
             else if (cmd.equals(CMD_REMOVECOLS)) {
                 // usage: java blahblah removecols <filename> collist
