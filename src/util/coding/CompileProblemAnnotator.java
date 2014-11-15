@@ -179,7 +179,12 @@ public class CompileProblemAnnotator {
     }
 
     private static class Key extends Pair<String,Integer> {
-        Key(String file, int line) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -1067662590645651401L;
+
+		Key(String file, int line) {
             super(file, line);
         }
     }

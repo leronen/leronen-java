@@ -53,7 +53,12 @@ public class SubsetRenderer<T> implements TableCellRenderer {
     }
     
     private class RenderingComponent extends JComponent {
-        public void paintComponent(Graphics g) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4725779467446561967L;
+
+		public void paintComponent(Graphics g) {
             super.paintComponent(g);
             Rectangle bounds = g.getClipBounds();            
             if (mValue instanceof IndexedSubset) {

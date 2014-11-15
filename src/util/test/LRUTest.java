@@ -19,7 +19,12 @@ public class LRUTest {
     private void run() {
         
          cache = new LinkedHashMap(10, 0.75f, true) {                
-            protected boolean removeEldestEntry(Map.Entry eldest) {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = -8902177239743851074L;
+
+			protected boolean removeEldestEntry(Map.Entry eldest) {
                 return size() > LRU_CACHE_SIZE; 
             }
         };

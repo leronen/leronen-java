@@ -35,7 +35,12 @@ import java.util.*;
  */  
 public class Distribution<T> extends HashWeightedSet<T> implements WeightedSet<T> {
             
-    // sum of the original weights; used to normalize weights on demand             
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6666671144178229275L;
+
+	// sum of the original weights; used to normalize weights on demand             
     private double mWeightSum;
     
     // this is a bit vulgar, as really there may be multiple modes...

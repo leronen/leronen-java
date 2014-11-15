@@ -23,7 +23,12 @@ import util.StringUtils;
   */
 public class DefaultPath<T,N extends DefaultNode<T>, E extends AbstractEdge<T, N>> extends ArrayList<E> {
 
-    public DefaultPath() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5840170577524410147L;
+
+	public DefaultPath() {
         super();
     }
     

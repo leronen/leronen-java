@@ -8,7 +8,11 @@ import java.util.*;
 /* An Row is just a ArrayList, with additional informationt(RowFormat) about its "fields */ 
 public class Row extends ArrayList {
           
-    protected RowFormat mFormat;                                                        
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5494915541209070242L;
+	protected RowFormat mFormat;                                                        
     
     /** 
      * Note that altough this is a public constructor, Rows should always be created by a RowFactory. 

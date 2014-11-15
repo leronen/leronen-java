@@ -12,7 +12,11 @@ import java.io.*;
 
 public class RecentObjectsListModel extends AbstractListModel {
     
-    private LinkedList mData;             
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 495277165867945695L;
+	private LinkedList mData;             
     private int mMaxItems;
     
     private File mFile;

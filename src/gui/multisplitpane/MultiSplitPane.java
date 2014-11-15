@@ -45,7 +45,11 @@ import gui.multisplitpane.MultiSplitLayout.Node;
  * @author Hans Muller
  */
 public class MultiSplitPane extends JPanel {
-    private AccessibleContext accessibleContext = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 111479463131103983L;
+	private AccessibleContext accessibleContext = null;
     private boolean continuousLayout = true;
     private DividerPainter dividerPainter = new DefaultDividerPainter();
 
@@ -389,7 +393,12 @@ public class MultiSplitPane extends JPanel {
     }
     
     protected class AccessibleMultiSplitPane extends AccessibleJPanel {
-        public AccessibleRole getAccessibleRole() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -668513244362532332L;
+
+		public AccessibleRole getAccessibleRole() {
             return AccessibleRole.SPLIT_PANE;
         }
     }

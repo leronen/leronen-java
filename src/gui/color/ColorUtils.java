@@ -417,6 +417,11 @@ public class ColorUtils {
     
     
     public class TooManyColorsRequestedException extends Exception {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5069563418007101717L;
         // no specific impl needed
     }
 }

@@ -21,7 +21,11 @@ import java.io.*;
 
 public class SuperGui extends JPanel {
 
-    public static final String FIELD_ID_DIR = "DIR";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7981982170671338225L;
+	public static final String FIELD_ID_DIR = "DIR";
     public static final String FIELD_ID_FILE_NAME_FILTER = "FILE_NAME_FILTER";
     public static final String FIELD_ID_EXPR_TO_REQUIRE = "EXPR_TO_REQUIRE";
     public static final String FIELD_ID_EXPR_TO_EXCUDE = "EXPR_TO_EXCLUDE";

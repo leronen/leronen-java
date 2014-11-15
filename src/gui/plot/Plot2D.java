@@ -6,7 +6,11 @@ import java.awt.*;
 
 public class Plot2D extends Plot {
             
-    protected ColorTable mColorTable;                
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7013865546971410290L;
+	protected ColorTable mColorTable;                
     protected Data2D mData;
     protected int mDataAreaWidth_pixels;
     protected int mDataAreaHeight_pixels;

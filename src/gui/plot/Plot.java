@@ -8,7 +8,12 @@ import java.awt.*;
 
 public abstract class Plot extends JPanel {
 
-    public static final int DEFAULT_PIXELS_CELL = 3;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5500958530784787691L;
+
+	public static final int DEFAULT_PIXELS_CELL = 3;
 
     protected boolean mOpaqueRuler = true; 
     

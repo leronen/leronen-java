@@ -6,7 +6,11 @@ import javax.swing.*;
 
 public class BasicAction extends AbstractAction {
     
-    private String mCommandId;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 510511511693974241L;
+	private String mCommandId;
     private String mMenuId;
     private CommandHandler mDefaultCommandHandler;    
     

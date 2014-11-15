@@ -87,7 +87,12 @@ public class ExceptionUtils {
 
     private static class TestException extends Exception {
         
-        public TestException(String pMsg) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4725785655635527818L;
+
+		public TestException(String pMsg) {
             super(pMsg);
         }
         

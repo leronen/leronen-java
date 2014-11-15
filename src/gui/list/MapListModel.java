@@ -5,7 +5,11 @@ import javax.swing.*;
 import java.util.*;
 
 public final class MapListModel extends AbstractListModel {
-    private ArrayList mKeys;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7676163523009699446L;
+	private ArrayList mKeys;
     private ArrayList mData;
     private Map mDataMap;
     private Map mKeyToIndexMap;

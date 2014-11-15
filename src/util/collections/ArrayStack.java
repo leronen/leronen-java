@@ -4,7 +4,12 @@ import java.util.ArrayList;
 
 public final class ArrayStack<T> extends ArrayList<T> {
 
-    public T peek() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8270977521504665314L;
+
+	public T peek() {
         return get(size()-1);        
     }
     

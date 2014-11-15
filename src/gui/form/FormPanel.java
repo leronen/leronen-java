@@ -17,7 +17,11 @@ import java.util.*;
 
 public class FormPanel extends JPanel {
     
-    private static final int X_PAD = 4;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7043059365474849975L;
+	private static final int X_PAD = 4;
     private static final int Y_PAD = 4;
     
     private FormData mModel;
@@ -430,7 +434,11 @@ public class FormPanel extends JPanel {
     
     private class FileComponent extends JPanel {        
         
-        JButton mBrowseButton;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -3670638054347419090L;
+		JButton mBrowseButton;
         JTextField mPathTextField;
                 
         FileComponent() {

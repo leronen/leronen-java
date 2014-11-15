@@ -2,7 +2,12 @@ package util;
 
 public class RuntimeParseException extends RuntimeException {
 
-    public RuntimeParseException(String pMessage) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 537371708135596905L;
+
+	public RuntimeParseException(String pMessage) {
         super(pMessage);
     }
     

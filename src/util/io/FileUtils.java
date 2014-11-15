@@ -385,6 +385,10 @@ public final class FileUtils {
                     }
                 }
             }
+            finally {
+            	if (srcChannel != null) srcChannel.close();
+            	if (dstChannel != null) dstChannel.close();
+            }
 
             if (retry) {
                 if (numRetries < maxNumRetries) {

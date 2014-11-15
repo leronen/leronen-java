@@ -13,7 +13,11 @@ import javax.swing.table.*;
 
 public class DetailedFileList extends AbstractTableModel implements CellColorCommander, ListDataListener {
     
-    public static final String ID_NAME = "NAME";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3990648399523859895L;
+	public static final String ID_NAME = "NAME";
     public static final String ID_DIR = "DIR";
     public static final String ID_MODIFIED = "MODIFIED";
     public static final String ID_SIZE = "SIZE";    

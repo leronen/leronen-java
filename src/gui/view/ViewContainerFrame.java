@@ -11,7 +11,11 @@ import javax.swing.*;
 
 public class ViewContainerFrame extends JFrame implements ViewContainer {
     
-    private IView mView;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3242755630000904316L;
+	private IView mView;
     private ViewManager mViewManager;
     private boolean mShowInScrollPane;
     private JScrollPane mScrollPane;

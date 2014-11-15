@@ -10,7 +10,11 @@ import java.awt.*;
 
 public class GradientColorPanel extends JComponent {
                                 
-    private static final int DEFAULT_WIDTH = 400;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2403836861932761083L;
+	private static final int DEFAULT_WIDTH = 400;
     private static final int DEFAULT_HEIGHT = 20;
             
     private double mMinVal;

@@ -13,7 +13,13 @@ import util.StringUtils;
  */
 public class IdentityHashedHashset<T> extends HashSet<T> {
     
-    public IdentityHashedHashset() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8094059959181164064L;
+
+
+	public IdentityHashedHashset() {
         super();
     }
     

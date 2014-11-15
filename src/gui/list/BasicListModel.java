@@ -6,7 +6,11 @@ import java.util.*;
 
 public final class BasicListModel<T> extends AbstractListModel {
     
-    private ArrayList<T> mData;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 9169478994475943307L;
+	private ArrayList<T> mData;
     private int mMaxNumLines;
     
     public BasicListModel(int pMaxNumLines) {
