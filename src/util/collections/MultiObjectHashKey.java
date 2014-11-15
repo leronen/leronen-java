@@ -4,7 +4,12 @@ import java.util.*;
 
 public class MultiObjectHashKey extends ArrayList {
 
-    public MultiObjectHashKey(Object pObj1, Object pObj2) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4701574474457096842L;
+
+	public MultiObjectHashKey(Object pObj1, Object pObj2) {
         super(2);
         add(pObj1);
         add(pObj2);

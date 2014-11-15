@@ -25,7 +25,11 @@ import util.dbg.Logger;
 /** Colorable, selectable horizontal list of labels */ 
 public class HorizontalList<T> extends JPanel {
               
-    private Set<T> mSelectedItems;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2455667150959692445L;
+	private Set<T> mSelectedItems;
     private List<JLabel> mLabels;
     private OneToOneBidirectionalMap<JLabel, T> mItemsByLabel;
     private OurMouseListener mMouseListener;

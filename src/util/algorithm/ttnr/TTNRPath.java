@@ -16,7 +16,12 @@ import util.factory.Factory;
   */
 public class TTNRPath<T> extends DefaultPath<T, TTNRNode<T>, TTNREdge<T>> {
 
-    public TTNRPath() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -302234371015649354L;
+
+	public TTNRPath() {
         super();
     }
     

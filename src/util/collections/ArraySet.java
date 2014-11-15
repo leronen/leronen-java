@@ -26,7 +26,11 @@ public class ArraySet<E>
     implements Set<E>
 {
        
-    /** Only allow adding elements when constructing */
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 138297003820300108L;
+	/** Only allow adding elements when constructing */
     boolean addsEnabled = true;
     
     /** The sole constructor to date. */

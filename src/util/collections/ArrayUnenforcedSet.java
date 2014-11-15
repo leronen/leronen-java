@@ -61,7 +61,12 @@ public class ArrayUnenforcedSet<E>
 
     //~ Constructors -----------------------------------------------------------
 
-    public ArrayUnenforcedSet()
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -9012524530424156156L;
+
+	public ArrayUnenforcedSet()
     {
         super();
     }

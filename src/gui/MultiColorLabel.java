@@ -12,7 +12,11 @@ import javax.swing.*;
 
 public class MultiColorLabel extends JLabel {    
     
-    private Distribution mColorDistribution;    
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2475586080275165986L;
+	private Distribution mColorDistribution;    
     private Color mBaseColor;
             
     public MultiColorLabel(Distribution pColorDistribution,

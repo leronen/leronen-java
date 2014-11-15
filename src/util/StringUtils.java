@@ -2404,7 +2404,12 @@ public final class StringUtils extends CommandLineTests {
 
     public static class ABAlphabet extends ArrayList<Character> {
 
-        public ABAlphabet() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -2664917303330764320L;
+
+		public ABAlphabet() {
             super();
             add('A');
             add('B');
@@ -2607,7 +2612,12 @@ public final class StringUtils extends CommandLineTests {
 
     public static class AToZAlphabet extends ArrayList<Character> {
 
-        public AToZAlphabet() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -7804017294279911147L;
+
+		public AToZAlphabet() {
             super();
             for (char c = 'A'; c <= 'Z'; c++) {
                 add(c);

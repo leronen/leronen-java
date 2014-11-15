@@ -14,7 +14,11 @@ import java.util.*;
 /** Häpeällistä: ainoa ei-oma luokka frameworkissa */
 class resizeDimension extends Exception
 {
-    public resizeDimension (int w, int h) { height = h; width = w; }
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3766010627687348488L;
+	public resizeDimension (int w, int h) { height = h; width = w; }
 
     int height;
     int width;

@@ -12,7 +12,12 @@ import util.dbg.Logger;
 /** keywords: statisticmanager, statistic manager */
 public class Statistics extends LinkedHashMap<String, Object> {        
         
-    public Statistics() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2741946785926163066L;
+
+	public Statistics() {
         super();
     }
 

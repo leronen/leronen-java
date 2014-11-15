@@ -31,7 +31,12 @@ public class CharSequenceTableCellRenderer implements TableCellRenderer {
     }
     
     private class RenderingComponent extends JComponent {
-        public void paintComponent(Graphics g) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 8286993826615764848L;
+
+		public void paintComponent(Graphics g) {
             super.paintComponent(g);
             Rectangle bounds = g.getClipBounds();            
             // dbgMsg("Rendering cell, bounds="+bounds);

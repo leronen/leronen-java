@@ -15,6 +15,11 @@ public class TreeWeightedSet<T> extends CustomizableWeightedSet<T>
                              implements WeightedSet<T>, Serializable {                    
         
     
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6668450814852441882L;
+
 	public TreeWeightedSet() {
     	super(new TreeMapFactory(), new TreeSetFactory());
     }

@@ -261,7 +261,12 @@ public final class Log {
     
     private class JTreeWrapper extends JTree {                        
         
-        public JTreeWrapper(DefaultMutableTreeNode pRoot) {            
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 8932532478359192646L;
+
+		public JTreeWrapper(DefaultMutableTreeNode pRoot) {            
             super(pRoot);    
         }                                                                                                      
                         

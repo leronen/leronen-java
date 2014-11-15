@@ -9,7 +9,11 @@ import java.util.*;
 
 public class MapTableModel extends DefaultTableModel {        
 
-    private ArrayList mKeys;        
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6133180562115577777L;
+	private ArrayList mKeys;        
     private LinkedHashMap mMap;
     
     public MapTableModel() {

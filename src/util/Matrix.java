@@ -1810,7 +1810,11 @@ public final class Matrix  {
     
     public class TableModelWrapper extends AbstractTableModel {    
         
-        private HashMap mFieldExtractorsByClass;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1956554341820123258L;
+		private HashMap mFieldExtractorsByClass;
         
         private TableModelWrapper() {
             mFieldExtractorsByClass = new HashMap();

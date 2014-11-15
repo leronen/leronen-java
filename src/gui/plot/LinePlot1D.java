@@ -6,7 +6,12 @@ import java.awt.*;
 
 public final class LinePlot1D extends Plot1D {                    
 
-    public LinePlot1D() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3052459793400251647L;
+
+	public LinePlot1D() {
         super(true);
     }
 

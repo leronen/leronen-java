@@ -22,7 +22,11 @@ import javax.swing.*;
  */
 public final class ListModelAdapter<T> extends AbstractListModel {
     
-    private int mLastNotifiedSize = 0;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3626340239150604897L;
+	private int mLastNotifiedSize = 0;
     private java.util.List<T> mData;    
     
     public ListModelAdapter(List<T> pData) {        

@@ -16,7 +16,11 @@ import util.factory.Factory;
 public class DijkstraPath<T> extends DefaultPath<T, DijkstraNode<T>, WeightedEdge<T,DijkstraNode<T>>> {
 
     
-    public Double mProb; 
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8490584760974931446L;
+	public Double mProb; 
             
     
     public void setProb(double pProb) {

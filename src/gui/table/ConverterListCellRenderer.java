@@ -9,7 +9,11 @@ import util.converter.Converter;
 
 public class ConverterListCellRenderer<T> extends DefaultListCellRenderer {
 
-    private Converter<T,String> mConverter;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4251230711997129055L;
+	private Converter<T,String> mConverter;
     
     public ConverterListCellRenderer(Converter<T,String> pConverter) {
         mConverter = pConverter;

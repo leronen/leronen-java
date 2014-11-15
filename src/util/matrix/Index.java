@@ -5,7 +5,12 @@ import util.collections.*;
 /** implemented as row-col pair */
 public final class Index extends Pair {    
                     
-    public Index(int pRow, int pCol) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2426186522721191788L;
+
+	public Index(int pRow, int pCol) {
         super(new Integer(pRow), new Integer(pCol));        
     }  
 

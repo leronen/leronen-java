@@ -15,6 +15,11 @@ import java.io.*;
 public class HashWeightedSet<T> extends CustomizableWeightedSet<T> 
                              implements WeightedSet<T>, Serializable {        
     
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1375460826616281053L;
+
 	public HashWeightedSet() {
     	super(new HashMapFactory(), new HashSetFactory());
     }

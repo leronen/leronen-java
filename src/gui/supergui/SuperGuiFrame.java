@@ -8,7 +8,11 @@ import javax.swing.*;
 /** The default stand-alone supergui application */
 public class SuperGuiFrame extends JFrame {
         
-    private String TITLE = "Super GUI";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4004345606942770337L;
+	private String TITLE = "Super GUI";
     private Dimension SIZE = new Dimension(1000, 600);
         
     private SuperGui mSuperGui;

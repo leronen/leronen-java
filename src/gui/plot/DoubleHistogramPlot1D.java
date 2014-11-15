@@ -4,7 +4,11 @@ import java.awt.*;
 
 public final class DoubleHistogramPlot1D extends HistogramPlot1D {    
         
-    private Data1D mData2;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3898749391863920727L;
+	private Data1D mData2;
      
     public DoubleHistogramPlot1D() {
         super();

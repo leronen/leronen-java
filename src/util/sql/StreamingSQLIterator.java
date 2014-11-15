@@ -158,7 +158,12 @@ public abstract class StreamingSQLIterator<T> implements Iterator<T> {
      */
     public static class SQLExceptionWrapper extends RuntimeException {
 
-        public SQLExceptionWrapper(SQLException pWrappedException) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 4690036268420774782L;
+
+		public SQLExceptionWrapper(SQLException pWrappedException) {
             super (pWrappedException);
         }
     }

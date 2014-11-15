@@ -103,6 +103,11 @@ public class TopologicalSort {
     }
     
     public static class CycleExistsException extends Exception {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -3802983864763338934L;
         
     }
     

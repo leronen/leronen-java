@@ -5,7 +5,11 @@ import util.*;
 
 public class Plot1D extends Plot {
 
-    protected static final Color COLOR_DATA_BACKGROUND = Color.white;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5329142651293464703L;
+	protected static final Color COLOR_DATA_BACKGROUND = Color.white;
     protected static final Color COLOR_DATA_FOREGROUND = Color.blue;    
     protected static final int HEIGHT_DATA_AREA_PIXELS = 400;
 

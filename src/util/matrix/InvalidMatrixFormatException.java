@@ -3,7 +3,12 @@ package util.matrix;
 
 public final class InvalidMatrixFormatException extends RuntimeException {
 
-    public InvalidMatrixFormatException(String pMessage) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2098128771347878826L;
+
+	public InvalidMatrixFormatException(String pMessage) {
         super(pMessage);
     }
     

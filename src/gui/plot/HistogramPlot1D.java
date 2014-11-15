@@ -5,7 +5,12 @@ import java.awt.*;
 
 public class HistogramPlot1D extends Plot1D {                       
 
-    public HistogramPlot1D() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3157725888909190729L;
+
+	public HistogramPlot1D() {
         super(true);
     }
 

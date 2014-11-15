@@ -147,7 +147,12 @@ public class EditDistance {
     
     private static class Match extends Pair<String,Integer> {
         
-        Match(String s, int d) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -7969459669882986987L;
+
+		Match(String s, int d) {
             super(s,d);
         }
         

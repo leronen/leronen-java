@@ -1487,6 +1487,11 @@ public class IOUtils {
     }
 
     public static class UnexpectedEndOfStreamException extends Exception {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1539777211560794878L;
         //
     }
 
@@ -1560,7 +1565,12 @@ public class IOUtils {
 
 
     public static class TooManyNonNullBytesException extends Exception {
-        //
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7560636179338672486L;
+
     }
 
     public static void main (String[] args) {
