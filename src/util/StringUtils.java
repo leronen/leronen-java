@@ -2272,19 +2272,19 @@ public final class StringUtils extends CommandLineTests {
     }
 
     public static String h(long p) {
-    	Formatter formatter = new Formatter(Locale.US);
-
-    	if (p >= 1000000000) {
-    		return formatter.format("%.1fG", (double)p/1000000000).toString();
-    	}
-    	else if (p >= 1000000) {
-    		return formatter.format("%.1fM", (double)p/1000000).toString();
-    	}
-    	else if (p >= 1000) {
-    		return formatter.format("%.1fk", (double)p/1000).toString();
-    	}
-    	else {
-    		return ""+p;
+    	try (Formatter formatter = new Formatter(Locale.US)) {
+	    	if (p >= 1000000000) {
+	    		return formatter.format("%.1fG", (double)p/1000000000).toString();
+	    	}
+	    	else if (p >= 1000000) {
+	    		return formatter.format("%.1fM", (double)p/1000000).toString();
+	    	}
+	    	else if (p >= 1000) {
+	    		return formatter.format("%.1fk", (double)p/1000).toString();
+	    	}
+	    	else {
+	    		return ""+p;
+	    	}    	
     	}
     }
 

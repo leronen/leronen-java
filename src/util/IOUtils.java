@@ -722,18 +722,18 @@ public class IOUtils {
     }
 
     public static boolean hasAtMostNLines(File pFile, int pN) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(pFile));
-        int count = 0;
-        while (count <= pN) {
-            String line = reader.readLine();
-            if (line == null) {
-                return true;
-            }
-            count++;
+        try (BufferedReader reader = new BufferedReader(new FileReader(pFile))) {
+	        int count = 0;
+	        while (count <= pN) {
+	            String line = reader.readLine();
+	            if (line == null) {
+	                return true;
+	            }
+	            count++;
+	        }	        
+	        // OK, count should be > n...
+	        return false;
         }
-        reader.close();
-        // OK, count should be > n...
-        return false;
 
     }
 
