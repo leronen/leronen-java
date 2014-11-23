@@ -1,8 +1,12 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+
+group = 'leronen'
+version = '1.0'
 
 repositories {
     mavenCentral()
@@ -23,8 +27,29 @@ eclipse {
     }
 }
 
-
 dependencies {
     compile 'org.json:json:20140107'
+    compile 'org.docopt:docopt:0.6.0-SNAPSHOT'
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+// generate dependencies to file "deps"
+task deps << {
+    def home = project.gradle.startParameter.gradleHomeDir
+
+    File depsfile = new File("dependencies")
+
+    project.configurations.runtime.files.findAll { f ->
+        !f.absolutePath.startsWith(home.absolutePath)
+    }.each {        
+        println it
+        depsfile << ("${it}\n")
+    }
+}
