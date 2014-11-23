@@ -9,3 +9,4 @@ leronen.jar.manifest
 .gradle/
 bin/
 build/
+dependencies
