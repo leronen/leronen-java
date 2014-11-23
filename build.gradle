@@ -25,6 +25,6 @@ eclipse {
 
 
 dependencies {
-    compile 'org.json:json:20140107'   
+    compile 'org.json:json:20140107'
 }
 
