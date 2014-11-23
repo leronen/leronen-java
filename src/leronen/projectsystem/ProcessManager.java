@@ -67,7 +67,9 @@ public class ProcessManager {
 		}
 	}
 	
-	public static class Process extends HashMap<String, String> {
+	public static class Process extends HashMap<String, String> {		
+		private static final long serialVersionUID = 8367217052905941487L;
+		
 		List<Process> children = new ArrayList<Process>();
 		
 		public Process(Map<String, String> data)  {
