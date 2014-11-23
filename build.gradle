@@ -17,6 +17,13 @@ sourceSets {
     }
 }
 
+eclipse {
+    classpath {
+        defaultOutputDir = file('classes')
+    }
+}
+
+
 dependencies {
     compile 'org.json:json:20140107'
 }
