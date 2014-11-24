@@ -1,7 +1,5 @@
 package util;
 
-
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -45,10 +43,7 @@ import util.converter.Converter;
 import util.converter.ObjectToStringConverter;
 import util.dbg.Logger;
 
-
-
 public final class StringUtils extends CommandLineTests {
-
 
     public static final String CMD_H = "h";
     public static final String CMD_TESTALLSTRINGSITERATOR = "testallstringsiterator";
@@ -95,8 +90,6 @@ public final class StringUtils extends CommandLineTests {
     public StringUtils(String[] args) {
         super(args);
     }
-
-
 
     @Override
     public void run(String cmd) throws Exception {
