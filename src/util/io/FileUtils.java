@@ -321,7 +321,6 @@ public final class FileUtils {
             throw new FileNotFoundException(pSrcFile.getPath());
         }
 
-        // jihuu, we have a brand new implementation!
         File dstFile;
 
         if (pDstFile.isDirectory()) {

@@ -8,24 +8,24 @@ import java.util.regex.*;
 
 public final class ReflectionUtils {
 
-   /** 
+	/** 
     * @return a list containing all objects obj in pCollection that for which 
     * expression (obj instaceof pClass) returns true.
     */
-    public static List extractObjectsOfClass(Class pClass, Collection pCollection) {
-        ArrayList result = new ArrayList();
-        Iterator i = pCollection.iterator();
+    public static <T> List<T> extractObjectsOfClass(Class<T> pClass, Collection<?> pCollection) {
+        ArrayList<T> result = new ArrayList<>();
+        Iterator<?> i = pCollection.iterator();
         while (i.hasNext()) {
             Object o = i.next();
             if (pClass.isInstance(o)) {
-                result.add(o);
+                result.add((T)o);
             }
         }
         return result;
     }
                                              
     /** return the set of all classses in the collection */
-    public static Class[] getClassesOfContainedObjects(Collection pCollection) {
+    public static Class[] getClassesOfContainedObjects(Collection<Object> pCollection) {
         Set classes = new HashSet();
         Iterator i = pCollection.iterator();
         while (i.hasNext()) {
@@ -85,15 +85,15 @@ public final class ReflectionUtils {
         }        
     }
         
-    public static Class[] getSuperClasses(Class pClass) {
-        Class currentClass = pClass;
-        ArrayList allClasses = new ArrayList();
+    public static <T> Class<? super T>[] getSuperClasses(Class<T> pClass) {
+        Class<? super T> currentClass = pClass;
+        ArrayList<Class<? super T>> allClasses = new ArrayList<>();
         while(currentClass !=null) {
             allClasses.add(currentClass);
             currentClass=currentClass.getSuperclass();
         }
         return (Class[])allClasses.toArray(new Class[allClasses.size()]);        
-    }    
+    }        
                     
     /** here "superclass" includes also the class itself */                    
     public static boolean isSuperClassForAll(Class pSuperClassCandidate, Class[] pSubClassCandidates) {
