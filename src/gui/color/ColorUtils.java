@@ -208,9 +208,9 @@ public class ColorUtils {
 
     public static List<Color> getForbiddenColors() {
         ArrayList result = new ArrayList(ReflectionUtils.getPublicStaticFieldsWithPrefix(ColorUtils.class, "DARK", true).values());
-        result.add(DARK_BLUE);
-        result.add(DARK_PURPLE);
-        result.add(DARK_BROWN);
+        result.add(BLUE);
+        result.add(GRAY);
+        result.add(BROWN);
         return result;
     }
 
