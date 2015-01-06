@@ -8,9 +8,7 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 
-
-
-/** Todo: this class contains inconsistent parsing/formatting schaiBe */
+/** TODO: this class contains inconsistent parsing/formatting schaiBe */
 public class DateUtils {
 
     public static final Calendar CALENDAR = Calendar.getInstance();
@@ -34,6 +32,7 @@ public class DateUtils {
     public static final SimpleDateFormat NON_WHITE_SPACE_DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
     public static final SimpleDateFormat DATE_FORMAT_1 = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
     public static final SimpleDateFormat DATE_FORMAT_2 = new SimpleDateFormat("MMM dd, yyyy KK:mm:ss aa");
+    public static final SimpleDateFormat ORDERABLE_TIME_OF_DAY = new SimpleDateFormat("HH:mm:ss");
 
     private static final int[] COMMON_FIELDS = {
         Calendar.YEAR,
@@ -117,6 +116,23 @@ public class DateUtils {
        String suffix = ""+(cal.get(Calendar.HOUR_OF_DAY)-21)+":"+cal.get(Calendar.MINUTE)+":"+cal.get(Calendar.SECOND);
        return prefix+"_"+suffix+" BMZ";
    }
+   
+   private static final int AB0 = 2008; 
+   
+   public static String formatABDateTime() {	   
+       Calendar cal = Calendar.getInstance();       
+       int abYear = cal.get(Calendar.YEAR) - AB0;
+       int month = cal.get(Calendar.MONTH) + 1;
+       int day = cal.get(Calendar.DAY_OF_MONTH);
+       String datePart = "" + StringUtils.formatFixedWidthLong(abYear,4) + "AB" + "-" + 
+                              StringUtils.formatFixedWidthLong(month, 2) + "-" + 
+                              StringUtils.formatFixedWidthLong(day, 2);
+       // String timePart = "foo"; //TIME_FORMAT.format(cal);
+       String timePart = ORDERABLE_TIME_OF_DAY.format(new Date(System.currentTimeMillis()));
+       // String timePart = "" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE) + ":" + cal.get(Calendar.SECOND);
+       // String timePart = "" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE) + ":" + cal.get(Calendar.SECOND);       
+       return datePart+"_"+timePart;
+   }
     
     /* Format with {@link #NON_WHITE_SPACE_DATE_FORMAT} (at the time of last checking,
     * that was just yyyy_MM_dd_HH_mm_ss
@@ -189,6 +205,10 @@ public class DateUtils {
     public static String formatOrderableDate_no_time_of_day() {
         return formatOrderableDate_no_time_of_day(System.currentTimeMillis());
     }
+    
+
+        
+    
     
     /**
      * Format with {@link #ORDERABLE_DATE_FORMAT} (at the time of last checking,

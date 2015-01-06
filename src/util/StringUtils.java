@@ -1672,7 +1672,7 @@ public final class StringUtils extends CommandLineTests {
         if (len>=pLen) {
             return tmp;
         }
-        int lendiff = pLen-len;
+        int lendiff = pLen-len;        
         return stringMultiply(lendiff, "0")+tmp;
     }
 

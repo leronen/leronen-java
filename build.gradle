@@ -36,7 +36,6 @@ jar {
     from sourceSets.main.allSource
 }
 
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
