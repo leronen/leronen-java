@@ -1,10 +1,24 @@
 package util;
 
-import util.collections.*;
-import util.converter.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.util.*;
-import java.io.*;
+import util.collections.Distribution;
+import util.collections.MultiMap;
+import util.collections.Pair;
+import util.converter.Converter;
+import util.converter.IdentityConverter;
+import util.converter.ObjectToStringConverter;
 
 /** Todo: rename to ConvUtils */
 public final class ConversionUtils  {                                       
@@ -717,6 +731,16 @@ public final class ConversionUtils  {
     
     public static List objectListToStringList(List pObjs) {
         return ConversionUtils.convert(pObjs, new ObjectToStringConverter());                            
+    }
+
+
+    /** Constructs a new arraylist */
+    public static List<Integer> toList(int[] pArr) {
+        ArrayList<Integer> result = new ArrayList<Integer>(pArr.length);
+        for (int i: pArr) {
+            result.add(i);
+        }
+        return result;
     }
     
     public static char[] characterCollectionToCharArray(Collection pCol) {

@@ -48,6 +48,7 @@ import util.Matrix;
 import util.RandUtils;
 import util.Range;
 import util.ReflectionUtils;
+import util.Relation;
 import util.SU;
 import util.StringUtils;
 import util.Utils;
@@ -90,6 +91,7 @@ public final class FileUtils {
     public static final String CMD_REMOVE_LONGEST_COMMON_SUFFIX = "removelongestcommonsuffix";
     public static final String CMD_LONGEST_COMMON_SUFFIX = "longestcommonsuffix";
     public static final String CMD_COUNTROWS = "countrows";
+    public static final String CMD_CONVERT = "convert";
     public static final String CMD_CAT = "cat";
     public static final String CMD_COMPARE_SETS = "compare-sets";
     public static final String CMD_DB2_POSTPROCESS = "db2-postprocess";
@@ -103,16 +105,16 @@ public final class FileUtils {
     /** Sort cols of of each row separately */
     public static final String CMD_SORT_ROWS_ROWWISE = "sortcols_rowwise";
     public static final String CMD_COUNTCOLS = "countcols";
+    public static final String CMD_COLLAPSE = "collapse";
     public static final String CMD_REMOVECOLS = "removecols";
     public static final String CMD_SET_CLIPBOARD_CONTENTS = "set_clipboard_contents";
     public static final String CMD_GET_CLIPBOARD_CONTENTS = "get_clipboard_contents";
     public static final String CMD_ENSURECONTAINSLINE = "ensurecontainsline";
     public static final String CMD_REMOVEROWSWITHZEROVALUEINCOLUMN = "removerowswithzerovalueincolumn";
     public static final String CMD_INSERT_LINE_INTO_FILE = "insert_line_into_file";
-    public static final String CMD_CONVERTCOL = "convertcol";
+    public static final String CMD_CONVERTCOL = "convertcol";    
     public static final String CMD_MAKE_PLOT = "makeplot"; // plot 2 values from a set of "summary" files ($1 as x, $2 as y)
     public static final String FORMAT_TABDELIMITED = "format_csv_file"; //
-
 
     /**
      * Convert a col $2 of a file $1 in-place, according to a mapping specified
@@ -1204,6 +1206,31 @@ public final class FileUtils {
                 removeCols(colList, new File(fileName), includesHeader);
                 Logger.endSubSection("removeCols");
             }
+            else if (cmd.equals(CMD_COLLAPSE)) {
+                // consider col1 as key. collapse values in column 2 to a single row, so that there will be one row / key
+                String file = argParser.shift();
+                Relation relation = IOUtils.readRelation(file, null);
+                MultiMap<String, String> multiMap = new MultiMap<>();
+                for (int i=0; i<relation.getNumRows(); i++) {
+                    String key = relation.get(i, 0);
+                    String value = relation.get(i, 1);
+                    multiMap.put(key, value);
+                }
+                
+                for (String key: multiMap.keySet()) {
+                    Set<String> values = multiMap.get(key);
+                    System.out.println(key + "\t" + StringUtils.collectionToString(values, "\t"));
+                }
+                
+            }
+            else if (cmd.equals(CMD_CONVERT)) {
+                // usage: java blahblah convert <converterclassname>
+                String converterClassName = argParser.shift("converterclassname");
+                Converter<String,String> converter = (Converter<String,String>)ReflectionUtils.createInstance(converterClassName);
+                for (String line: IOUtils.readLines()) {                    
+                    System.out.println(converter.convert(line));
+                }
+            }
             else if (cmd.equals(CMD_CONVERTCOL)) {
                 // usage: java blahblah convertcol <filename> <colind> <converterclassname>
                 String fileName = argParser.shift("filename");
@@ -1337,7 +1364,7 @@ public final class FileUtils {
             	}
                 List<List<String>> rows = IOUtils.readTable2(System.in, sep);
                 String formatted = StringUtils.formatTable(rows, "");
-                System.out.println(formatted);
+                System.out.print(formatted);
             }
             else if (cmd.equals(CMD_NO_OP2)) {
                 Matrix original = new Matrix(true);
@@ -1354,7 +1381,7 @@ public final class FileUtils {
                 // usage: java blahblah removecols <filename> collist
                 String fileName = argParser.shift("filename");
                 System.out.println(""+countCols(new File(fileName)));
-            }
+            }            
             else if (cmd.equals(CMD_REMOVELASTCOLS)) {
                 // usage: java blahblah removelastcols <filename> <numcols>
                 String fileName = argParser.shift("fileName");
@@ -2778,7 +2805,6 @@ public final class FileUtils {
                 System.out.println(rep+": "+items.size()+" items");
             }
         }
-
     }
 
     private static void usageAndExit(String pErrMsg) {

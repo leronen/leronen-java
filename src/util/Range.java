@@ -26,7 +26,8 @@ public class Range {
     public boolean isNull;
 
     private BitSet mAsBitset;
-
+    
+    
     /** Note that in pStringRep, the last index is inclusive, while in our internal rep it is not! */
     public Range(String pStringRep) throws java.text.ParseException {
 
@@ -302,6 +303,19 @@ public class Range {
         return result;
     }
 
+    public List<Integer> asIntegerList() {
+        return ConversionUtils.toList(asIntArr());
+    }
+    
+    /** Constructs a new arraylist */
+    public static List<Integer> toList(int[] pArr) {
+        ArrayList<Integer> result = new ArrayList<Integer>(pArr.length);
+        for (int i: pArr) {
+            result.add(i);
+        }
+        return result;
+    }
+    
     /** Compares patters by their lengths */
     public static class LengthComparator implements Comparator {
         @Override
@@ -314,5 +328,7 @@ public class Range {
             return  r1.length()-r2.length();
         }
     }
+    
+    
 
 }

@@ -12,11 +12,19 @@ public class RegExTester {
     public static void main (String[] args) throws Exception {
         // test1(args);
         // test2(args);
-    	// test3(args);
+    	test3(args);
     	// test4(args);
-        test5(args);
+        // test5(args);
+        // test6(args);
     }
 
+    public static void test6(String... args) {
+        String pattern = "foo";
+        for (String arg: args) {            
+            log(arg + ": " + pattern.matches(arg));            
+        }
+    }       
+    
     public static void test3 (String[] args) {
     	String pattern = ".*foo.*";
     	System.out.println("pattern: "+pattern);

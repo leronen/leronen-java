@@ -14,6 +14,7 @@ import util.IOUtils;
 import util.StringUtils;
 import util.dbg.Logger;
 
+/** Lauri's version of tools for executing executables. Originates from my tried and tested previous libraries */
 public class ProcessUtils {
 
     private static int sExecCount = 0;
@@ -32,11 +33,7 @@ public class ProcessUtils {
         executeCommand_nowait(//"rxvt -e "+
                               pEditor+" "+pFile.getPath(), null, pProcessOwner);
     }
-
-    public static String[] fortune() throws IOException {
-    	ProcessOutput output = executeCommand("fortune", null, null);
-    	return output.stdoutlines;
-    }
+    
 
     public static Process executeCommand_nowait(String pCommand, String pDir, ProcessOwner pProcessOwner) throws IOException {
         File dir = null;

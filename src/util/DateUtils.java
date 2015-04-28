@@ -1,12 +1,22 @@
 package util;
 
-import util.dbg.*;
-
 import java.io.IOException;
-import java.text.*;
+import java.text.DateFormat;
+import java.text.DateFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.util.*;
-import java.util.regex.*;
+import util.dbg.Logger;
 
 /** TODO: this class contains inconsistent parsing/formatting schaiBe */
 public class DateUtils {
@@ -181,7 +191,7 @@ public class DateUtils {
         String result = pCalendar.get(Calendar.YEAR)+
                         "_"+StringUtils.makePrefixPaddedString(""+(pCalendar.get(Calendar.MONTH)+1),2,'0')+
                         "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.DAY_OF_MONTH),2,'0')+
-                        "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.HOUR),2,'0')+
+                        "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.HOUR_OF_DAY),2,'0')+
                         "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.MINUTE),2,'0')+
                         "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.SECOND),2,'0');
         return result;                                                
@@ -292,8 +302,8 @@ public class DateUtils {
     
     public static String formatInterval(List<Date> pDates) {
         Collections.sort(pDates);
-        Date first = (Date)pDates.get(0);
-        Date last = (Date)pDates.get(pDates.size()-1);
+        Date first = pDates.get(0);
+        Date last = pDates.get(pDates.size()-1);
                 
         if (sameDay(first, last)) {
             // same day            
@@ -364,7 +374,7 @@ public class DateUtils {
         }
         if (tokens.hasNext()) {
             month = tokens.next();
-            calendar.set(Calendar.MONTH, Integer.parseInt(month));
+            calendar.set(Calendar.MONTH, Integer.parseInt(month)-1);
         }
         if (tokens.hasNext()) {
             day = tokens.next();
@@ -372,7 +382,7 @@ public class DateUtils {
         }
         if (tokens.hasNext()) {
             hour = tokens.next();
-            calendar.set(Calendar.HOUR, Integer.parseInt(hour));
+            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hour));
         }
         if (tokens.hasNext()) {
             min = tokens.next();
@@ -452,6 +462,7 @@ public class DateUtils {
     /** Generates current date as yyyy-mm-dd_hh:mm:ss */
     public static class DateGenerator implements StringGenerator {
         
+        @Override
         public String generate() {
             return formatOrderableDate();
         }
@@ -459,6 +470,7 @@ public class DateUtils {
     
     public static class BMZGenerator implements StringGenerator {
         
+        @Override
         public String generate() {
             return formatBmzDate();
         }

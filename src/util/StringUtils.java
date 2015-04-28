@@ -2719,5 +2719,55 @@ public final class StringUtils extends CommandLineTests {
 
     }
 
+    public static <T> String colToStr(Collection<T> col, String delim, Converter<T, String> formatter) {
+        if (col.size()==0) {
+            return "";
+        }
+        else {
+            StringBuffer buf = new StringBuffer();
+            Iterator<T> i = col.iterator();
+            T first = i.next();
+            buf.append(formatter.convert(first));
+            while (i.hasNext()) {
+                T o = i.next();
+                buf.append(delim);
+                buf.append(formatter.convert(o));
+            }
+            return buf.toString();
+        }
+    }
+    
 
+    /** Check if a string represents an integral number representable with java type {@link Integer} */ 
+    public static boolean isInteger(String p) {
+        try {
+            Integer.parseInt(p);
+            return true;
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    /** Check if a string represents an integral number representable with java type {@link Long} */
+    public static boolean isLong(String p) {
+        try {
+            Long.parseLong(p);
+            return true;
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    public static boolean isNumber(String p) {
+        try {
+            Double.parseDouble(p);
+            return true;
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
 }
