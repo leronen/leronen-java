@@ -1350,10 +1350,6 @@ public final class FileUtils {
 
             }
             else if (cmd.equals(CMD_PRETTIFYCOLS)) {
-//                Matrix m = new Matrix(false);
-//                m.readFromStream(System.in);
-//                m.setPrettyPrinting(true);
-//                m.writeToStream(System.out);
             	boolean tabbed = argParser.getBooleanOpt("tabbed", false);
             	String sep;
             	if (tabbed) {
@@ -2019,8 +2015,8 @@ public final class FileUtils {
                     sets.add(set);
                 }
                 List<String> setNames = Arrays.asList(args);
-                setNames = StringUtils.removeLongestCommonPrefix(setNames);
-                setNames = StringUtils.removeLongestCommonSuffix(setNames);
+                setNames = StringUtils.removeLongestCommonPrefix(setNames, 3);
+                setNames = StringUtils.removeLongestCommonSuffix(setNames, 6);
                 compareSets(sets, setNames, outputFiles);
             }
             else if (cmd.equals(CMD_JACCARDDISTANCE)) {

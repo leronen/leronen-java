@@ -18,8 +18,10 @@ import util.collections.Pair;
 import util.converter.Converter;
 
 public class CompileProblemAnnotator {
-    private static final Pattern WARNING_PATTERN = Pattern.compile("^([^:]*):([^:]*):([^:]*): warning: (.*)$");
-    private static final Pattern ERROR_PATTERN = Pattern.compile("^([^:]*):([^:]*):([^:]*): error: (.*)$");
+    private static final Pattern WARNING_PATTERN =        Pattern.compile("^([^:]*):([^:]*):([^:]*): warning: (.*)$");
+    private static final Pattern WARNING_PATTERN_NO_COL = Pattern.compile("^([^:]*):([^:]*): warning: (.*?)$");
+    private static final Pattern ERROR_PATTERN =          Pattern.compile("^([^:]*):([^:]*):([^:]*): error: (.*)$");
+    private static final Pattern ERROR_PATTERN_NO_COL =   Pattern.compile("^([^:]*):([^:]*): error: (.*?)$");
 
     private Map<Key, Warning> warningsByKey;
     MultiMap<String, Warning> warningsByFile;
@@ -74,6 +76,16 @@ public class CompileProblemAnnotator {
                     problems.add(error);
                     continue;
                 }
+                
+                matcher = ERROR_PATTERN_NO_COL.matcher(problemLine);
+                if (matcher.matches()) {
+                    String file = matcher.group(1);
+                    String line  = matcher.group(2);                    
+                    String problemText = matcher.group(3);
+                    Problem error = new Error(file, line, "0", problemText);
+                    problems.add(error);
+                    continue;
+                }
 
                 matcher = WARNING_PATTERN.matcher(problemLine);
                 if (matcher.matches()) {
@@ -85,8 +97,18 @@ public class CompileProblemAnnotator {
                     problems.add(warning);
                     continue;
                 }
-
-                System.err.println("UNMATCHED LINE: "+problemFile);
+                
+                matcher = WARNING_PATTERN_NO_COL.matcher(problemLine);
+                if (matcher.matches()) {
+                    String file = matcher.group(1);
+                    String line  = matcher.group(2);                    
+                    String problemText = matcher.group(3);
+                    Problem warning = new Warning(file, line, "0", problemText);
+                    problems.add(warning);
+                    continue;
+                }
+                
+                System.err.println("UNMATCHED LINE: <" + problemLine + ">");
             }
         }
         return problems;

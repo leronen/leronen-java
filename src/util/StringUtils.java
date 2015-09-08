@@ -1306,23 +1306,43 @@ public final class StringUtils extends CommandLineTests {
     }
 
     public static List<String> removeLongestCommonSuffix(Collection<String> pStrings) {
+        return removeLongestCommonSuffix(pStrings, null);
+    }
+    
+    public static List<String> removeLongestCommonSuffix(Collection<String> pStrings, Integer threshold) {
         String longestCommonSuffix= longestCommonSuffix(pStrings);
-        ArrayList<String> result = new ArrayList(pStrings.size());
-        for (String s: pStrings) {
-            result.add(s.substring(0, s.length()-longestCommonSuffix.length()));
+        if (threshold != null && longestCommonSuffix(pStrings).length() < threshold) {
+            // prefix length below threshold, do not remove
+            return new ArrayList<String>(pStrings);
         }
-        return result;
+        else { 
+            ArrayList<String> result = new ArrayList(pStrings.size());
+            for (String s: pStrings) {
+                result.add(s.substring(0, s.length()-longestCommonSuffix.length()));
+            }
+            return result;
+    }
     }
 
     public static List<String> removeLongestCommonPrefix(Collection<String> pStrings) {
-        String longestCommonPrefix= longestCommonPrefix(pStrings);
-        ArrayList<String> result = new ArrayList(pStrings.size());
-        for (String s: pStrings) {
-            result.add(s.substring(longestCommonPrefix.length()));
-        }
-        return result;
+        return removeLongestCommonPrefix(pStrings, null);
     }
 
+    /** @param threshold if length of longest common prefix is below threshold, do not perform removal */
+    public static List<String> removeLongestCommonPrefix(Collection<String> pStrings, Integer threshold) {
+        String longestCommonPrefix= longestCommonPrefix(pStrings);
+        if (threshold != null && longestCommonPrefix.length() < threshold) {
+            // prefix length below threshold, do not remove
+            return new ArrayList<String>(pStrings);
+        }
+        else {        
+            ArrayList<String> result = new ArrayList<String>(pStrings.size());
+            for (String s: pStrings) {
+                result.add(s.substring(longestCommonPrefix.length()));
+            }
+            return result;
+        }
+    }
 
 //    public static int indexOfLastCommonChar(Collection<String> pStrings) {
 //        List stringLengths = ConversionUtils.convert(pStrings, new StringToStringLenConverter());

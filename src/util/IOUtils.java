@@ -713,7 +713,6 @@ public class IOUtils {
             result.add(Arrays.asList(tokens));
         }
         return result;
-
     }
 
     public static boolean isEmpty(File pFile) {
@@ -1420,6 +1419,11 @@ public class IOUtils {
         public LineIterator(InputStream pStream)  {
             init(pStream, null);
         }
+        
+        /** Caller is responsible for closing the stream once reading is finished */
+        public LineIterator(BufferedReader reader)  {
+            init(reader);
+        }
 
        /**
         * Create a FileInputStream and close it once reading is completed
@@ -1450,6 +1454,23 @@ public class IOUtils {
         }
        
 
+       
+        /**
+         * Caller is responsible for closing the Reader once reading is finished.
+         * Null charset causes default charset to be used
+         */
+         private void init(BufferedReader reader) {
+             mReader = reader;
+             
+             try {
+                 mLine = mReader.readLine();
+             }
+             catch (IOException e) {
+                 mLine = null;
+                 e.printStackTrace();
+                 throw new RuntimeException("Failed reading");
+             }
+         }
         
        /**
         * Caller is responsible for closing the stream once reading is finished.

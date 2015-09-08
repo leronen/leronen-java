@@ -1,13 +1,32 @@
 package util.collections;
 
-import util.*;
-import util.clone.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+
+import util.CollectionUtils;
+import util.SU;
+import util.StringUtils;
+import util.clone.Cloner;
+import util.clone.ShallowCloner;
+import util.clone.StringCloner;
+import util.collections.graph.DirectedGraph;
 import util.collections.graph.IGraph;
-import util.factory.*;
-
-import java.util.*;
-
-import java.io.*;
+import util.collections.graph.defaultimpl.DefaultGraph;
+import util.factory.ArrayUnenforcedSetFactory;
+import util.factory.HashMapFactory;
+import util.factory.HashSetFactory;
+import util.factory.LinkedHashMapFactory;
+import util.factory.LinkedHashSetFactory;
 
 /**
  * A map that may have multiple items with the same key.
@@ -80,6 +99,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
         mToplevelMap = mToplevelMapFactory.makeObject(); // new LinkedHashMap<K,Set<V>>();
     }
     
+    @Override
     public Map toMap() {
     	Map<K,V> result = mToplevelMapFactory.makeObject();
     	
@@ -150,6 +170,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
         return ((double)countNumVals()) / keySet().size();
     }
     
+    @Override
     public void put(K pKey, V pVal) {
         Set<V> set = mToplevelMap.get(pKey);
         if (set==null) {
@@ -160,9 +181,10 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     }
 
     /**
-     * Use putMultiple() (and not this method) to put all values from a set 
+     * Use {@link #putMultiple(Object, Collection)} (and not this method) to put all values from a set 
      * under a single given key 
      */
+    @Override
     public void putAll(Map<K,V> pMap) {
         Iterator<K> keys = pMap.keySet().iterator();
         while(keys.hasNext()) {
@@ -172,6 +194,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
         }            
     }
     
+    @Override
     public void putAll(MultiMap<K,V> pMultiMap) {
         Iterator<K> keys = pMultiMap.keySet().iterator();
         while(keys.hasNext()) {
@@ -181,6 +204,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
         }            
     }
                 
+    @Override
     public void putMultiple(K pKey, Collection<V> pVals) {        
         Iterator<V> vals = pVals.iterator();
         while(vals.hasNext()) {            
@@ -189,6 +213,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
         }            
     }
     
+    @Override
     public boolean containsKey(K pKey) {
         return mToplevelMap.containsKey(pKey);
     }
@@ -227,6 +252,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
      * 
      * 
      */
+    @Override
     public Set<V> get(K pKey) {
         Set<V> set = mToplevelMap.get(pKey);
         if (set==null) {
@@ -246,6 +272,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     }
     
     
+    @Override
     public void updateKey(K pOldKey, K pNewKey) {
     	if (mToplevelMap.containsKey(pNewKey)) {
     		throw new RuntimeException("Already contains key: "+pNewKey);
@@ -265,6 +292,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
      * probably threw a runtimeexception, as get generates an empty set 
      * for a non-existent key!
      */
+    @Override
     public V getSingleton(K pKey) {
          Set<V> vals = mToplevelMap.get(pKey);
         
@@ -295,7 +323,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
         return new MultiMapIterator();
     }
     
-    /** Constructs a new set of pairs from scratch -> no repeated calls, please! */
+    /** Constructs a new set of pairs from scratch =&lt; no repeated calls, please! */
     public Set<Pair<K,V>> entrySet() {
         return CollectionUtils.makeHashSet(entryIterator());
     }
@@ -311,10 +339,12 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
             mValIterator = null;
         }
         
+        @Override
         public boolean hasNext() {
             return mKeyIterator.hasNext() || (mValIterator != null && mValIterator.hasNext());
         }
         
+        @Override
         public Pair<K,V> next() {
             if (mValIterator == null || !(mValIterator.hasNext())) {
                 // no more vals for this key or iteration not initialized
@@ -333,6 +363,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
             return new Pair(mCurrentKey, mValIterator.next());            
         }
         
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -341,11 +372,13 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     
     
     /** Returms (an unmodifiable!) key set */
+    @Override
     public Set<K> keySet() {
         return Collections.unmodifiableSet(mToplevelMap.keySet());    
     }
 
     /** Return an UNMODIFIABLE list of multi val keys */
+    @Override
     public List<K> getMultiValKeys() {
         ArrayList<K> result = new ArrayList<K>();
         Iterator<K> keys = mToplevelMap.keySet().iterator();
@@ -360,6 +393,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     }
             
     /** Sorts each invidual contained set according to pComparator */
+    @Override
     public void sortKeys(Comparator pComparator) {
         LinkedHashMap<K,Set<V>> orderedMap = new LinkedHashMap<K,Set<V>>();
         ArrayList<K> orderedKeys = new ArrayList<K>(mToplevelMap.keySet());
@@ -375,6 +409,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     
     
     /** Sorts each invidual contained set according to pComparator */
+    @Override
     public void sortSets(Comparator pComparator) {
         Iterator<K> keys = mToplevelMap.keySet().iterator();
         while(keys.hasNext()) {
@@ -391,6 +426,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
      * Prunes the set map such that only one entry (hopefully the one that 
      * was inserted first!) per key remains 
      */
+    @Override
     public void prune() {
         LinkedHashMap<K, V> tmpMap = new LinkedHashMap<K,V>();
         Iterator<K> keys = mToplevelMap.keySet().iterator();
@@ -411,15 +447,18 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
      * just do mere clearing of a potentially large set, which might lead
      * to dangling memory!
      */
+    @Override
     public void clear(K pKey) {
         mToplevelMap.remove(pKey);    
     }
     
     /** Uh, seems to be exactly the same as {@link #clear(K)}! */
+    @Override
     public void removeKey(K pKey) {
         mToplevelMap.remove(pKey);                
     }
     
+    @Override
     public void remove(K pKey, V pVal) {
         Set<V> set = mToplevelMap.get(pKey);
         if (set != null) {
@@ -431,11 +470,13 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
         }
     }
     
+    @Override
     public String toString() {        
         return StringUtils.multiMapToString(this);    
     }
         
     /** TODO: this may enable malicious access to the internal data structures */
+    @Override
     public Collection<Set<V>> getValuesAsCollectionOfSets() {
         return mToplevelMap.values();                
     }                
@@ -448,6 +489,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
      * Note that we will have multiple instances of a value in the result,
      * if the same value appears in sets for multiple keys.
      */
+    @Override
     public List<V> values() {
         ArrayList<V> result = new ArrayList<V>();
         Iterator<K> keys = mToplevelMap.keySet().iterator();
@@ -464,6 +506,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     }
     
     /** Creates a deep clone */
+    @Override
     public MultiMap<K,V> createClone(Cloner<K> pKeyCloner, Cloner<V> pValCloner) {
         MultiMap<K,V> clone = new MultiMap<K,V>(mToplevelMapFactory, mSetFactory);                
         
@@ -481,6 +524,7 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     }
     
     /** Creates a shallow clone where keys and attributes are copied by reference*/
+    @Override
     public MultiMap<K,V> createClone() {
         return createClone(new ShallowCloner<K>(), new ShallowCloner<V>());                
     }
@@ -521,14 +565,17 @@ public class MultiMap<K,V> implements IMultiMap<K,V>, Serializable {
     /** Note that this can only be used when the key and value types are same */
     public class GraphWrapper implements IGraph<K> {
         
+        @Override
         public Set<K> followers(K p) {
             return (Set<K>)get(p);
         }
         
+        @Override
         public Set<K> nodes() {
             return mToplevelMap.keySet();
         }
         
+        @Override
         public Set<IPair<K,K>> edges() {
             throw new UnsupportedOperationException();
         }

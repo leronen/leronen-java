@@ -5,11 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
-
 
 import util.CollectionUtils;
 import util.ConversionUtils;
@@ -69,10 +68,12 @@ public class ArrayMap<T> extends AbstractMap<Integer, T> {
         mKeySet = new ArrayIndexSet(pData.length);
     }
     
+    @Override
     public T get(Object pKey) {
         return mData[(Integer)pKey];
     }        
     
+    @Override
     public T put(Integer pKey, T pVal) {
         T oldVal = mData[pKey];
         mData[pKey] = pVal;
@@ -87,18 +88,21 @@ public class ArrayMap<T> extends AbstractMap<Integer, T> {
         throw new UnsupportedOperationException();
     }        
     
+    @Override
     public Set<Integer> keySet() {
         return mKeySet;
     }
 
+    @Override
     public Collection<T> values() {
         return Collections.unmodifiableList(Arrays.asList(mData));
     }
     
     /** 
-     * Constructs a new set of pairs from scratch -> no repeated calls, please! 
+     * Constructs a new set of pairs from scratch -&lt; no repeated calls, please! 
      * Could also use a iterator based set-implementation, without explicitly constructing
      * the entries*/
+    @Override
     public Set<Map.Entry<Integer, T>> entrySet() {
         Logger.error("Inefficient implementation of entrySet being called in class: "+this.getClass());
         throw new RuntimeException();
@@ -113,19 +117,23 @@ public class ArrayMap<T> extends AbstractMap<Integer, T> {
             mKey = pKey;
         }
                                
+        @Override
         public Integer getKey() {
             return mKey;
         }
         
+        @Override
         public T getValue() {
             return mData[mKey];
         }
         
+        @Override
         public boolean equals(Object o) {
             Entry other = (Entry)o;
             return mKey == other.mKey && getValue().equals(other.getValue());                     
         }
         
+        @Override
         public int hashCode() {
             int result = HashUtils.SEED;         
             result = HashUtils.hash(result, mKey);
@@ -133,6 +141,7 @@ public class ArrayMap<T> extends AbstractMap<Integer, T> {
             return result;           
         }
        
+        @Override
         public T setValue(T pVal) {
             T oldVal = mData[mKey];
             mData[mKey] = pVal;
@@ -148,16 +157,19 @@ public class ArrayMap<T> extends AbstractMap<Integer, T> {
             mKeyIterator = mKeySet.iterator();            
         }
         
+        @Override
         public boolean hasNext() {
             return mKeyIterator.hasNext();
         }
         
+        @Override
         public Entry next() {                        
             // val iterator should now have next element for us
             int key = mKeyIterator.next();
             return new Entry(key);            
         }
         
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }        
@@ -198,11 +210,13 @@ public class ArrayMap<T> extends AbstractMap<Integer, T> {
             mComponentClass = pComponentClass;
         }
         
+        @Override
         public ArrayMap makeObject() {
             T[] arr = (T[]) java.lang.reflect.Array.newInstance(mComponentClass, mArrayLength);
             return new ArrayMap<T>(arr);
         }
         
+        @Override
         public ArrayMap makeObject(Integer pSize) {
             T[] arr = (T[]) java.lang.reflect.Array.newInstance(mComponentClass, pSize);
             return new ArrayMap(arr);
