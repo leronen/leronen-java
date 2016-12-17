@@ -876,8 +876,7 @@ public final class CollectionUtils {
 
 
    /**
-    * Extract first pNumToExtract objects.
-    * If there are'nt enough objects, just return all the objects in the collection
+    * Extract first pNumToExtract objects.  If there aren't enough objects, just return all the objects in the collection
     */
     public static <T> List<T> extractFirst(int pNumToExtract, Collection<T> pCol) {
         Iterator<T> objects = pCol.iterator();

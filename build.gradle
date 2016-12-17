@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
+
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -30,6 +31,11 @@ eclipse {
 dependencies {
     compile 'org.json:json:20140107'
     compile 'org.docopt:docopt:0.6.0-SNAPSHOT'
+}
+
+
+jar {
+    from sourceSets.main.allSource
 }
 
 publishing {

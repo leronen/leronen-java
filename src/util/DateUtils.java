@@ -1,16 +1,24 @@
 package util;
 
-import util.dbg.*;
-
 import java.io.IOException;
-import java.text.*;
+import java.text.DateFormat;
+import java.text.DateFormatSymbols;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.util.*;
-import java.util.regex.*;
+import util.dbg.Logger;
 
-
-
-/** Todo: this class contains inconsistent parsing/formatting schaiBe */
+/** TODO: this class contains inconsistent parsing/formatting schaiBe */
 public class DateUtils {
 
     public static final Calendar CALENDAR = Calendar.getInstance();
@@ -34,6 +42,7 @@ public class DateUtils {
     public static final SimpleDateFormat NON_WHITE_SPACE_DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
     public static final SimpleDateFormat DATE_FORMAT_1 = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
     public static final SimpleDateFormat DATE_FORMAT_2 = new SimpleDateFormat("MMM dd, yyyy KK:mm:ss aa");
+    public static final SimpleDateFormat ORDERABLE_TIME_OF_DAY = new SimpleDateFormat("HH:mm:ss");
 
     private static final int[] COMMON_FIELDS = {
         Calendar.YEAR,
@@ -117,6 +126,23 @@ public class DateUtils {
        String suffix = ""+(cal.get(Calendar.HOUR_OF_DAY)-21)+":"+cal.get(Calendar.MINUTE)+":"+cal.get(Calendar.SECOND);
        return prefix+"_"+suffix+" BMZ";
    }
+   
+   private static final int AB0 = 2008; 
+   
+   public static String formatABDateTime() {	   
+       Calendar cal = Calendar.getInstance();       
+       int abYear = cal.get(Calendar.YEAR) - AB0;
+       int month = cal.get(Calendar.MONTH) + 1;
+       int day = cal.get(Calendar.DAY_OF_MONTH);
+       String datePart = "" + StringUtils.formatFixedWidthLong(abYear,4) + "AB" + "-" + 
+                              StringUtils.formatFixedWidthLong(month, 2) + "-" + 
+                              StringUtils.formatFixedWidthLong(day, 2);
+       // String timePart = "foo"; //TIME_FORMAT.format(cal);
+       String timePart = ORDERABLE_TIME_OF_DAY.format(new Date(System.currentTimeMillis()));
+       // String timePart = "" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE) + ":" + cal.get(Calendar.SECOND);
+       // String timePart = "" + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE) + ":" + cal.get(Calendar.SECOND);       
+       return datePart+"_"+timePart;
+   }
     
     /* Format with {@link #NON_WHITE_SPACE_DATE_FORMAT} (at the time of last checking,
     * that was just yyyy_MM_dd_HH_mm_ss
@@ -165,7 +191,7 @@ public class DateUtils {
         String result = pCalendar.get(Calendar.YEAR)+
                         "_"+StringUtils.makePrefixPaddedString(""+(pCalendar.get(Calendar.MONTH)+1),2,'0')+
                         "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.DAY_OF_MONTH),2,'0')+
-                        "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.HOUR),2,'0')+
+                        "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.HOUR_OF_DAY),2,'0')+
                         "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.MINUTE),2,'0')+
                         "_"+StringUtils.makePrefixPaddedString(""+pCalendar.get(Calendar.SECOND),2,'0');
         return result;                                                
@@ -189,6 +215,10 @@ public class DateUtils {
     public static String formatOrderableDate_no_time_of_day() {
         return formatOrderableDate_no_time_of_day(System.currentTimeMillis());
     }
+    
+
+        
+    
     
     /**
      * Format with {@link #ORDERABLE_DATE_FORMAT} (at the time of last checking,
@@ -272,8 +302,8 @@ public class DateUtils {
     
     public static String formatInterval(List<Date> pDates) {
         Collections.sort(pDates);
-        Date first = (Date)pDates.get(0);
-        Date last = (Date)pDates.get(pDates.size()-1);
+        Date first = pDates.get(0);
+        Date last = pDates.get(pDates.size()-1);
                 
         if (sameDay(first, last)) {
             // same day            
@@ -344,7 +374,7 @@ public class DateUtils {
         }
         if (tokens.hasNext()) {
             month = tokens.next();
-            calendar.set(Calendar.MONTH, Integer.parseInt(month));
+            calendar.set(Calendar.MONTH, Integer.parseInt(month)-1);
         }
         if (tokens.hasNext()) {
             day = tokens.next();
@@ -352,7 +382,7 @@ public class DateUtils {
         }
         if (tokens.hasNext()) {
             hour = tokens.next();
-            calendar.set(Calendar.HOUR, Integer.parseInt(hour));
+            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hour));
         }
         if (tokens.hasNext()) {
             min = tokens.next();
@@ -432,6 +462,7 @@ public class DateUtils {
     /** Generates current date as yyyy-mm-dd_hh:mm:ss */
     public static class DateGenerator implements StringGenerator {
         
+        @Override
         public String generate() {
             return formatOrderableDate();
         }
@@ -439,6 +470,7 @@ public class DateUtils {
     
     public static class BMZGenerator implements StringGenerator {
         
+        @Override
         public String generate() {
             return formatBmzDate();
         }

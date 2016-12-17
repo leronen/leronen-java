@@ -1,22 +1,72 @@
 package util;
 
-import gui.application.*;
+import gui.application.DummyApplication;
+import gui.plot.Data2D;
 
-import util.matrix.*;
-import util.dbg.*;
-import util.collections.*;
-import util.condition.*;
-import util.converter.*;
-import util.comparator.*;
-import util.math.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import gui.plot.*;
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
-import java.io.*;
-import java.util.*;
-
-import javax.swing.*;
-import javax.swing.table.*;
+import util.collections.HashMultiSet;
+import util.collections.MultiMap;
+import util.collections.MultiSet;
+import util.collections.Pair;
+import util.collections.SymmetricPair;
+import util.comparator.ByFieldComparator;
+import util.condition.Condition;
+import util.condition.IsIntegerCondition;
+import util.condition.IsNonEmptyStringCondition;
+import util.condition.IsNumericCondition;
+import util.condition.ListCondition;
+import util.converter.AnyToDoubleConverter;
+import util.converter.Converter;
+import util.converter.ConverterChain;
+import util.converter.IndexBasedConverter;
+import util.converter.ListFieldExtractor;
+import util.converter.MapConverter;
+import util.converter.NumberBeautifyingConverter;
+import util.converter.ObjectToStringConverter;
+import util.converter.StringToStringLenConverter;
+import util.dbg.Logger;
+import util.math.BinaryOperator;
+import util.math.MaxOperation;
+import util.math.UnaryOperator;
+import util.math.VectorToScalarOperation;
+import util.matrix.ArrayListRowFactory;
+import util.matrix.ColumnCondition;
+import util.matrix.ColumnIndexSet;
+import util.matrix.FieldId;
+import util.matrix.Index;
+import util.matrix.IndexMapper;
+import util.matrix.IndexSet;
+import util.matrix.InvalidMatrixFormatException;
+import util.matrix.Row;
+import util.matrix.RowFactory;
+import util.matrix.RowFormat;
+import util.matrix.RowFormatFactory;
+import util.matrix.RowIndexSet;
+import util.matrix.TotalIndexSet;
 
 /** 
  * A dense, in-memory, matrix of untyped values 
@@ -341,7 +391,7 @@ public final class Matrix  {
     
     /** Monomaniously fill part of the matrix with a single object */
     public void fill(Object pObj, IndexSet pIndexSet) {                        
-        Iterator indexIter = pIndexSet.iterator();
+        Iterator<?> indexIter = pIndexSet.iterator();
         while(indexIter.hasNext()){
             Index index = (Index)indexIter.next();
             set_row_col(index.getRow(), index.getCol(), pObj);                         
@@ -504,6 +554,7 @@ public final class Matrix  {
     
     public void removeRowsWithZeroValueInColumn(int pCol) {
         Condition isZeroCondition = new Condition() {
+            @Override
             public boolean fulfills(Object pObj) {
                 double val;
                 if (pObj instanceof String) {
@@ -670,7 +721,7 @@ public final class Matrix  {
                 throw new RuntimeException("Col has wrong number of rows!");
             }                           
             for (int i=0; i<mRows.size(); i++) {
-                List row = (List)mRows.get(i);
+                List row = mRows.get(i);
                 Object val = pCol.get(i);
                 if (pHeaderEntry != null && row instanceof Row) {                     
                     ((Row)row).appendField(pHeaderEntry.getName(), val);                                                                                                                                      
@@ -721,7 +772,7 @@ public final class Matrix  {
                 throw new RuntimeException("Col has wrong number of rows!");
             }                           
             for (int i=0; i<mRows.size(); i++) {
-                List row = (List)mRows.get(i);
+                List row = mRows.get(i);
                 Object val = pCol.get(i);
                 if (pHeaderEntry != null && row instanceof Row) {                     
                     ((Row)row).appendField(pHeaderEntry, val);                                                                                                                                      
@@ -740,7 +791,7 @@ public final class Matrix  {
         clone.mRowFormatFactory = mRowFormatFactory;
         
         for (int i=0; i<mRows.size(); i++) {
-            clone.mRows.add(clone.getRowFactory().makeRow((List)mRows.get(i)));
+            clone.mRows.add(clone.getRowFactory().makeRow(mRows.get(i)));
         }            
         clone.mNumCols = mNumCols;                                            
         clone.mName = mName;
@@ -829,7 +880,7 @@ public final class Matrix  {
             for (Object o: objects) {
                Logger.dbg("o: "+o+", class: "+o.getClass());  
             }
-            List numericObjects = (List)CollectionUtils.extractMatchingObjects(objects, new IsNumericCondition());
+            List numericObjects = CollectionUtils.extractMatchingObjects(objects, new IsNumericCondition());
                                 
             // HashSet valSet = new HashSet(numericObjects);             
             // Logger.dbg("valSet:\n"+StringUtils.collectionToString(valSet));
@@ -857,7 +908,7 @@ public final class Matrix  {
             // for (Object o: objects) {
                // Logger.dbg("o: "+o+", class: "+o.getClass());  
             // }
-            List matchingObjects = (List)CollectionUtils.extractMatchingObjects(objects, pCondition);
+            List matchingObjects = CollectionUtils.extractMatchingObjects(objects, pCondition);
                                 
             // HashSet valSet = new HashSet(matchingObjects);             
             // Logger.dbg("valSet:\n"+StringUtils.collectionToString(valSet));
@@ -893,7 +944,7 @@ public final class Matrix  {
             mHeader = mHeader.removeFields(pColInds);            
         }                                                
         for (int i=0; i<mRows.size(); i++) {
-            List oldRow = (ArrayList)mRows.get(i);
+            List oldRow = mRows.get(i);
             ArrayList newValues = new ArrayList(mNumCols);            
             for (int j=0; j<oldRow.size(); j++) { 
                 if (!(pColInds.contains(new Integer(j)))) {
@@ -977,7 +1028,7 @@ public final class Matrix  {
     }
                                    
     public Object get_row_col(int pRow, int pCol) {        
-        return ((List)mRows.get(pRow)).get(pCol);
+        return mRows.get(pRow).get(pCol);
     }
     
     public Object get_row_col(int pRow, String pColName) {        
@@ -985,7 +1036,7 @@ public final class Matrix  {
     }    
     
     public void set_row_col(int pRow, int pCol, Object pVal) {        
-        ((List)mRows.get(pRow)).set(pCol, pVal);
+        mRows.get(pRow).set(pCol, pVal);
     }
 
     public Object get_x_y(int pX, int pY) {
@@ -1099,9 +1150,9 @@ public final class Matrix  {
             return;
         }
         
-        int godGivenLen = ((List)mRows.get(0)).size();
+        int godGivenLen = mRows.get(0).size();
         for (int i=1; i<mRows.size(); i++) {
-            if (((List)mRows.get(i)).size() != godGivenLen) {
+            if (mRows.get(i).size() != godGivenLen) {
                 throw new InvalidMatrixFormatException("Rows 0 and "+i+" cannot agree on the number of cols, abandon ship.\n"+
                                                        "Row 0 (len: "+mRows.get(0).size()+"): "+mRows.get(0)+"\n"+
                                                        "Row "+i+"(len: "+mRows.get(i).size()+"): "+mRows.get(i));
@@ -1163,7 +1214,7 @@ public final class Matrix  {
         String[] lineArray = IOUtils.readLineArray(pStream);
         List<String> lineList = Arrays.asList(lineArray);
         // remove empty lines
-        lineList = (List)CollectionUtils.extractMatchingObjects(lineList, new IsNonEmptyStringCondition());
+        lineList = CollectionUtils.extractMatchingObjects(lineList, new IsNonEmptyStringCondition());
         if (lineList.size()==0) {
             throw new InvalidMatrixFormatException("No lines found in the input stream!");     
         }
@@ -1661,7 +1712,7 @@ public final class Matrix  {
         }           
         
         for (int i=0; i<mRows.size(); i++) {            
-            List row = (List)mRows.get(i);
+            List row = mRows.get(i);
                                     
             for (int j=0; j<row.size(); j++) {
                 if (j>0) {
@@ -1703,7 +1754,7 @@ public final class Matrix  {
         }           
         
         for (int i=0; i<mRows.size(); i++) {            
-            List row = (List)mRows.get(i);
+            List row = mRows.get(i);
                                     
             for (int j=0; j<row.size(); j++) {
                 if (j>0) {
@@ -1726,6 +1777,7 @@ public final class Matrix  {
         }
     }
     
+    @Override
     public String toString() {
         if (mPrettyPrinting) {
             return toString_pretty();
@@ -1825,10 +1877,12 @@ public final class Matrix  {
             mFieldExtractorsByClass.put(pClass, pFieldExtractor);                                 
         }                                                
                     
+        @Override
         public int getRowCount() {
             return getNumRows();
         }
         
+        @Override
         public int getColumnCount() {
             return getNumCols();
         }
@@ -1893,6 +1947,7 @@ public final class Matrix  {
                                            
         }
         
+        @Override
         public Object getValueAt(int row, int column) {
             Object val = get_row_col(row, column);
             if (val != null) {
@@ -1910,6 +1965,7 @@ public final class Matrix  {
             return val;    
         }
         
+        @Override
         public String getColumnName(int column) {
             if (mHeader == null) {
                 // let's hope superclass provides something sensible
@@ -1994,13 +2050,16 @@ public final class Matrix  {
         // this flag is meant to be set only when sorting the matrix
         private boolean mAllowSModifications = false;
         
+        @Override
         public List get(int index) {
             return mRows.get(index);
         }
+        @Override
         public int size() {
             return mRows.size();
         }            
                 
+        @Override
         public List set(int index, List element) {
             if (!mAllowSModifications) {
                 throw new UnsupportedOperationException("List wrapper for Matrix does not support modifications!");
@@ -2021,7 +2080,7 @@ public final class Matrix  {
     }
     
     /** If pComparator == null, try to use natural ordering */
-    public void sortByCol(int pCol, Comparator pComparator) {
+    public void sortByCol(int pCol, Comparator<?> pComparator) {
         // wrap the matrix as a java.util.List
         ListWrapper listWrapper = new ListWrapper();
         // only on this special occasion do we allow modifications through the list wrapper
@@ -2075,32 +2134,39 @@ public final class Matrix  {
             mMin = min();
         }
                                                                                      
+        @Override
         public int getValueAt(int pX, int pY) {
             double val = ConversionUtils.anyToDouble(get_x_y(pX, pY));
             double normalized = MathUtils.normalize(val, mMin, mMax);
             return (int)(255.d*normalized);
         }
             
+        @Override
         public int getMaxVal() {
             return 256;
         }
       
+        @Override
         public int getMinVal() {
             return 0;
         }
         
+        @Override
         public int getNumXIndices() {
             return getNumCols();
         }   
         
+        @Override
         public String getXIndexAt(int pInd) {
             return ""+pInd;
         }
     
+        @Override
         public int getNumYIndices() {
             return getNumRows();
         }   
         
+        @Override
         public String getYIndexAt(int pInd) {
             return ""+pInd;
         }                        

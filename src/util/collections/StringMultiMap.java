@@ -1,9 +1,18 @@
 package util.collections;
 
 
-import java.util.*;
-import util.StringUtils;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import util.IOUtils;
+import util.StringUtils;
 
 /** LinkedHashMap-based multimap. Store single values as Strings, only use sets if more than 1 values... */
 public class StringMultiMap { 
@@ -205,7 +214,7 @@ public class StringMultiMap {
 //        return new MultiMapIterator();
 //    }
     
-    /** Constructs a new set of pairs from scratch -> no repeated calls, please! */
+    /** Constructs a new set of pairs from scratch &lt;-> no repeated calls, please! */
 //    public Set<Pair<K,V>> entrySet() {
 //        return CollectionUtils.makeHashSet(entryIterator());
 //    }
@@ -339,6 +348,7 @@ public class StringMultiMap {
 //    }
     
     /** for debug purposes only (formatting might change abruptly) */
+    @Override
     public String toString() {        
         return StringUtils.toString(this);
     }

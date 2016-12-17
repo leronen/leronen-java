@@ -54,8 +54,8 @@ public class CurlyBracketsIndenter {
 					type = LineType.NORMAL;
 				}
 				else {
-					type = LineType.INVALID;
-					throw new RuntimeException("More than one curly bracket on line "+(i+1)+": "+text);
+					type = LineType.COMMENT;
+					System.err.println("More than one curly bracket on line "+(i+1)+": "+text);
 				}
 			}
 			lines.add(new Line(text, type, i+1));

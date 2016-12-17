@@ -16,14 +16,13 @@ import util.process.ProcessOutput;
 import util.process.ProcessUtils;
 
 public class RecursiveDU {
-	
-	
+
 	private List<String> files;
 	/** limit in bytes to report */
 	private long minsize_kilos;
-		
-	private RecursiveDU(CmdLineArgs2 args) {		
-		
+
+	private RecursiveDU(CmdLineArgs2 args) {
+
 		files = args.getNonOptArgs();
 		if (files.size() == 0) {
 			files = Collections.singletonList(".");
@@ -38,11 +37,11 @@ public class RecursiveDU {
 			minszStr = minszStr.replace("M", "000000");
 			minszStr = minszStr.replace("m", "000000");
 			minszStr = minszStr.replace("K", "000");
-			minszStr = minszStr.replace("k", "000");			
+			minszStr = minszStr.replace("k", "000");
 			long minsize_bytes = Long.parseLong(minszStr);
 			minsize_kilos = minsize_bytes/1000;
-			
-			if (minsize_kilos >= 1000) {				
+
+			if (minsize_kilos >= 1000) {
 				double minsize_megas = minsize_kilos / 1000;
 				if (minsize_megas >= 1000) {
 					// x >= 1G
@@ -62,7 +61,7 @@ public class RecursiveDU {
 		else {
 			minsize_kilos = 10000000;
 			System.err.println("Using default minsize of 10G");
-		}		
+		}
 	}
 
 	private Entry fileToentry(File f, int depth) throws IOException {
@@ -73,14 +72,14 @@ public class RecursiveDU {
 		cmdArr[1] = "-s";
 		cmdArr[2] = ""+f;
 		ProcessOutput output = ProcessUtils.executeCommand(cmdArr);
-		
+
 		if (output.exitValue != 0) {
 			System.err.println("Warning: du failed for file "+f);
 			System.err.println(output.getStdErr());
 			return null;
 		}
 		List<String> outputLines = output.getStdOutAslist();
-				
+
 		for (String line: outputLines) {
 			try {
 				Entry entry = new Entry(line, depth);
@@ -105,22 +104,22 @@ public class RecursiveDU {
 			throw new RuntimeException("More than one entry for file "+f+":"+
 		                               StringUtils.listToString(entries));
 		}
-		
+
 		Entry entry = entries.iterator().next();
-		
+
 		return entry;
 	}
-	
+
 	private void recurse(File f, int depth) throws IOException {
-					
+
 		Entry entry = fileToentry(f, depth);
 		if (entry != null) {
 			recurse(entry);
-		}		
+		}
 	}
-	
+
 	private void recurse(Entry e) throws IOException {
-			
+
 		if (e.size > minsize_kilos) {
 			System.out.println(e);
 			if (e.file.isDirectory()) {
@@ -137,35 +136,36 @@ public class RecursiveDU {
 					recurse(child);
 				}
 			}
-		}																
+		}
 	}
-	
+
 	private void run() throws IOException {
 		for (String f: files) {
 			recurse(new File(f), 0);
-		}				
+		}
 	}
-	
+
 	private class Entry {
-		
+
 		File file;
 		long size;
 		int depth;
-		
-		private static final int SIZELEN = 12; 
-		
+
+		private static final int SIZELEN = 12;
+
 		Entry(String line, int depth) throws IOException  {
 			String[] cols = line.split("\t");
-			this.size = Long.parseLong(cols[0]);			 		
+			this.size = Long.parseLong(cols[0]);
 			this.file = new File(line.replace(cols[0]+"\t", ""));
 			if (!(file.exists())) {
 				throw new IOException("No such file: "+file);
 			}
 			this.depth = depth;
 		}
-		
-		public String toString() {
-			String sizeString = StringUtils.h(size*1000);			
+
+		@Override
+        public String toString() {
+			String sizeString = StringUtils.h(size*1000);
 			int padLen = SIZELEN - sizeString.length();
 			String numPad = StringUtils.stringMultiply(padLen, " ");
 			String indent = StringUtils.stringMultiply(4*depth, " ");
@@ -174,21 +174,22 @@ public class RecursiveDU {
 			return indent+sizeString+numPad+file+" "+lastModified;
 		}
 	}
-		
+
 	private class LengthComparator extends ByFieldComparator<Entry> {
 		private LengthComparator() {
 			super(new LengthExtractor());
 		}
 	}
-	
+
 	private class LengthExtractor implements Converter<Entry, Long> {
-		public Long convert(Entry e) {
+		@Override
+        public Long convert(Entry e) {
 			return e.size;
 		}
 	}
-	
+
 	public static void main(String[] pArgs) throws Exception {
-		// ArgsDef def = new ArgsDef();		
+		// ArgsDef def = new ArgsDef();
 		CmdLineArgs2 args = new CmdLineArgs2(pArgs);
 		RecursiveDU du = new RecursiveDU(args);
 		du.run();

@@ -1,6 +1,9 @@
 package util.collections.iterator;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import util.collections.SymmetricPair;
 import util.collections.Triple;
@@ -11,16 +14,14 @@ import util.collections.Triple;
  */
 public class CompositeIterator<T> implements Iterator<T> {
     
-    private List<Iterator<T>> mIterators;
-    private int mCurrentIndex;            
-    private Iterator<T> mCurrentIterator;
-        
-    // int mNumObjectsIterated = 0;
-                        
+    private List<Iterator<T>> iterators;
+    private int currentIndex;            
+    private Iterator<T> currentIterator;
+                               
     public CompositeIterator(List<Iterator<T>> pIterators) {
-        mCurrentIndex = 0;
-        mIterators = pIterators;
-        mCurrentIterator = pIterators.size() > 0 ? (Iterator)pIterators.get(0) : Collections.EMPTY_LIST.iterator();
+        currentIndex = 0;
+        this.iterators = pIterators;
+        currentIterator = iterators.size() > 0 ? iterators.get(0) : Collections.EMPTY_LIST.iterator();
         proceedToNextIteratorIfNeeded();
     }        
 
@@ -33,35 +34,38 @@ public class CompositeIterator<T> implements Iterator<T> {
     }                
                                     
     private void proceedToNextIteratorIfNeeded() {            
-        while(!mCurrentIterator.hasNext() && mCurrentIndex < mIterators.size()-1) {
-            mCurrentIndex++;                                    
-            mCurrentIterator = mIterators.get(mCurrentIndex);
+        while(!currentIterator.hasNext() && currentIndex < iterators.size()-1) {
+            currentIndex++;                                    
+            currentIterator = iterators.get(currentIndex);
         }                                    
     }
     
+    @Override
     public boolean hasNext() {                         
-        boolean result = mCurrentIterator.hasNext();                    
+        boolean result = currentIterator.hasNext();                    
         return result;
     }
     
+    @Override
     public T next() {                    
-        if (!mCurrentIterator.hasNext()) {                
+        if (!currentIterator.hasNext()) {                
             throw new NoSuchElementException();                        
         }
         // OK, the iterator should have something to return...
-        T objectToReturn = mCurrentIterator.next();
+        T objectToReturn = currentIterator.next();
         if (objectToReturn == null) {
             throw new RuntimeException("What the heck, our good iterator claimed to have a next, but returned a null anyway!\n"+
-                                       "mCurrentIndex=="+mCurrentIndex+"\n"+
-                                       "mCurrentIterator=="+mCurrentIterator);
+                                       "mCurrentIndex=="+currentIndex+"\n"+
+                                       "mCurrentIterator=="+currentIterator);
         }                                                       
-        if (!mCurrentIterator.hasNext()) {
+        if (!currentIterator.hasNext()) {
             proceedToNextIteratorIfNeeded();
         }            
         // mNumObjectsIterated++;        
         return objectToReturn;                        
     }
     
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();    
     }        

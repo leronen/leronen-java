@@ -1,6 +1,6 @@
 package util.dbg;
 
-/** Logger which does nothing */
+/** Logger which does nothing. keywords: DummyLogger */
 public class DevNullLogger implements ILogger {    
     
     public static final DevNullLogger SINGLETON = new DevNullLogger();

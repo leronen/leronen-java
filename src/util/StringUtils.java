@@ -1,7 +1,5 @@
 package util;
 
-
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -45,10 +43,7 @@ import util.converter.Converter;
 import util.converter.ObjectToStringConverter;
 import util.dbg.Logger;
 
-
-
 public final class StringUtils extends CommandLineTests {
-
 
     public static final String CMD_H = "h";
     public static final String CMD_TESTALLSTRINGSITERATOR = "testallstringsiterator";
@@ -95,8 +90,6 @@ public final class StringUtils extends CommandLineTests {
     public StringUtils(String[] args) {
         super(args);
     }
-
-
 
     @Override
     public void run(String cmd) throws Exception {
@@ -240,6 +233,7 @@ public final class StringUtils extends CommandLineTests {
 
     /** Expand all lists of style "FOO{foo,bar,baz}BAR" to (FOOfooBAR, FOObarBAR, FOObazBAR). Nested lists not supported! */
     public static List<String> expandBashLists(String p) {
+        System.err.println("expanding: "+p);
     	int [] openBracketInds = findOccurences(p, '{');
     	int [] closeBracketInds = findOccurences(p, '}');
     	if (openBracketInds.length != closeBracketInds.length) {
@@ -1312,23 +1306,43 @@ public final class StringUtils extends CommandLineTests {
     }
 
     public static List<String> removeLongestCommonSuffix(Collection<String> pStrings) {
+        return removeLongestCommonSuffix(pStrings, null);
+    }
+    
+    public static List<String> removeLongestCommonSuffix(Collection<String> pStrings, Integer threshold) {
         String longestCommonSuffix= longestCommonSuffix(pStrings);
-        ArrayList<String> result = new ArrayList(pStrings.size());
-        for (String s: pStrings) {
-            result.add(s.substring(0, s.length()-longestCommonSuffix.length()));
+        if (threshold != null && longestCommonSuffix(pStrings).length() < threshold) {
+            // prefix length below threshold, do not remove
+            return new ArrayList<String>(pStrings);
         }
-        return result;
+        else { 
+            ArrayList<String> result = new ArrayList(pStrings.size());
+            for (String s: pStrings) {
+                result.add(s.substring(0, s.length()-longestCommonSuffix.length()));
+            }
+            return result;
+    }
     }
 
     public static List<String> removeLongestCommonPrefix(Collection<String> pStrings) {
-        String longestCommonPrefix= longestCommonPrefix(pStrings);
-        ArrayList<String> result = new ArrayList(pStrings.size());
-        for (String s: pStrings) {
-            result.add(s.substring(longestCommonPrefix.length()));
-        }
-        return result;
+        return removeLongestCommonPrefix(pStrings, null);
     }
 
+    /** @param threshold if length of longest common prefix is below threshold, do not perform removal */
+    public static List<String> removeLongestCommonPrefix(Collection<String> pStrings, Integer threshold) {
+        String longestCommonPrefix= longestCommonPrefix(pStrings);
+        if (threshold != null && longestCommonPrefix.length() < threshold) {
+            // prefix length below threshold, do not remove
+            return new ArrayList<String>(pStrings);
+        }
+        else {        
+            ArrayList<String> result = new ArrayList<String>(pStrings.size());
+            for (String s: pStrings) {
+                result.add(s.substring(longestCommonPrefix.length()));
+            }
+            return result;
+        }
+    }
 
 //    public static int indexOfLastCommonChar(Collection<String> pStrings) {
 //        List stringLengths = ConversionUtils.convert(pStrings, new StringToStringLenConverter());
@@ -1539,7 +1553,7 @@ public final class StringUtils extends CommandLineTests {
         }
     }
 
-    public static <T> String collectionToString(Collection pCol, String pDelim, Converter<T, String> pFormatter) {
+    public static <T> String collectionToString(Collection<T> pCol, String pDelim, Converter<T, String> pFormatter) {
         if (pCol.size()==0) {
             return "";
         }
@@ -1678,7 +1692,7 @@ public final class StringUtils extends CommandLineTests {
         if (len>=pLen) {
             return tmp;
         }
-        int lendiff = pLen-len;
+        int lendiff = pLen-len;        
         return stringMultiply(lendiff, "0")+tmp;
     }
 
@@ -1741,7 +1755,7 @@ public final class StringUtils extends CommandLineTests {
     }
 
     /**
-     * Formats a set of fields, each with a minimum widht
+     * Formats a set of fields, each with a minimum width
      * If some of the strings is longer than it's respective col width,
      * fails pathetically.
      */
@@ -1791,7 +1805,7 @@ public final class StringUtils extends CommandLineTests {
              for (int j=0; j<row.size(); j++) {
                 String formatted = pFormatter.convert(row.get(j));
                 int len = formatted.length();
-                colWidths[j] = MathUtils.max(colWidths[j], len+1);
+                colWidths[j] = Math.max(colWidths[j], len+1);
              }
          }
 
@@ -2697,5 +2711,83 @@ public final class StringUtils extends CommandLineTests {
         }
     }
 
+    public static String indentLines(String multilineString, int numSpaces) {
+        String spaceString = stringMultiply(numSpaces, " ");
+        List<String> tok = Arrays.asList(multilineString.split("\\n", -1));
+        boolean addNewline = false;
+        if (tok.get(tok.size()-1).equals("")) {
+            // terminated with a newline
+            tok = tok.subList(0, tok.size()-1);
+            addNewline = true;
+        }
 
+        StringBuffer buf = new StringBuffer();
+        for (int i=0; i<tok.size(); i++) {
+            String s = tok.get(i);
+            buf.append(spaceString);
+            buf.append(s);
+            if (i < tok.size() -1) {
+                buf.append("\n");
+            }
+        }
+
+        if (addNewline) {
+            buf.append("\n");
+        }
+
+        return buf.toString();
+
+    }
+
+    public static <T> String colToStr(Collection<T> col, String delim, Converter<T, String> formatter) {
+        if (col.size()==0) {
+            return "";
+        }
+        else {
+            StringBuffer buf = new StringBuffer();
+            Iterator<T> i = col.iterator();
+            T first = i.next();
+            buf.append(formatter.convert(first));
+            while (i.hasNext()) {
+                T o = i.next();
+                buf.append(delim);
+                buf.append(formatter.convert(o));
+            }
+            return buf.toString();
+        }
+    }
+    
+
+    /** Check if a string represents an integral number representable with java type {@link Integer} */ 
+    public static boolean isInteger(String p) {
+        try {
+            Integer.parseInt(p);
+            return true;
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    /** Check if a string represents an integral number representable with java type {@link Long} */
+    public static boolean isLong(String p) {
+        try {
+            Long.parseLong(p);
+            return true;
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    public static boolean isNumber(String p) {
+        try {
+            Double.parseDouble(p);
+            return true;
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
 }

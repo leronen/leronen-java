@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import util.collections.Pair;
 import util.collections.SymmetricPair;
@@ -45,6 +47,7 @@ import util.converter.ListFieldExtractor;
 import util.converter.StringToIntegerConverter;
 import util.converter.StringToLongConverter;
 import util.dbg.Logger;
+import util.io.CSVFileReader;
 import util.process.ProcessUtils;
 
 public class IOUtils {
@@ -141,27 +144,27 @@ public class IOUtils {
             return buffer;
         }
     }
-    
-    /** 
-     * Read bytes from an input stream until the first zero byte in encountered, or the given max bytes limit is exceeded. 
+
+    /**
+     * Read bytes from an input stream until the first zero byte in encountered, or the given max bytes limit is exceeded.
      * Read the zero byte as well, but do not include it in the result.
-     * 
+     *
      * @return null, if end of stream has already been reached.
      * @throws UnexpectedEndOfStreamException if some bytes are read, and the end stream ends with a non-zero byte
-     * before any zero bytes are read.  
-     * @throws RuntimeException when maxBytes bytes have already been read and the next byte is not null */     
+     * before any zero bytes are read.
+     * @throws RuntimeException when maxBytes bytes have already been read and the next byte is not null */
     public static byte[] readBytesUntilNull(InputStream is, int maxBytes) throws UnexpectedEndOfStreamException, IOException, TooManyNonNullBytesException {
-        
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int b;        
-        while ( (b=is.read()) > 0 ) {            
+        int b;
+        while ( (b=is.read()) > 0 ) {
             baos.write(b);
             if (baos.size() > maxBytes) {
                 throw new TooManyNonNullBytesException();
             }
-        }        
+        }
 
-        if (b == 0) {        
+        if (b == 0) {
             return baos.toByteArray();
         }
         else if (b == -1) {
@@ -178,7 +181,7 @@ public class IOUtils {
             throw new RuntimeException("foo");
         }
     }
-    
+
     /**
      * Read bytes from an input stream until the first zero byte in encountered.
      * Read the zero byte as well, but do not include it in the result.
@@ -710,7 +713,6 @@ public class IOUtils {
             result.add(Arrays.asList(tokens));
         }
         return result;
-
     }
 
     public static boolean isEmpty(File pFile) {
@@ -1284,8 +1286,6 @@ public class IOUtils {
         return ConversionUtils.convert(lines, pObjectFactory);
     }
 
-
-
     /** Read lines of a file and convert each line into some object using pObjectFactory */
     public static <T> List<T> readObjects(String pFile, Converter<String, T> pObjectFactory) throws IOException {
         return readObjects(new FileInputStream(pFile), pObjectFactory);
@@ -1412,27 +1412,82 @@ public class IOUtils {
         /** may be null, if we have not created the stream ourself */
         private InputStream mInputStream;
         private String mLine;
+        /** Index of the line last read */
+        int indOfCurLine = 0;
 
+        /** Caller is responsible for closing the stream once reading is finished */
         public LineIterator(InputStream pStream)  {
-            init(pStream);
+            init(pStream, null);
+        }
+        
+        /** Caller is responsible for closing the stream once reading is finished */
+        public LineIterator(BufferedReader reader)  {
+            init(reader);
         }
 
+       /**
+        * Create a FileInputStream and close it once reading is completed
+        * TODO: should provide possibility for caller to close the stream explicitly?
+        */
         public LineIterator(String pFilename) throws IOException {
-            mInputStream = new FileInputStream(pFilename);
-            init(mInputStream);
+            mInputStream = getPossiblyGunzippingFileInputStream(pFilename);
+            init(mInputStream, null);
         }
 
-        public LineIterator(File pFile) throws IOException {
-            mInputStream = new FileInputStream(pFile);
-            init(mInputStream);
-        }
+       /**
+        * Create a FileInputStream and close it once reading is completed
+        * @param charset null for default charset
+        */
+        public LineIterator(String fileName, Charset charset) throws IOException {
+            mInputStream = getPossiblyGunzippingFileInputStream(fileName);
+            init(mInputStream, charset);
+        }               
 
-        private void init(InputStream pInputStream) {
-            mReader = new BufferedReader(new InputStreamReader(pInputStream));
+        
+       /**
+        * Create a FileInputStream and close it once reading is completed
+        * TODO: should provide possibility for caller to close the stream explicitly?
+        */
+        public LineIterator(File file) throws IOException {
+            mInputStream = getPossiblyGunzippingFileInputStream(file);
+            init(mInputStream, null);
+        }
+       
+
+       
+        /**
+         * Caller is responsible for closing the Reader once reading is finished.
+         * Null charset causes default charset to be used
+         */
+         private void init(BufferedReader reader) {
+             mReader = reader;
+             
+             try {
+                 mLine = mReader.readLine();
+             }
+             catch (IOException e) {
+                 mLine = null;
+                 e.printStackTrace();
+                 throw new RuntimeException("Failed reading");
+             }
+         }
+        
+       /**
+        * Caller is responsible for closing the stream once reading is finished.
+        * Null charset causes default charset to be used
+        */
+        private void init(InputStream pInputStream, Charset charset) {
+            if (charset != null) {
+                mReader = new BufferedReader(new InputStreamReader(pInputStream, charset));
+            }
+            else {
+                mReader = new BufferedReader(new InputStreamReader(pInputStream));
+            }
+
             try {
                 mLine = mReader.readLine();
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 mLine = null;
                 e.printStackTrace();
                 throw new RuntimeException("Failed reading");
@@ -1473,13 +1528,13 @@ public class IOUtils {
         public String next() {
             String line = mLine;
             moveToNextLine();
+            indOfCurLine++;
             return line;
         }
 
-        public String nextLine() {
-            String line = mLine;
-            moveToNextLine();
-            return line;
+        /** Index of the line last read */
+        public int getIndOfLastLine() {
+            return indOfCurLine;
         }
 
         @Override
@@ -1487,6 +1542,43 @@ public class IOUtils {
             throw new RuntimeException("Operation not implemented by iterator");
         }
     }
+           
+    public static InputStream getPossiblyGunzippingFileInputStream(File file) throws IOException {
+        if (file.getPath().endsWith(".gz")) {
+            return new GZIPInputStream(new FileInputStream(file));
+        }
+        else {
+            return new FileInputStream(file);
+        }
+    }
+
+    public static BufferedReader getPossiblyGunzippingFileReader(String file) throws IOException {
+        if (file.endsWith(".gz")) {
+            return new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+        }
+        else {
+            return new BufferedReader(new FileReader(file));
+        }
+    }
+
+    /** read the first line of a file */
+    public static String readFirstLine(File file, Charset charset) throws IOException  {
+        InputStream fis = getPossiblyGunzippingFileInputStream(file);
+        InputStreamReader isr;
+        if (charset != null) {
+            // specified charset
+            isr = new InputStreamReader(fis, charset);
+        }
+        else {
+            // default charset
+            isr = new InputStreamReader(fis);
+        }
+        BufferedReader br = new BufferedReader(isr);
+        String result = br.readLine();
+        br.close();
+        return result;
+    }
+        
 
     public static class UnexpectedEndOfStreamException extends Exception {
 
@@ -1497,6 +1589,15 @@ public class IOUtils {
         //
     }
 
+    
+    public static InputStream getPossiblyGunzippingFileInputStream(String fileName) throws IOException {
+        if (fileName.endsWith(".gz")) {
+            return new GZIPInputStream(new FileInputStream(fileName));
+        }
+        else {
+            return  new FileInputStream(fileName);
+        }
+    }
 
     /*
     private static class RunnableStreamReader implements Runnable {
@@ -1565,16 +1666,15 @@ public class IOUtils {
     */
 
 
-    
+
     public static class TooManyNonNullBytesException extends Exception {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -7560636179338672486L;
-        // 
     }
-            
+
     public static void main (String[] args) {
         String cmd = args[0];
 
@@ -1607,4 +1707,47 @@ public class IOUtils {
             System.exit(-1);
         }
     }
+    
+    /** Read relation from given file. Rows will be instances of Row */
+    public static <T extends Row> Relation readRelation(String fname) throws IOException, FileFormatException {
+        return readRelation(fname, null);
+    }
+    
+    /**
+     * Read a relation from a BCOS formatted (tab-delimited, with a header) file.
+     * 
+     * @param rowFactory not mandatory; if not provided, rows will be instances of Row
+     * @param acceptTrailingWhitespaces if false, fail for accept non-empty values with trailing and/or leading white space.   
+     */
+    public static <T extends Row> Relation readRelation(String fname, RowFactory<T> rowFactory) throws IOException, FileFormatException {
+            
+        try {
+            Timer.startTiming("readRelation");
+            CSVFileReader reader = new CSVFileReader(fname);
+            List<String> columns = reader.getMetadata().getColumnNames();
+            if (rowFactory != null && !columns.equals(rowFactory.getColumns().getColumnNames())) { 
+                throw new FileFormatException("Unexpected column names in data file: " + columns + ". " + 
+                                              "Expected columns: " + rowFactory.getColumns().getColumnNames());
+            }
+            ColumnsDef defaultColumnsDef = new DefaultColumnsDef(columns);
+            Relation relation = new Relation(columns);
+            while (reader.hasNextLine()) {
+                reader.readLine();
+                List<String> values = reader.getRowAsList();
+                
+                if (rowFactory != null) {
+                    relation.addRow(rowFactory.create(values));
+                }
+                else {
+                    relation.addRow(new Row(defaultColumnsDef, values));
+                }                                
+            }                                              
+            
+            return relation;
+        }
+        finally {
+            Timer.endTiming("readRelation");
+        }
+    }
+            
 }
