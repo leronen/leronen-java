@@ -283,27 +283,6 @@ public class ProcessUtils {
     		System.err.println("No such command: "+cmd);
     		System.exit(1);
     	}
-
-
-//    	int intervalInMilliSeconds = Integer.parseInt(args[0])*1000;
-//    	List restOfArgs = CollectionUtils.tailList(Arrays.asList(args), 1);
-//    	String cmd = StringUtils.collectionToString(restOfArgs, " ");
-//    	while (true) {
-//    		System.err.println("Executing command: "+cmd);
-//    		try {
-//    			Runtime.getRuntime().exec(cmd);
-//    		}
-//    		catch (IOException e) {
-//    			System.err.println("Failed to an IOException.");
-//       		}
-//    		try {
-//    			Thread.sleep(intervalInMilliSeconds);
-//    		}
-//    		catch (InterruptedException e) {
-//    			System.err.println("Interrupted.");
-//    		}
-//
-//    	}
     }
 
     private static void dbgMsg(String pMsg) {

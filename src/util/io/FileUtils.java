@@ -229,7 +229,13 @@ public final class FileUtils {
         if (!parent.endsWith("/")) {
             parent += "/";
         }
-
+        
+        parent = parent.replace("^/srv/ext_sas", "");
+        child = child.replace("^/srv/ext_sas", "");             
+        
+        parent = parent.replaceAll("\\/\\.\\/", "/");
+        child = child.replaceAll("\\/\\.\\/", "/");
+        
         if (child.startsWith(parent)) {
             return child.substring(parent.length());
         }
@@ -2676,7 +2682,6 @@ public final class FileUtils {
 
                 String child = args[0];
                 String parent = (args[1]);
-
 
                 String result = FileUtils.getPathRelativeTo(child, parent);
                 System.out.println(result);

@@ -686,9 +686,11 @@ public class Relation {
      * @param rowKey value of a key column that uniquely identifies a row. Said column must be indexed using
      * method {@link #buildIndex(String)} prior to calling this method. Note that only one can be indexed, using 
      * currrent implementation (this could be easily changed).
+     * 
      * @param columnName obvious
      * @return null if no such column.
-     * @throws RuntimeException if no such rowKey exists in the set of indexed keys, or if rows have not been indexed.
+     * @throws NoSuchRowException if no such rowKey exists in the set of indexed keys 
+     * @throws RuntimeException if rows have not been indexed.
      */
     public String get(String rowKey, String columnName) {
         if (rowIndex == null) {
@@ -697,7 +699,7 @@ public class Relation {
             
         Integer row = rowIndex.getIndex(rowKey);
         if (row == null) {
-            throw new RuntimeException("No such row key in set of indexed rows: " + rowKey);
+            throw new NoSuchRowException("No such row: " + rowKey);
         }
         
         Integer column = columnIndex.getIndex(columnName);
@@ -716,6 +718,7 @@ public class Relation {
      * method {@link #buildIndex(String)} prior to calling this method. Note that currently only one column can be indexed
      * (this could be easily changed).
      * @return null if no such column.
+     * @throws NoSuchRowException if no such rowKey exists in the set of indexed keys
      * @throws RuntimeException if no such rowKey exists in the set of indexed keys, or if rows have not been indexed.
      */
     public List<String> getRow(String rowKey) {
@@ -725,7 +728,7 @@ public class Relation {
             
         Integer row = rowIndex.getIndex(rowKey);
         if (rowIndex == null) {
-            throw new RuntimeException("No such row key in set of indexed rows: " + rowKey);
+            throw new NoSuchRowException("No such row key in set of indexed rows: " + rowKey);
         }
         
         return rows.get(row);

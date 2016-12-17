@@ -28,8 +28,8 @@ public final class MapConverter<K,V> implements Converter<K,V> {
     private V mDefaultVal; // only used with NOT_FOUND_BEHAUVIOR_RETURN_DEFAULT
 
     public MapConverter(Map<K,V> pMap, NotFoundBehauvior pNotFoundBehauviour) {
-        if (pNotFoundBehauviour == NotFoundBehauvior.RETURN_DEFAULT) {
-            throw new RuntimeException("Call a different method instead!");
+        if (pNotFoundBehauviour == NotFoundBehauvior.RETURN_DEFAULT || pNotFoundBehauviour == NotFoundBehauvior.RETURN_DEFAULT_AND_WARN) {
+            throw new RuntimeException("Call constructor with default val parameter (notfoundbehaviour: " + pNotFoundBehauviour + ")");
         }
         mNotFoundBehauviour = pNotFoundBehauviour;
         mMap = pMap;
@@ -40,8 +40,8 @@ public final class MapConverter<K,V> implements Converter<K,V> {
     }
 
     public MapConverter(Map<K,V> pMap, NotFoundBehauvior pNotFoundBehauviour, V pDefaultVal) {
-        if (pNotFoundBehauviour == NotFoundBehauvior.RETURN_DEFAULT) {
-            throw new RuntimeException("Call a different method instead!");
+        if (pNotFoundBehauviour != NotFoundBehauvior.RETURN_DEFAULT && pNotFoundBehauviour != NotFoundBehauvior.RETURN_DEFAULT_AND_WARN) {
+            throw new RuntimeException("Can only specify NotFoundBehauvior.RETURN_DEFAULT or NotFoundBehauvior.RETURN_DEFAULT_AND_WARN in this constructor");
         }
         mNotFoundBehauviour = pNotFoundBehauviour;
         mMap = pMap;

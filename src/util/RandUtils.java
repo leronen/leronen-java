@@ -30,6 +30,7 @@ public class RandUtils {
 
     public static final String CMD_RANDINT = "randint";
     public static final String CMD_RANDINTS = "randints";
+    public static final String CMD_RANDPROBS = "randprobs";
     public static final String CMD_RANDHEX = "randhex";
     public static final String CMD_RANDHEXES = "randhexes";
     public static final String CMD_RAND_XTERM_COLOR = "rand_xterm_color";
@@ -257,6 +258,12 @@ public class RandUtils {
             int num = Integer.parseInt(args[3]);
             for (int i=0; i<num; i++) {
                 System.out.println(randInt(min, max));
+            }
+        }
+        else if (args[0].equals(CMD_RANDPROBS)) {            
+            int num = Integer.parseInt(args[1]);
+            for (int i=0; i<num; i++) {
+                System.out.println(StringUtils.formatFloat(Math.random(), 3));
             }
         }
         else if (args[0].equals(CMD_RANDHEXES)) {

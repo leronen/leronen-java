@@ -1755,7 +1755,7 @@ public final class StringUtils extends CommandLineTests {
     }
 
     /**
-     * Formats a set of fields, each with a minimum widht
+     * Formats a set of fields, each with a minimum width
      * If some of the strings is longer than it's respective col width,
      * fails pathetically.
      */
@@ -1805,7 +1805,7 @@ public final class StringUtils extends CommandLineTests {
              for (int j=0; j<row.size(); j++) {
                 String formatted = pFormatter.convert(row.get(j));
                 int len = formatted.length();
-                colWidths[j] = MathUtils.max(colWidths[j], len+1);
+                colWidths[j] = Math.max(colWidths[j], len+1);
              }
          }
 
