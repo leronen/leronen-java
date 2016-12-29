@@ -97,7 +97,7 @@ public class IndexedSubset<T> {
     }
     
     public String toString() {
-        return StringUtils.mapToString(mSubSetMap.getDirectMap(), ": "," ");
+        return StringUtils.format(mSubSetMap.getDirectMap(), ": "," ");
     }
     
     public static Comparator<IndexedSubset> makeComparator() {

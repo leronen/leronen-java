@@ -6,26 +6,42 @@ import java.util.List;
 import util.*;
 
 public class ProcessOutput {
-    public String[] stdoutlines;
-    public String[] stderrlines;
-    public int exitValue;
-    public Process theProcess;
+    private String cmd;
+    private String[] stdoutlines;
+    private String[] stderrlines;
+    private int exitValue;
+    private Process process;
     
-    public ProcessOutput(String[] pStdoutlines,
-                         String[] pStderrlines,
-                         int pExitValue,
-                         Process pTheProcess)  {
-        stdoutlines = pStdoutlines;
-        stderrlines = pStderrlines;    
-        exitValue = pExitValue;
-        theProcess = pTheProcess;        
+    public ProcessOutput(String cmd,
+                         String[] stdoutlines,
+                         String[] stderrlines,
+                         int exitValue,
+                         Process process)  {
+        this.cmd = cmd;
+        this.stdoutlines = stdoutlines;
+        this.stderrlines = stderrlines;    
+        this.exitValue = exitValue;
+        this.process = process;        
+    }
+    
+    public int getExitValue() {
+        return exitValue;
+    }
+    
+    public Process getProcess() {
+        return process;
+    }
+    
+    /** the executed command */
+    public String getCmd() {
+        return cmd;
     }
     
     /*
      * as a single string containing "\n":s. 
      */
     public String getStdOut() {
-        return StringUtils.arrayToString(stdoutlines, "\n");
+        return Strings.format(stdoutlines, "\n");
     }
     
     public List<String> getStdOutAslist() {
@@ -40,14 +56,15 @@ public class ProcessOutput {
      * as a single string containing "\n":s. 
      */
     public String getStdErr() {
-        return StringUtils.arrayToString(stderrlines, "\n");
+        return Strings.format(stderrlines, "\n");
     }
     
+    @Override
     public String toString() {
         return "Process output:\n"+
-               "  stdout:\n\t"+StringUtils.arrayToString(stdoutlines, "\n\t")+
+               "  stdout:\n\t"+Strings.format(stdoutlines, "\n\t")+
                "\n"+
-               "  stderr:\n\t"+StringUtils.arrayToString(stderrlines, "\n\t")+
+               "  stderr:\n\t"+Strings.format(stderrlines, "\n\t")+
                "\n"+
                "Exit value: "+exitValue;
     }

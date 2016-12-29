@@ -145,7 +145,7 @@ public class DotProductDistanceFunction<E,A> implements IDataManagingDistanceFun
         for (Object point: data.keySet()) {
             WeightedSet vec = data.get(point);
             Map asMap = vec.asObjToWeightMap();
-            Logger.info(point+": "+StringUtils.mapToString(asMap, "=", ", "));
+            Logger.info(point+": "+StringUtils.format(asMap, "=", ", "));
         }
         
         DotProductDistanceFunction func = new DotProductDistanceFunction(data); 

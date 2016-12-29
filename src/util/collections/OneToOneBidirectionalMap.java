@@ -167,7 +167,7 @@ public class OneToOneBidirectionalMap<T1,T2> implements Iterable<Pair<T1,T2>> {
     }
     
     public String toString() {
-    	return StringUtils.mapToString(mMap, " => ", "\n");
+    	return StringUtils.format(mMap, " => ", "\n");
     }
         
     

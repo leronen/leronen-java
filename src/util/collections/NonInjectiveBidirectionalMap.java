@@ -123,7 +123,7 @@ public class NonInjectiveBidirectionalMap<T1,T2> implements Iterable<Map.Entry<T
     
     public String toString(Converter<T1,String> formatter1,
                            Converter<T2,String> formatter2) {
-        return "direct map:\n"+StringUtils.mapToString(mMap, "=", "\n", formatter1, formatter2)+"\n"+
+        return "direct map:\n"+StringUtils.format(mMap, "=", "\n", formatter1, formatter2)+"\n"+
                "inverse map:\n"+StringUtils.multiMapToString(mInverseMultiMap, formatter2, formatter1);
     }
     

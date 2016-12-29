@@ -701,7 +701,7 @@ public class CmdLineArgs implements IArgs {
         	    	
     	if (nonOverriddenDefaultValuesToBeDisplayedToTheUser.size() > 0 ) {            
     		result.append("Using default values for options not specified on command-line:\n  "+                    
-                       	  StringUtils.mapToString(nonOverriddenDefaultValuesToBeDisplayedToTheUser, "=", "\n  ")
+                       	  StringUtils.format(nonOverriddenDefaultValuesToBeDisplayedToTheUser, "=", "\n  ")
                        	  +"\n");
     	}
     	

@@ -752,6 +752,10 @@ public final class StringUtils extends CommandLineTests {
         return buf.toString();
     }
 
+    public static String arrToStr(Object[] pArr, String pDelim) {
+        return arrayToString(pArr, pDelim);
+    }
+    
     public static String arrayToString(int[] pArr) {
         return arrayToString(pArr, " ");
     }
@@ -957,7 +961,7 @@ public final class StringUtils extends CommandLineTests {
     }
 
 
-    public static String mapToString(Map pMap, String pKeyValDelim, String pEntryDelim) {
+    public static String format(Map pMap, String pKeyValDelim, String pEntryDelim) {
         StringBuffer buf = new StringBuffer();
         Iterator keys = pMap.keySet().iterator();
         while(keys.hasNext()) {
@@ -973,7 +977,7 @@ public final class StringUtils extends CommandLineTests {
         return buf.toString();
     }
 
-    public static String mapToString(Map pMap, String pKeyValDelim, String pEntryDelim, Converter pKeyConverter, Converter pValConverter) {
+    public static String format(Map pMap, String pKeyValDelim, String pEntryDelim, Converter pKeyConverter, Converter pValConverter) {
         StringBuffer buf = new StringBuffer();
         Iterator keys = pMap.keySet().iterator();
         while(keys.hasNext()) {
@@ -1170,11 +1174,11 @@ public final class StringUtils extends CommandLineTests {
     public static String multiSetToString(MultiSet pSet, String pValCountDelim, String pEntryDelim) {
         Map asMap = new LinkedHashMap(pSet.asObjToWeightMap());
         ConversionUtils.convertVals_inplace(asMap, new AnyToIntegerConverter());
-        return mapToString(asMap, pValCountDelim, pEntryDelim);
+        return format(asMap, pValCountDelim, pEntryDelim);
     }
 
     public static String distributionToString(Distribution pDistribution, String pValCountDelim, String pEntryDelim) {
-        return mapToString(pDistribution.asObjToWeightMap(), pValCountDelim, pEntryDelim);
+        return format(pDistribution.asObjToWeightMap(), pValCountDelim, pEntryDelim);
     }
 
     /* count occurences of char in string */
@@ -1211,11 +1215,11 @@ public final class StringUtils extends CommandLineTests {
     * key and val are separated by an "="-character
     **/
     public static String mapToString(Map pMap, String pDelim) {
-        return mapToString(pMap, "=", pDelim);
+        return format(pMap, "=", pDelim);
     }
 
     public static String mapToString(Map pMap) {
-        return mapToString(pMap, "=", "\n");
+        return format(pMap, "=", "\n");
     }
 
     /** keywords: startsWith */

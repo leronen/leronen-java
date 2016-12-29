@@ -1473,7 +1473,7 @@ public final class FileUtils {
                     }
                 }
 
-                System.out.println(StringUtils.mapToString(data, " ", "\n"));
+                System.out.println(StringUtils.format(data, " ", "\n"));
 
             }
             else if (cmd.equals(CMD_REMOVEDUPLICATEROWS)) {

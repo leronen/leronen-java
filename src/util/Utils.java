@@ -248,12 +248,12 @@ public final class Utils {
         else if (args[0].equals("executeindir")) {
             try {
                 String dir = args[1];
-                String cmd = args[2];
-                for(int i=3; i<args.length; i++) {
-                    cmd+=" ";
-                    cmd+=args[i];
-                }
-                ProcessUtils.executeCommand(cmd, dir, null);
+                List<String> arguments = CollectionUtils.tailList(Arrays.asList(args), 2);
+                
+                ProcessUtils.executor()
+                    .command(arguments)
+                    .dir(dir)
+                    .exec();                
             }
             catch (IOException e) {
                 e.printStackTrace();

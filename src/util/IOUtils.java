@@ -984,186 +984,22 @@ public class IOUtils {
     }
 
 
-    /*
-    public static ProcessOutput executeCommand(String pCommand,
-                                              ProcessOwner pProcessOwner) throws IOException{
-        return executeCommand(pCommand, null, null, pProcessOwner);
-    }
-    */
-
-    /**
-     * Executes process and waits for it's termination.
-    *  Lines outputted by stdout and stderr of the process are returned.
-    */
-/*
-    public static ProcessOutput executeCommand(String pCommand,
-                                               StreamListener pOutputStreamListener,
-                                               StreamListener pErrorStreamListener,
-                                               ProcessOwner pProcessOwner) throws IOException {
-        // dbgMsg("Executing command: "+pCommand);
-        return executeCommand(pCommand, null, pProcessOwner);
-    }
-    */
-
-    /** Open emacs and do not wait */
-    /*
-    public static void openWithEmacs(File pFile, ProcessOwner pProcessOwner) throws IOException {
-        executeCommand_nowait("rxvt -e ue "+pFile.getPath(), null, pProcessOwner);
-    }
-    */
-
+    
     public static void openPdfFile(File pFile) throws IOException {
-    	ProcessUtils.executeCommand_nowait("acroread "+pFile, null, null);
+    	ProcessUtils.executeCommand_nowait("acroread "+pFile, null);
     }
 
     public static void openBMGraphFile(File pFile) throws IOException {
-        ProcessUtils.executeCommand_nowait("bmvis_lauri "+pFile, null, null);
+        ProcessUtils.executeCommand_nowait("bmvis_lauri "+pFile, null);
     }
 
-    /** Open emacs and do not wait */
-    /*
-    public static void openWithEditor(File pFile, String pEditor, ProcessOwner pProcessOwner) throws IOException {
-        executeCommand_nowait("rxvt -e "+pEditor+" "+pFile.getPath(), null, pProcessOwner);
-        // executeCommand_nowait(pEditor+" "+pFile.getPath(), null);
-    }
-
-
-
-*/
-  /*
-    public static Process executeCommand_nowait(String pCommand, ProcessOwner pProcessOwner) throws IOException {
-        return executeCommand_nowait(pCommand, null, pProcessOwner);
-    }
-
-    public static Process executeCommand_nowait(String pCommand, String pDir, ProcessOwner pProcessOwner) throws IOException {
-        File dir = null;
-        if (pDir!=null) {
-            dbgMsg("Executing command: "+pCommand+" in dir "+pDir);
-            dir = new File(pDir);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("cannot exec in dir: directory does not exist!");
-            }
-        }
-        else {
-            dbgMsg("Executing command: "+pCommand+" in current dir");
-        }
-        Process proc = Runtime.getRuntime().exec(pCommand, null, dir);
-        if (pProcessOwner != null) {
-            pProcessOwner.registerExternalProcess(proc);
-        }
-        dbgMsg("returning process: "+proc);
-        return proc;
-    }
-*/
+    
     /** search terms: "pwd", "getCurrendDir", "current directory" */
     public static String getWorkingDir() {
         return System.getProperty("user.dir");
 
     }
-
-    /** see below for explanation */
-/*
-    public static ProcessOutput executeCommand(String pCommand,
-                                                    String pDir,
-                                                    ProcessOwner pProcessOwner) throws IOException {
-        return executeCommand(pCommand, pDir, null, null, pProcessOwner);
-    }
-  */
-    /**
-     * Executes process in give directory and waits for it's termination.
-     * Lines outputted by stdout and stderr of the process are returned.
-     * the listeners may be null.
-     */
-     /*
-    public static ProcessOutput executeCommand(String pCommand,
-                                                    String pDir,
-                                                    StreamListener pOutputStreamListener,
-                                                    StreamListener pErrorStreamListener,
-                                                    ProcessOwner pProcessOwner) throws IOException {
-        return executeCommand(pCommand,
-                                   pDir,
-                                   pOutputStreamListener,
-                                   pErrorStreamListener,
-                                   pProcessOwner,
-                                   false);
-    }
-    */
-
-    /**
-     * Executes process in give directory and waits for it's termination.
-     *  Lines outputted by stdout and stderr of the process are returned.
-     * the listeners may be null.
-     */
-     /*
-    public static ProcessOutput executeCommand(String pCommand,
-                                                    String pDir,
-                                                    StreamListener pOutputStreamListener,
-                                                    StreamListener pErrorStreamListener,
-                                                    ProcessOwner pProcessOwner,
-                                                    boolean pOutputInfoMessages) throws IOException {
-        File dir = null;
-        if (pDir!=null) {
-            dbgMsg("Executing command: "+pCommand+" in dir "+pDir);
-            dir = new File(pDir);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("cannot exec in dir: directory does not exist!");
-            }
-        }
-        else {
-            dbgMsg("Executing command: "+pCommand+" in current dir");
-        }
-        // execute process
-        Process proc = Runtime.getRuntime().exec(pCommand, null, dir);
-        if (pProcessOwner != null) {
-            pProcessOwner.registerExternalProcess(proc);
-        }
-
-        // store output and errors
-        InputStream outStream = proc.getInputStream();
-        InputStream errStream = proc.getErrorStream();
-
-        String arg0 = pCommand.split("\\s+")[0];
-        String commandName = new File(arg0).getName();
-        RunnableStreamReader stdoutReader = new RunnableStreamReader(commandName, "stdout", outStream, pOutputStreamListener, pOutputInfoMessages);
-        RunnableStreamReader stderrReader = new RunnableStreamReader(commandName, "stderr", errStream, pErrorStreamListener, pOutputInfoMessages);
-
-        Thread stdOutReaderThread = new Thread(stdoutReader);
-        Thread stdErrReaderThread = new Thread(stderrReader);
-
-        stdOutReaderThread.start();
-        stdErrReaderThread.start();
-
-        try {
-            stdOutReaderThread.join();
-            stdErrReaderThread.join();
-            String[] outlist = stdoutReader.getResult();
-            String[] errlist = stderrReader.getResult();
-
-            // print debug info
-            // Logger.dbg("**************** stdout of the executed process: *********************");
-            // dbgMsg(arrayToString(outlist, "\n"));
-            // Logger.dbg("**************** strerr of the executed process: *********************");
-            // dbgMsg(arrayToString(errlist, "\n"));
-
-            // wait for process to terminate, just in case...
-            proc.waitFor();
-            // all seems to have went well, return output of process
-            dbgMsg("finished executing command: "+pCommand);
-            dbgMsg("Returning process output...");
-            return new ProcessOutput(outlist, errlist);
-        }
-        catch (InterruptedException e) {
-            dbgMsg("interrupted while executing command: "+pCommand);
-            e.printStackTrace();
-            dbgMsg("Destroying process: "+proc);
-            proc.destroy();
-            dbgMsg("Process should rest in peace now.");
-            dbgMsg("Returning null, as we failed to complete the processing due to the irritating interruption.");
-            return null;
-        }
-    }
-    */
-
+    
 
     /** Append a string to a file. Note that a newline is not automatically appended! */
     public static void appendToFile(File pFile, String pStringToAppend) throws IOException {

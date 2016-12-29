@@ -413,7 +413,7 @@ public class CustomizableWeightedSet<T> extends AbstractSet<T>
     @Override
     public String toString(String pCountValSeparator) {
         Map asKeySortedMap = CollectionUtils.asKeySortedMap(asObjToWeightMap(), mDefaultComparator);
-        return StringUtils.mapToString(asKeySortedMap, " ", "\n");
+        return StringUtils.format(asKeySortedMap, " ", "\n");
     }
 
     public void readFromStream(InputStream pStream, StringToObjectWeightPairConverter pLineParser) throws IOException {

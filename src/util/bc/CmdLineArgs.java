@@ -287,7 +287,7 @@ public class CmdLineArgs {
     @Override
     public String toString() {
         return "flags:\n\t"+StringUtils.colToStr(flags, "\n\t")+"\n"+
-               "opts:\n\t"+StringUtils.mapToString(opts, "=", "\n\t")+"\n"+
+               "opts:\n\t"+StringUtils.format(opts, "=", "\n\t")+"\n"+
                "args:\n\t"+StringUtils.colToStr(args, "\n\t");
     }
 

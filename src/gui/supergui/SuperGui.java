@@ -286,9 +286,7 @@ public class SuperGui extends JPanel {
                 String msg = "Executing command line: "+cmd; 
                 dbgMsg(msg);
                 doSetStatusText(msg);                    
-                ProcessUtils.executeCommand(cmd, 
-                                                 null, // dir
-                                                 null); // process owner
+                ProcessUtils.exec(cmd);
             }
             doSetStatusText(""+fileList.length+" commands executed.");                                                                        
         }        

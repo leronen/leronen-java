@@ -163,7 +163,7 @@ public class CmdLineArgs2 {
     
     public String toString() {
         return "flags:\n\t"+StringUtils.collectionToString(flags, "\n\t")+"\n"+
-               "opts:\n\t"+StringUtils.mapToString(opts, "=", "\n\t")+"\n"+
+               "opts:\n\t"+StringUtils.format(opts, "=", "\n\t")+"\n"+
                "args:\n\t"+StringUtils.collectionToString(posargs, "\n\t");
     }
     

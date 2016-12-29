@@ -24,7 +24,7 @@ public class SU {
     }
     
     public static <K,V> String toString(Map pMap, String pKeyValDelim, String pEntryDelim) {
-        return StringUtils.mapToString(pMap, pKeyValDelim, pEntryDelim); 
+        return StringUtils.format(pMap, pKeyValDelim, pEntryDelim); 
     }
     
     public static <K,V> String toString(Map<K, V> pMap) {

@@ -10,199 +10,233 @@ import java.util.Arrays;
 import java.util.List;
 
 import util.CollectionUtils;
+import util.ConversionUtils;
 import util.IOUtils;
 import util.StringUtils;
+import util.Strings;
+import util.Timer;
 import util.dbg.Logger;
 
-/** Lauri's version of tools for executing executables. Originates from my tried and tested previous libraries */
+/** Developer likes executing executables. */
 public class ProcessUtils {
-
-    private static int sExecCount = 0;
-    private static int sDestroyCount = 0;
-
-    public static int getExecCount() {
-        return sExecCount;
-    }
-
-    public static int getDestroyCount() {
-        return sDestroyCount;
-    }
-
-    /** Open pFile with pEditor. A new process is created. */
-    public static void openWithEditor(File pFile, String pEditor, ProcessOwner pProcessOwner) throws IOException {
-        executeCommand_nowait(//"rxvt -e "+
-                              pEditor+" "+pFile.getPath(), null, pProcessOwner);
+                  
+    /** 
+     * Execute a command using java's standard system command utility.
+     * Command must be a "simple" command splittable into arguments by delimited white space 
+     * - commands having quoted arguments wont work!
+     * Use {@link ProcessOutput#exec(List)} for such cases. 
+     * 
+     * Use {@link ProcessOutput#getExitValue()} to check exit status.
+     * (IOException is only thrown on system errors, not when executed command fails
+     * with non-zero exit status)!
+     * 
+     * Use {@link executor()} for more versatile behavior.  
+     * 
+     * @return {@link ProcessOutput} object providing access to the exit value, stdout and stderr of the executed process. 
+     * @throws IOException only in exceptional cases; in particular, if the process exits a non-zero value, an exception is NOT thrown. 
+     */
+    public static ProcessOutput exec(String command) throws IOException {
+        return executor().simpleCommand(command).exec();        
     }
     
+    public static ProcessOutput exec(String... command) throws IOException {
+        return executor().command(command).exec();        
+    }
+                    
+    
 
-    public static Process executeCommand_nowait(String pCommand, String pDir, ProcessOwner pProcessOwner) throws IOException {
+    public static Process executeCommand_nowait(String pCommand, String pDir) throws IOException {
         File dir = null;
         if (pDir!=null) {
-            dbgMsg("Executing command: "+pCommand+" in dir "+pDir);
+            debug("Executing command: "+pCommand+" in dir "+pDir);
             dir = new File(pDir);
             if (!dir.exists() || !dir.isDirectory()) {
                 throw new RuntimeException("cannot exec in dir: directory does not exist!");
             }
         }
         else {
-            dbgMsg("Executing command: "+pCommand+" in current dir");
+            debug("Executing command: "+pCommand+" in current dir");
         }
-//        ProcessBuilder pb = new ProcessBuilder(pCommand);
-//        if (dir != null) {
-//        	pb.directory(dir);
-//        }
-//        Logger.info("Envinronment of the processbuilder:\n"+
-//        		    StringUtils.mapToString(pb.environment()));
-//        Process proc = pb.start();
 
-        Process proc = Runtime.getRuntime().exec(pCommand, null, dir);
-        sExecCount++;
-
-        if (pProcessOwner != null) {
-            pProcessOwner.registerExternalProcess(proc, pCommand);
-        }
-        dbgMsg("returning process: "+proc);
+        Process proc = Runtime.getRuntime().exec(pCommand, null, dir);       
+        
+        debug("returning process: "+proc);
         return proc;
     }
 
-    public static ProcessOutput executeCommand(String pCommand,
-                                               ProcessOwner pOwner) throws IOException {
-        return executeCommand(pCommand,
-                              null, // no work dir
-                              pOwner);
+    /** 
+     * Execute a command using frankly quite poor java's standard system command utility.
+     * <p>
+     * Warning: commands having quoted arguments wont work! - ise {@link ProcessOutput#exec(List)} for such cases. 
+     * <p>
+     * Use {@link ProcessOutput#getExitValue()} to check exit status of executed command
+     * (IOException is only thrown on system errors, not when executed command fails
+     * with non-zero exit status)!
+     * <p>
+     * See {@link #executor()} for more control over the executed command.
+     * See {@link #bash()} for a richer shell experience, including but not limited to pipes ("|") 
+     * and process substitution ("<(command)") 
+     * <p>
+     * @return {@link ProcessOutput} object containing the exit value, stdout and stderr of the executed process. 
+     * @throws IOException only in exceptional cases; in particular, if the process exits a non-zero value, an exception is NOT thrown!
+     */
+    public static ProcessOutput exec(List<String> arguments) throws IOException {
+        return executor().command(ConversionUtils.stringCollectionToArray(arguments)).exec();        
     }
 
-    public static ProcessOutput executeCommand(String pCommand) throws IOException {
-        return executeCommand(pCommand,
-                null, // no work dir
-                null, // no listener for stdout
-                null, // no listener for stderr
-                null); // no process owner
-    }
-
-
+    /**
+     * Execute a shell command (or why not even several commands) using the quite reliable bourne again shell.
+     * 
+     * Caller should use {@link ProcessOutput#getExitValue()} to check exit status of the executed command
+     * (IOException is only thrown on system errors, not when executed command fails with non-zero exit status!).
+     * 
+     * See {@link #executor()} for more control over the executed command.
+     * 
+     * @return {@link ProcessOutput} object containing the exit value, stdout and stderr of the executed process. 
+     * @throws IOException only in exceptional cases; in particular, if the process exits a non-zero value, an exception is NOT thrown!
+     */
     public static ProcessOutput bash(String script) throws IOException {
-    	File tmpFile = null;
-    	try {
-	    	String pidStr = ManagementFactory.getRuntimeMXBean().getName();
-	    	String threadName = Thread.currentThread().getName();
-	    	long nanos = System.nanoTime();
-	    	tmpFile = new File(pidStr+"."+threadName+"."+nanos+"."+"processutils.executeBash.tmp");
-	    	script = "#!/bin/bash\n"+script+"\n";
-	    	IOUtils.writeToFile(tmpFile, script);
-	    	executeCommand("chmod u+x "+tmpFile);
-	    	ProcessOutput out = executeCommand(tmpFile.getPath());
-	    	return out;
-    	}
-    	finally {
-    		if (tmpFile != null && tmpFile.exists()) {
-    			tmpFile.delete();
-    		}
-    	}
+        Executor executor = executor()
+                .command(script)
+                .bash();
+        
+        return executor.exec();
     }
-
-    public static ProcessOutput executeCommand(String[] cmdArr) throws IOException {
-        return executeCommand(cmdArr,
-                			  null, // no work dir
-                			  null, // no listener for stdout
-                			  null, // no listener for stderr
-                			  null,
-                			  false,
-                			  false); // no process owner
-
+      
+    public static Executor executor() {
+        return new Executor();
     }
-
-    /** see below for explanation */
-    public static ProcessOutput executeCommand(String pCommand,
-                                               String pDir,
-                                               ProcessOwner pProcessOwner) throws IOException {
-        return executeCommand(pCommand,
-                              pDir,
-                              null, // no listener for stdout
-                              null, // no listener for stderr
-                              pProcessOwner);
+    
+    public static Executor executor(String... args) {
+        return new Executor().command(args);
     }
+    
+    public static class Executor {
+        private String[] commandArray;
+        private String dir;
+        private StreamListener outputStreamListener;
+        private StreamListener errorStreamListener;
+        private ProcessOwner processOwner;
+        private boolean logCommand = true;
+        private boolean timing = true;
+        private boolean bash;        
+        
+        /** Command must be a simple command splittable into arguments simply by delimited white space. Quoted arguments wont work */
+        public Executor simpleCommand(String command) {
+            String[] arguments = command.split("\\s+");
+            return command(arguments);
+        }
+        
+        public Executor command(String... arguments) {
+            this.commandArray = arguments;
+            return this;
+        }
+        
+        public Executor command(List<String> arguments) {
+            this.commandArray = ConversionUtils.stringCollectionToArray(arguments);
+            return this;
+        }
+        
+        private Executor bash() {
+            this.bash = true;
+            return this;
+        }
+        
+        private Executor bash(boolean value) {
+            this.bash = value;
+            return this;
+        }
+        
+        private Executor copy() {
+            Executor copy = new Executor();
+            copy.commandArray = commandArray;
+            copy.dir = dir;
+            copy.outputStreamListener = outputStreamListener;
+            copy.errorStreamListener = errorStreamListener;
+            copy.processOwner = processOwner;
+            copy.logCommand = logCommand;
+            copy.timing = timing;
+            
+            return copy;
+        }
+        
+        public Executor log(boolean value) {
+            this.logCommand = value;
+            return this;
+        }
+        
+        public Executor timing(boolean value) {
+            this.timing = value;
+            return this;
+        }
+        
+        
+        public Executor dir(String dir) {
+            this.dir = dir;
+            return this;
+        }
 
+        public Executor outListener(StreamListener outputStreamListener) {
+            this.outputStreamListener = outputStreamListener;
+            return this;
+        }
+
+        public Executor errListener(StreamListener errorStreamListener) {
+            this.errorStreamListener = errorStreamListener;
+            return this;
+        }
+
+        public Executor owner(ProcessOwner processOwner) {
+            this.processOwner = processOwner;
+            return this;
+        }
+        
+        public ProcessOutput exec() throws IOException {
+            if (bash) {
+                return ProcessUtils.bash(this);
+            }
+            else {
+                return ProcessUtils.exec(this);
+            }
+        }        
+    }
+    
     /**
-     * Executes process in directory pDir and waits for it's termination.
+     * Executes process in given directory and waits for it's termination.
+     * Uses java's own system call facility (unless Executor speficies bash flag, 
+     * in which case bash is used).
+     * 
      * Lines outputted by stdout and stderr of the process are returned.
-     * the listeners may be null.
+     * 
      */
-    public static ProcessOutput executeCommand(String pCommand,
-                                               String pDir,
-                                               StreamListener pOutputStreamListener,
-                                               StreamListener pErrorStreamListener,
-                                               ProcessOwner pProcessOwner) throws IOException {
-        return executeCommand(pCommand,
-                              pDir,
-                              pOutputStreamListener,
-                              pErrorStreamListener,
-                              pProcessOwner,
-                              false,  // Do not output stdout
-                              false); // Do not output stderr
-    }
+    private static ProcessOutput exec(Executor args) throws IOException {
 
-
-    /**
-     * Executes process in give directory and waits for it's termination.
-     *  Lines outputted by stdout and stderr of the process are returned.
-     * the listeners may be null.
-     */
-    public static ProcessOutput executeCommand(String pCommand,
-                                               String pDir,
-                                               StreamListener pOutputStreamListener,
-                                               StreamListener pErrorStreamListener,
-                                               ProcessOwner pProcessOwner,
-                                               boolean pOutputStdOut,
-                                               boolean pOutputStdErr) throws IOException {
-    	String[] cmdArr = pCommand.split("\\s+");
-    	return executeCommand(cmdArr, pDir, pOutputStreamListener, pErrorStreamListener, pProcessOwner, pOutputStdOut, pOutputStdErr);
-    }
-
-    /**
-     * Executes process in give directory and waits for it's termination.
-     *  Lines outputted by stdout and stderr of the process are returned.
-     * the listeners may be null.
-     */
-    public static ProcessOutput executeCommand(String[] pCommandArray,
-                                               String pDir,
-                                               StreamListener pOutputStreamListener,
-                                               StreamListener pErrorStreamListener,
-                                               ProcessOwner pProcessOwner,
-                                               boolean pOutputStdOut,
-                                               boolean pOutputStdErr) throws IOException {
-    	File dir = null;
-    	String cmdAsString = StringUtils.arrayToString(pCommandArray, " ");
-        if (pDir!=null) {
-            dbgMsg("Executing command: "+cmdAsString+" in dir "+pDir);
-            dir = new File(pDir);
+        File dir = null;
+        String cmdAsString = Strings.format(args.commandArray, " ");
+        if (args.dir != null) {
+            dir = new File(args.dir);
             if (!dir.exists() || !dir.isDirectory()) {
                 throw new RuntimeException("cannot exec in dir: directory does not exist!");
             }
-        }
-        else {
-            dbgMsg("Executing command: "+cmdAsString+" in current dir");
-        }
+        }        
 
-        Process proc = Runtime.getRuntime().exec(pCommandArray, null, dir);
-        sExecCount++;
+        Process proc = Runtime.getRuntime().exec(args.commandArray, null, dir);        
 
-        if (pProcessOwner != null) {
-            pProcessOwner.registerExternalProcess(proc, cmdAsString);
+        if (args.processOwner != null) {
+            args.processOwner.registerExternalProcess(proc, cmdAsString);
         }
 
         // store output and errors
         InputStream outStream = proc.getInputStream();
         InputStream errStream = proc.getErrorStream();
         OutputStream inStream = proc.getOutputStream();
-        // we shall provide no input: (!)
+
+        // we shall provide no input
         inStream.close();
         // out streams shall be closed by their respective readers...
-
-        String arg0 = pCommandArray[0];
-        String commandName = new File(arg0).getName();
-        RunnableStreamReader stdoutReader = new RunnableStreamReader(commandName, "stdout", outStream, pOutputStreamListener, pOutputStdOut);
-        RunnableStreamReader stderrReader = new RunnableStreamReader(commandName, "stderr", errStream, pErrorStreamListener, pOutputStdErr);
+               
+        RunnableStreamReader stdoutReader = new RunnableStreamReader(outStream, args.outputStreamListener);
+        RunnableStreamReader stderrReader = new RunnableStreamReader(errStream, args.errorStreamListener);
 
         Thread stdOutReaderThread = new Thread(stdoutReader);
         Thread stdErrReaderThread = new Thread(stderrReader);
@@ -211,83 +245,168 @@ public class ProcessUtils {
         stdErrReaderThread.start();
 
         try {
+            if (args.timing) {
+                Timer.startTiming("Executing command line: " + cmdAsString);
+            }
+            if (args.logCommand) {
+                debug("Executing command line: " + cmdAsString);
+            }
+            
             stdOutReaderThread.join();
             stdErrReaderThread.join();
             String[] outlist = stdoutReader.getResult();
             String[] errlist = stderrReader.getResult();
 
-            // print debug info
-            // Logger.dbg("**************** stdout of the executed process: *********************");
-            // dbgMsg(arrayToString(outlist, "\n"));
-            // Logger.dbg("**************** strerr of the executed process: *********************");
-            // dbgMsg(arrayToString(errlist, "\n"));
-
-            // wait for process to terminate, just in case...
+            // wait for process to terminate, just in case (although the fact that we
+            // have joined with the reader streams should already guarantee this)
             proc.waitFor();
+            
             // all seems to have went well, return output of process
-            dbgMsg("finished executing command: "+cmdAsString);
-            // dbgMsg("Returning process output...");
-            return new ProcessOutput(outlist, errlist, proc.exitValue(), proc);
+            return new ProcessOutput(cmdAsString, outlist, errlist, proc.exitValue(), proc);
         }
         catch (InterruptedException e) {
-            Logger.info("interrupted while executing command: "+cmdAsString);
+            info("interrupted while executing command: "+cmdAsString);
             e.printStackTrace();
-            Logger.info("Destroying process: "+cmdAsString);
+            info("Destroying process: "+cmdAsString);
             // try to close streams, just in case...
-            closeStreamsAndDestroy(proc);
-//            outStream = proc.getInputStream();
-//            errStream = proc.getErrorStream();
-//            inStream = proc.getOutputStream();
-//            for (Closeable stream: CollectionUtils.makeArrayList(outStream, errStream, inStream)) {
-//                try {
-//                    stream.close();
-//                }
-//                catch (IOException foo) {
-//                    // foo
-//                }
-//            }
-//            proc.destroy();
-            Logger.info("Process should rest in peace now.");
-            Logger.warning("Returning null, as we failed to complete the processing due to the irritating interruption.");
-            return null;
+            closeStreamsAndDestroy(proc);            
+            throw new IOException("Failed due to being interrupted while executing command " + cmdAsString + ". execution status unknown);");
+        }
+        finally {
+            if (args.timing) {                
+                Timer.endTiming("Executing command line: " + cmdAsString);
+            }
         }
     }
-
-    /** Try to avoid closed streams using this... */
-    public static void closeStreamsAndDestroy(Process proc) {
+    
+    /**
+     * Execute a bash script. 
+     * 
+     * Implementation is based on creating a tmp script file under 
+     * $BCOS_BASH_TMP (defaults to /tmp/bash) and then executing the script using
+     * <i>bash -c 'source <script>'</i>. Directory is created if it does not exist.
+     * Script is temporarily stored into file named as: "<pid>.<threadname>.<nanos>.bash".
+     * Script file is immediately deleted after execution, regardless of the outcome.
+     * 
+     * More elegant solutions are welcomed.
+     * 
+     * <b>Note</b>: failing the command with non-zero exit status DOES NOT throw an {@link IOException} instead,
+     * one must check the return value of the process using {@link ProcessOutput#getExitValue()}.
+     * IOException is only thrown in cases of more esoteric system errors.
+     */
+    private static ProcessOutput bash(Executor params) throws IOException {        
+        File tmpFile = null;        
+        String[] cmdArr = params.commandArray;
+        if (cmdArr.length != 1) {
+            throw new RuntimeException("Wrong length of command array (" + cmdArr.length + "): " + Strings.format(cmdArr));
+        }
+        
+        if (!params.bash) {
+            throw new RuntimeException("Executor does not define bash flag");
+        }
+        
+        String script = cmdArr[0];
+        
+        if (params.logCommand) {
+            debug("Executing bash: " + script);
+        }
+        
+        if (params.timing) {
+            Timer.startTiming("Executing bash: " + script);
+        }
+        
+        try {
+            // resolve directory and create if needed 
+            String bcosBashDir = System.getenv("BCOS_BASH_TMP");
+            if (bcosBashDir == null) {
+                bcosBashDir = "/tmp/bash/";
+            }
+            File bashDir = new File(bcosBashDir);
+            if (!bashDir.exists()) {
+                if (!bashDir.mkdirs()) {
+                    throw new IOException("Failed creating directory " + bashDir);
+                }
+            }
+                        
+            // generate script file 
+            String pidStr = ManagementFactory.getRuntimeMXBean().getName();
+            String threadName = Thread.currentThread().getName();
+            long nanos = System.nanoTime();
+            tmpFile = new File(bashDir.getPath() + "/" + pidStr + "." + threadName + "." + nanos + "." + "bash");            
+            IOUtils.writeToFile(tmpFile, script + "\n");
+            executor("chmod", "u+x", tmpFile.getPath())
+                    .log(false)
+                    .exec();
+            
+            // execute script using an actual executor 
+            return params.copy()
+                .command("/bin/bash", "-c", "source " + tmpFile.getPath())
+                .log(false)
+                .timing(false)
+                .bash(false)
+                .exec();
+                        
+        }
+        finally {
+            // burn after reading
+            if (tmpFile != null && tmpFile.exists()) {
+                tmpFile.delete();
+            }
+            
+            if (params.timing) {
+                Timer.endTiming("Executing bash: " + script);
+            }
+        }
+    }
+ 
+    
+    private static void info(String msg) {        
+        Logger.info(msg);
+    }       
+    
+    /** Try to avoid closed streams (TODO: is this hack needed in these modern days?) */
+    private static void closeStreamsAndDestroy(Process proc) {
         InputStream outStream = proc.getInputStream();
         InputStream errStream = proc.getErrorStream();
         OutputStream inStream = proc.getOutputStream();
-        for (Closeable stream: CollectionUtils.makeArrayList(outStream, errStream, inStream)) {
+        for (Closeable stream: Arrays.asList(outStream, errStream, inStream)) {
             try {
                 stream.close();
             }
             catch (IOException foo) {
-                // foo
+                // no action
             }
         }
-        proc.destroy();
-        sDestroyCount++;
+        
+        proc.destroy();        
     }
 
     public static void main(String[] pArgs) throws Exception {
-    	String cmd = pArgs[0];
-    	List<String> args = CollectionUtils.tailList(Arrays.asList(pArgs), 1);
-    	if (cmd.equals("bash")) {
-    		String script = StringUtils.collectionToString(args, " ");
-        	ProcessOutput out = ProcessUtils.bash(script);
-        	System.out.println(""+out.toString());
-        	System.exit(out.exitValue);
-    	}
-    	else {
-    		System.err.println("No such command: "+cmd);
-    		System.exit(1);
-    	}
+        String cmd = pArgs[0];
+        List<String> args = CollectionUtils.tailList(Arrays.asList(pArgs), 1);
+        if (cmd.equals("bash")) {
+            String script = StringUtils.colToStr(args, " ");
+            ProcessOutput out = ProcessUtils.bash(script);
+            System.out.println(""+out.toString());
+            System.exit(out.getExitValue());
+        }
+        else if (cmd.equals("exec")) {                       
+            ProcessOutput out = ProcessUtils.exec(args);
+            System.out.println(""+out.toString());
+            System.exit(out.getExitValue());
+        }
+        else {
+            System.err.println("No such command: "+cmd);
+            System.exit(1);
+        }
+    }         
+    
+    /** Open pFile with pEditor. A new process is created. */
+    public static void openWithEditor(File pFile, String pEditor, ProcessOwner pProcessOwner) throws IOException {
+        executeCommand_nowait(pEditor+" "+pFile.getPath(), null);
     }
 
-    private static void dbgMsg(String pMsg) {
-        Logger.dbg("ProcessUtils: "+pMsg);
+    private static void debug(String pMsg) {        
+        Logger.dbg(pMsg);
     }
-
-
 }

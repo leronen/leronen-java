@@ -96,7 +96,7 @@ public class Statistics extends LinkedHashMap<String, Object> {
     }
     
     public String toString() {
-        return StringUtils.mapToString(new TreeMap(this), "=", 
+        return StringUtils.format(new TreeMap(this), "=", 
                                        System.getProperty("line.separator"), null,
                                        new NumberBeautifyingConverter(5));
                                        

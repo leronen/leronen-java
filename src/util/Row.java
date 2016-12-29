@@ -309,7 +309,7 @@ public class Row implements IRow, List<String> {
     
     @Override
     public String toString() {
-        return StringUtils.mapToString(toMap(), "=", ", ");
+        return StringUtils.format(toMap(), "=", ", ");
     }
 
     /**

@@ -1,28 +1,20 @@
 package util.process;
 
-import util.dbg.*;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
 class RunnableStreamReader implements Runnable {
-        private InputStream mInputStream;  
-        private String mProcessName;
-        private String mStreamName;
+        private InputStream mInputStream;                  
         private String[] mResult;
         private StreamListener mListener;
-        private Pattern[] mListenerPatterns;
-        private boolean mOutputAsInfo;        
+        private Pattern[] mListenerPatterns;               
         
-        RunnableStreamReader(String pProcessName, String pStreamName, 
-                                    InputStream pInStream, 
-                                    StreamListener pListener,
-                                    boolean pOutputAsInfo) {
-            mStreamName = pStreamName;
-            mProcessName = pProcessName;
+        RunnableStreamReader(InputStream pInStream, 
+                             StreamListener pListener) {
+                       
             mInputStream = pInStream;
-            mOutputAsInfo = pOutputAsInfo;
+            
             if (pListener != null) {
                 mListener = pListener;
                 String[] patternStrings = pListener.getRegularExpressions();
@@ -40,8 +32,7 @@ class RunnableStreamReader implements Runnable {
                 LinkedList lines = new LinkedList();
                 String line = reader.readLine();                                
                 while (line!=null) {
-                    lines.add(line);
-                    output(line);
+                    lines.add(line);                    
                     if (mListener != null) {
                         for (int i=0; i<mListenerPatterns.length; i++) {
                             Matcher m = mListenerPatterns[i].matcher(line);
@@ -72,11 +63,5 @@ class RunnableStreamReader implements Runnable {
         public String[] getResult() {
             return mResult;    
         }
-        
-        private void output(String pMsg) {
-            if (mOutputAsInfo) {
-                // Logger.info(mProcessName+" output ("+mStreamName+"): "+pMsg);
-                Logger.info(mProcessName+" ("+mStreamName+"): "+pMsg);
-            }
-        }                
+                   
     }

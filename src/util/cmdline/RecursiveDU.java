@@ -71,9 +71,9 @@ public class RecursiveDU {
 		cmdArr[0] = "/usr/bin/du";
 		cmdArr[1] = "-s";
 		cmdArr[2] = ""+f;
-		ProcessOutput output = ProcessUtils.executeCommand(cmdArr);
+		ProcessOutput output = ProcessUtils.exec(cmdArr);
 
-		if (output.exitValue != 0) {
+		if (output.getExitValue() != 0) {
 			System.err.println("Warning: du failed for file "+f);
 			System.err.println(output.getStdErr());
 			return null;

@@ -33,6 +33,6 @@ public class Properties {
     }
     
     public String toString() {
-        return StringUtils.mapToString(mData, "=", "\n");
+        return StringUtils.format(mData, "=", "\n");
     }
 }

@@ -38,10 +38,10 @@ public final class MapToStringConverter implements Converter {
             
     public Object convert(Object pObj) {
         if (mKeyConverter != null || mValConverter != null) {
-            return StringUtils.mapToString((Map)pObj, mKeyAndValDelim, mKeyValPairDelim, mKeyConverter, mValConverter);            
+            return StringUtils.format((Map)pObj, mKeyAndValDelim, mKeyValPairDelim, mKeyConverter, mValConverter);            
         }
         else {            
-            return StringUtils.mapToString((Map)pObj, mKeyAndValDelim, mKeyValPairDelim);
+            return StringUtils.format((Map)pObj, mKeyAndValDelim, mKeyValPairDelim);
         }
     }
 }

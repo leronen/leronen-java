@@ -618,7 +618,7 @@ public class HClust {
                         int clusterId = clusterIdByRoot.get(cRoot);
                         Map statistics = cluster.computeStatistics(distanceFunction);
                         ps.println(""+clusterId+" "+
-                                   StringUtils.mapToString(statistics, "=", ", ")+
+                                   StringUtils.format(statistics, "=", ", ")+
                                    (args.isDefined("minuslog") ? ", avg_within_cluster_goodness=" + Math.exp(-cluster.getAvgDistance(distanceFunction)) : "")); 
                         within_cluster_avg_distance_sum += cluster.getAvgDistance(distanceFunction)*cluster.getNumElements();                                                
                     }

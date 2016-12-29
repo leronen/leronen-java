@@ -359,14 +359,14 @@ public class Timer {
         if (!sTimingEnabled) return "Timing not enabled";
                 
         if (sHierarchicalTiming) {
-            return StringUtils.mapToString(asMillisecondsMap(),
+            return StringUtils.format(asMillisecondsMap(),
                                            "=",
                                            "\n",
                                            new HierarchicalOutputBeautifyer(pKeyPrefix),
                                            new TimeFormatter());
         }
         else {
-            return StringUtils.mapToString(asMillisecondsMap(),
+            return StringUtils.format(asMillisecondsMap(),
                     "=",
                     "\n",
                     new RegularOutputBeautifyer(pKeyPrefix),
