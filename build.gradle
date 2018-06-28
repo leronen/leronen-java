@@ -30,7 +30,7 @@ eclipse {
 
 dependencies {
     compile 'org.json:json:20140107'
-    compile 'org.docopt:docopt:0.6.0-SNAPSHOT'
+    compile 'leronen-extlibs:docopt:2014-11-24'
 }
 
 
