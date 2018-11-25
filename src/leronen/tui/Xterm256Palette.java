@@ -1,10 +1,15 @@
 package leronen.tui;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import gui.color.ColorUtils;
 
 public class Xterm256Palette {
+    
+    // sadly enough, the origin of this PALETTE does not seem to be documented
     private static final int[] PALETTE = {
             0x000000, 0x800000, 0x008000, 0x808000, 0x000080, 0x800080, 0x008080, 0xc0c0c0,
             0x808080, 0xff0000, 0x00ff00, 0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff,
@@ -44,26 +49,32 @@ public class Xterm256Palette {
     
     public Xterm256Palette() {
         palette = new Color[256];
-        for (int i=0; i<256; i++) {            
-            palette[i] = new Color(PALETTE[i]);            
-        }        
+        for (int i=0; i<256; i++) {
+            palette[i] = new Color(PALETTE[i]);
+        }
     }
         
+    private List<Integer> randOrder256() {
+        List<Integer> result = new ArrayList(256);
+        for (int i=0; i<256; i++) {
+            result.add(i);
+        }
+        Collections.shuffle(result);
+        return result;
+    }
     
     public int getClosestMatch(int r, int g, int b) {
         Color query = new Color(r, g, b);
         int bestIndex = 0;
-        double bestDistance = ColorUtils.distance(palette[0], query); 
-        for (int i=1; i<256; i++) {
+        double bestDistance = ColorUtils.distance(palette[0], query);
+//        for (int i=1; i<256; i++) {
+        for (int i: randOrder256()) {  // iterate colors in random order to avoid breaking ties in favor of the first one
             double distance = ColorUtils.distance(palette[i], query);
             if (distance < bestDistance) {
                 bestIndex = i;
                 bestDistance = distance;
             }
         }
-        
-        // TODO: stop favoring colors first in the palette, either by randomizing iteration order or 
-        // collecting list of equally good matches and sampling one
         
         return bestIndex;
     }
@@ -73,9 +84,9 @@ public class Xterm256Palette {
         int g = Integer.parseInt(args[1]);
         int b = Integer.parseInt(args[2]);
         int xterm256Color = new Xterm256Palette().getClosestMatch(r, g, b);
-        System.out.println("Got this color:");        
+        System.out.println("Got this color:");
         for (int i=0; i<8; i++) {
-            System.out.println("        " + TerminalUtils.getXtermBgColor(xterm256Color) + "                " + TerminalUtils.ANSI_ESCAPE_RESET);            
+            System.out.println("        " + TerminalUtils.getXtermBgColor(xterm256Color) + "                " + TerminalUtils.ANSI_ESCAPE_RESET);
         }
     }
 }

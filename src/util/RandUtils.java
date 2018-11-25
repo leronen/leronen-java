@@ -181,7 +181,7 @@ public class RandUtils {
     public static <T> List <T> sampleWithoutReplacement(List<T> pList, int pNumToSample) {
         int numObjects = pList.size();
         if (pNumToSample > numObjects) {
-            throw new RuntimeException("Not enough objects in list: asked for "+pNumToSample+ "and we have only "+numObjects);
+            throw new RuntimeException("Not enough objects in list: asked for " + pNumToSample + " and provided only " + numObjects);
         }
         ArrayList result = new ArrayList();
 
@@ -217,7 +217,7 @@ public class RandUtils {
     public static List<Integer> sampleIndices(int pListSize, int pNumToSample) {
         int numObjects = pListSize;
         if (pNumToSample > numObjects) {
-            throw new RuntimeException("Not enough objects in list: asked for "+pNumToSample+ "and we have only "+numObjects);
+            throw new RuntimeException("Not enough objects in list: asked for " + pNumToSample + " and provided only " + numObjects);
         }
         ArrayList<Integer> result = new ArrayList<Integer>();
 
@@ -260,7 +260,7 @@ public class RandUtils {
                 System.out.println(randInt(min, max));
             }
         }
-        else if (args[0].equals(CMD_RANDPROBS)) {            
+        else if (args[0].equals(CMD_RANDPROBS)) {
             int num = Integer.parseInt(args[1]);
             for (int i=0; i<num; i++) {
                 System.out.println(StringUtils.formatFloat(Math.random(), 3));

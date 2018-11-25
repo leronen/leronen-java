@@ -30,8 +30,7 @@ public class Xterm256Image {
         
         dbg("scaling image to " + rows + " rows, " + columns + " columns");
         
-        BufferedImage scaledImage = new BufferedImage(columns,
-            rows, sourceImage.getType());
+        BufferedImage scaledImage = new BufferedImage(columns, rows, sourceImage.getType());
 
         // create new image, scaled to desired number of rows / columns
         Graphics2D g2d = scaledImage.createGraphics();
@@ -59,7 +58,6 @@ public class Xterm256Image {
                 handlesinglepixel(column, row, pixels[row * columns + column]);
             }
         }
-                
     }
     
     public void handlesinglepixel(int column, int row, int pixel) {
@@ -100,7 +98,7 @@ public class Xterm256Image {
 //    }
     
     public void setPixel(int y, int x, int value) {
-        try { 
+        try {
             data[width * y + x]  = value;
         }
         catch (ArrayIndexOutOfBoundsException e) {
@@ -117,7 +115,7 @@ public class Xterm256Image {
     public void render() {
         for (int y=0; y < height; y++) {
             for (int x=0; x<width; x++) {
-                int color = getPixel(y, x);             
+                int color = getPixel(y, x);
                 System.out.print(TerminalUtils.getXtermBgColor(color) + " ");
             }
             System.out.println(TerminalUtils.ANSI_ESCAPE_RESET);
@@ -128,11 +126,11 @@ public class Xterm256Image {
         Logger.enableLogging();
         File infile = new File(args[0]);
 //        int rows = Integer.parseInt(args[1]);
-        int columns = Integer.parseInt(args[1]);        
+        int columns = Integer.parseInt(args[1]);
         BufferedImage inputImage = ImageIO.read(infile);
         double aspectRatio = ((double)inputImage.getWidth()) / inputImage.getHeight();
         dbg("aspect ratio :" + aspectRatio);
-        int rows = (int) (((double)columns) / aspectRatio);
+        int rows = (int) ((columns) / aspectRatio);
         Xterm256Image xtermImage = new Xterm256Image(inputImage, rows, columns);
         xtermImage.render();
     }

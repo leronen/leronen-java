@@ -273,14 +273,42 @@ public class ColorUtils {
 
     /** Return a distance in the range of 0..1 */
     public static double distance(Color p1, Color p2) {
+//         return rgbDistance(p1, p2);
+//        return hsbDistance(p1, p2, HSBWeights.UNIFORM);
+        return hsbDistance(p1, p2, HSBWeights.HUE_FIRST);
+//        return hsbDistance(p1, p2, HSBWeights.HUE_ONLY);
+    }
+        
+    public static double rgbDistance(Color p1, Color p2) {
         int d_r = Math.abs(p1.getRed()-p2.getRed());
         int d_g = Math.abs(p1.getGreen()-p2.getGreen());
         int d_b = Math.abs(p1.getBlue()-p2.getBlue());
         return ((double)(d_r + d_g + d_b)) / (255*3);
-//        int d_b= p1.getRed();
-//        int d_g = p1.getRed();
+    }
+    
+    public enum HSBWeights {
+        UNIFORM(1,1,1),
+        HUE_FIRST(1,0.5,0.5),
+        HUE_ONLY(1,0,0);
+    
+        double h;
+        double s;
+        double b;
+
+        private HSBWeights(double h, double s, double b) {
+            this.h = h;
+            this.s = s;
+            this.b = b;
+        }
     }
 
+    /** Attempt to do a bit more sensible distance */
+    public static double hsbDistance(Color p1,
+                                     Color p2,
+                                     HSBWeights weights) {
+        return hsbDistance(p1, p2, weights.h, weights.s, weights.b);
+    }
+    
     /** Attempt to do a bit more sensible distance */
     public static double hsbDistance(Color p1,
                                      Color p2,
@@ -294,20 +322,18 @@ public class ColorUtils {
         float h1 = hsv1[0]; float s1 = hsv1[1]; float b1 = hsv1[2];
         float h2 = hsv2[0]; float s2 = hsv2[1]; float b2 = hsv2[2];
 
-        float d_h = Math.abs(h1-h2);
+        float d_h = Math.abs(h2-h1);
         if (d_h > 0.5) {
             d_h = 1.0f-d_h;
         }
         d_h = d_h * 2; // as the maximum is 0.5, let's put this in line with the other two
 
-        float d_s = Math.abs(s1-s2);
-        float d_b = Math.abs(b1-b2);
+        float d_s = Math.abs(s2-s1);
+        float d_b = Math.abs(b2-b1);
 
         return MathUtils.weightedAvg(d_h, hWeight,
                                      d_s, sWeight,
                                      d_b, bWeight);
-//        int d_b= p1.getRed();
-//        int d_g = p1.getRed();
     }
 
 
