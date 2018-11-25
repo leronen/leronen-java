@@ -12,10 +12,11 @@ public class RegExTester {
     public static void main (String[] args) throws Exception {
         // test1(args);
         // test2(args);
-    	test3(args);
+    	// test3(args);
     	// test4(args);
         // test5(args);
         // test6(args);
+        targetDatasetTest();
     }
 
     public static void test6(String... args) {
@@ -104,6 +105,17 @@ public class RegExTester {
 
     }
 
+    private static void targetDatasetTest() throws IOException {
+        Pattern targetDatasetPattern = java.util.regex.Pattern.compile(">>> To:.*\\((.*)\\)$");        
+        for (String line: IOUtils.readLines()) {
+            Matcher m = targetDatasetPattern.matcher(line);
+            if (m.matches()) {
+                System.out.println(m.group(1));
+            }
+        }
+    }
+    
+    
     private static void log(String pMsg) {
         Logger.info(pMsg);
     }
