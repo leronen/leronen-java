@@ -153,14 +153,17 @@ public final class CollectionUtils {
         return result;
     }
 
+    @SafeVarargs
     public static <T> LinkedHashSet<T> makeLinkedHashSet(T... pItems) {
         return new LinkedHashSet<T>(Arrays.asList(pItems));
     }
 
+    @SafeVarargs
     public static <T> List<T> makeList(T... pItems) {
     	return Arrays.asList(pItems);
     }
 
+    @SafeVarargs
     public static <T> List<T> makeArrayList(T... pItems) {
         return new ArrayList<T>(Arrays.asList(pItems));
     }
@@ -223,6 +226,7 @@ public final class CollectionUtils {
         return result;
     }
 
+    @SafeVarargs
     public static <T> Map<T,Integer> numberElements(T... pVals) {
         int number = 1;
         HashMap result = new LinkedHashMap();
@@ -232,6 +236,7 @@ public final class CollectionUtils {
         return result;
     }
 
+    @SafeVarargs
     public static <T> HashSet<T> makeHashSet(T... pItems) {
         return new HashSet(Arrays.asList(pItems));
     }
