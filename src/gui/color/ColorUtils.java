@@ -274,8 +274,8 @@ public class ColorUtils {
     /** Return a distance in the range of 0..1 */
     public static double distance(Color p1, Color p2) {
 //         return rgbDistance(p1, p2);
-//        return hsbDistance(p1, p2, HSBWeights.UNIFORM);
-        return hsbDistance(p1, p2, HSBWeights.HUE_FIRST);
+        return hsbDistance(p1, p2, HSBWeights.UNIFORM);
+//        return hsbDistance(p1, p2, HSBWeights.HUE_FIRST);
 //        return hsbDistance(p1, p2, HSBWeights.HUE_ONLY);
     }
         

@@ -26,7 +26,7 @@ public class Row implements IRow, List<String> {
      */
     public Row(ColumnsDef columnsDef, List<String> data) {
         if (columnsDef.getColumnNames().size() != data.size()) {
-            throw new RuntimeDataIntegrityException("Mismatching number of columns in def and data");
+            throw new RuntimeDataIntegrityException("Mismatching number of columns in def and data: " + columnsDef.getColumnNames().size() + " vs. " + data.size());
         }
         
         this.columnsDef = columnsDef;
@@ -46,7 +46,7 @@ public class Row implements IRow, List<String> {
         return data;
     }
     
-    /** @throws NoSuchColumnException */ 
+    /** @throws NoSuchColumnException */
     @Override
     public String get(int column) {
         if (column < 0 || column >= data.size()) {
@@ -77,14 +77,14 @@ public class Row implements IRow, List<String> {
     public String get(String columnName) {
         Integer column = columnsDef.getColumnIndex(columnName);
         if (column != null) {
-            return get(column);            
+            return get(column);
         }
         else {
-            throw new NoSuchColumnException("No such column: " + columnName);            
+            throw new NoSuchColumnException("No such column: " + columnName);
         }
     }
     
-    /** Get value of an optional column. In no such column, return null. */ 
+    /** Get value of an optional column. In no such column, return null. */
     public String getOpt(String columnName) {
         if (columnsDef.getColumnIndex(columnName) != null) {
             return get(columnName);
@@ -137,7 +137,7 @@ public class Row implements IRow, List<String> {
 
         if (s == null || s.equals("")) {
             return null;
-        }       
+        }
         
         return Long.parseLong(s);
     }
@@ -176,7 +176,7 @@ public class Row implements IRow, List<String> {
         String columnName;
         
         public FieldExtractor(String columnName) {
-            this.columnName = columnName;           
+            this.columnName = columnName;
         }
         
         @Override
@@ -259,7 +259,7 @@ public class Row implements IRow, List<String> {
 
     @Override
     public void add(int index, String element) {
-        data.add(index, element);        
+        data.add(index, element);
     }
 
     @Override
@@ -297,7 +297,7 @@ public class Row implements IRow, List<String> {
         private final String column;
         
         FieldExractor(String column) {
-            this.column = column;            
+            this.column = column;
         }
         
         @Override
@@ -305,7 +305,7 @@ public class Row implements IRow, List<String> {
             return row.get(column);
         }
         
-    }       
+    }
     
     @Override
     public String toString() {
@@ -315,8 +315,8 @@ public class Row implements IRow, List<String> {
     /**
      * Convert row instances to another kind of row instances, based on a mapping of column names.
      * 
-     * In current implementation, behavior for target columns missing from either the conversion 
-     * map or the source data is just to set null as the target column value. 
+     * In current implementation, behavior for target columns missing from either the conversion
+     * map or the source data is just to set null as the target column value.
      */
     public static class RowConverter <T1 extends Row, T2 extends Row> implements Converter<T1, T2> {
             
@@ -330,23 +330,23 @@ public class Row implements IRow, List<String> {
         public RowConverter(RowFactory<T2> factory,
                      Map<String, String> columnNameMappings) {
             this.factory = factory;
-            this.columnNameMappings = columnNameMappings;           
+            this.columnNameMappings = columnNameMappings;
         }
              
         @Override
         public T2 convert(T1 source) {
             List<String> targetValues = new ArrayList<>(factory.getColumns().getColumnNames().size());
             for (String targetColumn: factory.getColumns().getColumnNames()) {
-                String sourceColumn = columnNameMappings.get(targetColumn);                
-                if (sourceColumn != null) {                    
+                String sourceColumn = columnNameMappings.get(targetColumn);
+                if (sourceColumn != null) {
                     targetValues.add(source.get(sourceColumn));
                 }
                 else {
                     targetValues.add(null);
                 }
             }
-            return factory.create(targetValues);            
-        }        
+            return factory.create(targetValues);
+        }
     }
         
     
@@ -365,7 +365,7 @@ public class Row implements IRow, List<String> {
         }
         Row other = (Row)param;
         
-        return columnsDef.equals(other.columnsDef) && data.equals(other.data); 
+        return columnsDef.equals(other.columnsDef) && data.equals(other.data);
     }
     
 }
