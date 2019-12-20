@@ -1,7 +1,5 @@
 package gui.color;
 
-import gui.GuiUtils;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +16,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+import gui.GuiUtils;
 import util.CollectionUtils;
 import util.MathUtils;
 import util.ReflectionUtils;
@@ -271,14 +270,17 @@ public class ColorUtils {
     }
 
 
+
+
     /** Return a distance in the range of 0..1 */
     public static double distance(Color p1, Color p2) {
-//         return rgbDistance(p1, p2);
-        return hsbDistance(p1, p2, HSBWeights.UNIFORM);
+	return rgbDistance(p1, p2);
+//         return hsbDistance(p1, p2, HSBWeights.UNIFORM);
 //        return hsbDistance(p1, p2, HSBWeights.HUE_FIRST);
 //        return hsbDistance(p1, p2, HSBWeights.HUE_ONLY);
     }
         
+    /** Compute normalized manhattan distance between two colors in RGB space */
     public static double rgbDistance(Color p1, Color p2) {
         int d_r = Math.abs(p1.getRed()-p2.getRed());
         int d_g = Math.abs(p1.getGreen()-p2.getGreen());
@@ -302,7 +304,10 @@ public class ColorUtils {
         }
     }
 
-    /** Attempt to do a bit more sensible distance */
+    /**
+     * Attempt to do a bit more sensible distance. Fails badly, looks horrible.
+     * Trivial RGB distance on the other hand works very nicely...
+     */
     public static double hsbDistance(Color p1,
                                      Color p2,
                                      HSBWeights weights) {
