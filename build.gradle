@@ -17,7 +17,8 @@ repositories {
 sourceSets {
     main {
         java {
-            srcDir 'src'
+            srcDir 'src/'
+            outputDir = file('build/classes')
         }
     }
 }
@@ -48,15 +49,15 @@ publishing {
 }
 
 // generate dependencies to file "deps"
-task deps << {
-    def home = project.gradle.startParameter.gradleHomeDir
-
-    File depsfile = new File("dependencies")
-
-    project.configurations.runtime.files.findAll { f ->
-        !f.absolutePath.startsWith(home.absolutePath)
-    }.each {        
-        println it
-        depsfile << ("${it}\n")
-    }
-}
+// task deps << {
+//     def home = project.gradle.startParameter.gradleHomeDir
+// 
+//     File depsfile = new File("dependencies")
+// 
+//     project.configurations.runtime.files.findAll { f ->
+//         !f.absolutePath.startsWith(home.absolutePath)
+//     }.each {        
+//         println it
+//         depsfile << ("${it}\n")
+//     }
+// }
